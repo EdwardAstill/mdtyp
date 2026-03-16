@@ -2,10 +2,14 @@
 
 from markdown_it import MarkdownIt
 from markdown_it.token import Token
+from mdit_py_plugins.dollarmath import dollarmath_plugin
+
+from md2typst.latex2typst import latex_to_typst
 
 
 def convert(md_text: str) -> str:
     md = MarkdownIt().enable("table")
+    dollarmath_plugin(md, double_inline=True)
     tokens = md.parse(md_text)
     ctx = _Ctx()
     _render_tokens(tokens, ctx)
@@ -115,6 +119,11 @@ def _render_tokens(tokens: list[Token], ctx: _Ctx):
 
         elif t == "html_block":
             ctx.write(f"/* HTML: {tok.content.strip()} */\n\n")
+
+        # --- math ---
+        elif t == "math_block":
+            content = latex_to_typst(tok.content.strip())
+            ctx.write(f"$ {content} $\n\n")
 
         # --- tables ---
         elif t == "table_open":
@@ -248,6 +257,9 @@ def _render_inline(children: list[Token]) -> str:
             src = tok.attrGet("src") or ""
             alt = tok.attrGet("alt") or ""
             out += f'#figure(image("{src}"), caption: [{alt}])'
+
+        elif t == "math_inline":
+            out += f"${latex_to_typst(tok.content)}$"
 
         elif t == "html_inline":
             out += f"/* {tok.content.strip()} */"
