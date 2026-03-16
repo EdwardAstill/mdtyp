@@ -1,0 +1,17 @@
+[project]
+name = "md2typst"
+version = "0.1.0"
+description = "Convert Markdown documents to Typst"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "markdown-it-py>=4.0.0",
+    "typer>=0.24.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+md2typst = "md2typst.cli:app"
