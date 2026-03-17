@@ -37,7 +37,12 @@ _COMMANDS: list[tuple[str, str]] = [
     (r"\notin", "in.not"),
     (r"\ni", "in.rev"),
 
+    # Escaped characters in math
+    (r"\%", "%"),
+
     # Arrows
+    (r"\implies", "=>"),
+    (r"\iff", "<=>"),
     (r"\to", "->"),
     (r"\rightarrow", "->"),
     (r"\leftarrow", "<-"),
@@ -88,6 +93,11 @@ _COMMANDS: list[tuple[str, str]] = [
     (r"\arg", "arg"),
     (r"\gcd", "gcd"),
     (r"\mod", "mod"),
+
+    # Currency
+    (r"\pounds", "£"),
+    (r"\euro", "€"),
+    (r"\yen", "¥"),
 
     # Misc symbols
     (r"\infty", "infinity"),
@@ -203,9 +213,89 @@ def latex_to_typst(latex: str) -> str:
     s = _translate_environments(s)
     s = _translate_commands(s)
     s = _translate_scripts(s)
+    s = _quote_multichar_identifiers(s)
     # Clean up excess whitespace
     s = re.sub(r"  +", " ", s)
     return s.strip()
+
+
+# Known Typst math identifiers that must NOT be quoted.
+_TYPST_MATH_IDENTS: frozenset[str] = frozenset({
+    # Typst math functions
+    "frac", "sqrt", "root", "binom", "boxed",
+    "hat", "macron", "arrow", "diaer", "tilde",
+    "overline", "underline", "overbrace", "underbrace",
+    "upright", "bold", "italic", "cal", "op", "bb",
+    "mat", "pmat", "bmat", "vmat", "cases",
+    # Math operator functions (from _COMMANDS)
+    "lim", "sup", "inf", "min", "max",
+    "log", "ln", "exp",
+    "sin", "cos", "tan", "sec", "csc", "cot",
+    "arcsin", "arccos", "arctan",
+    "sinh", "cosh", "tanh",
+    "det", "dim", "ker", "deg", "arg", "gcd", "mod",
+    # Symbols
+    "dot", "times", "div", "compose", "ast", "star",
+    "approx", "equiv", "prop",
+    "subset", "supset",
+    "forall", "exists",
+    "sum", "product", "integral",
+    "union", "sect",
+    "nabla", "infinity", "diff", "ell", "aleph", "nothing",
+    "dots", "quad", "wide", "thin", "med",
+    "Re", "Im",
+    "and", "or", "not", "in",
+    # Greek lowercase
+    "alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta",
+    "iota", "kappa", "lambda", "mu", "nu", "xi", "pi", "rho", "sigma",
+    "tau", "upsilon", "phi", "chi", "psi", "omega",
+    # Greek uppercase
+    "Gamma", "Delta", "Theta", "Lambda", "Xi", "Pi", "Sigma", "Upsilon",
+    "Phi", "Psi", "Omega",
+    # Blackboard bold
+    "RR", "NN", "ZZ", "QQ", "CC", "FF", "PP", "EE",
+})
+
+
+def _quote_multichar_identifiers(s: str) -> str:
+    """Wrap multi-letter identifiers not known to Typst math in double quotes.
+
+    In Typst math mode consecutive letters like ``EX`` are parsed as separate
+    multiplied variables.  User-defined multi-letter names (e.g. ``EX``, ``IM``,
+    ``GNI``) must be written as ``"EX"``, ``"IM"``, ``"GNI"`` to render as a
+    single identifier.
+    """
+    result = []
+    i = 0
+    while i < len(s):
+        # Pass already-quoted strings through unchanged.
+        if s[i] == '"':
+            j = i + 1
+            while j < len(s) and s[j] != '"':
+                j += 1
+            result.append(s[i:j + 1])
+            i = j + 1
+            continue
+        # Collect a run of letters.
+        if s[i].isalpha():
+            j = i
+            while j < len(s) and s[j].isalpha():
+                j += 1
+            word = s[i:j]
+            # Skip whitespace, then check whether a '(' follows (function call).
+            k = j
+            while k < len(s) and s[k] == ' ':
+                k += 1
+            is_func_call = k < len(s) and s[k] == '('
+            if len(word) >= 2 and word not in _TYPST_MATH_IDENTS and not is_func_call:
+                result.append(f'"{word}"')
+            else:
+                result.append(word)
+            i = j
+            continue
+        result.append(s[i])
+        i += 1
+    return ''.join(result)
 
 
 def _translate_environments(s: str) -> str:
@@ -284,6 +374,9 @@ def _convert_matrix(body: str, delim: str) -> str:
 def _translate_commands(s: str) -> str:
     """Handle structured commands like \\frac, \\sqrt, \\text, \\mathbb, etc."""
 
+    # \boxed{x} → x  (Typst math has no direct equivalent)
+    s = _replace_cmd_passthrough(s, "boxed")
+
     # \frac{a}{b} → frac(a, b)
     s = _replace_cmd_two_args(s, "frac", "frac")
     s = _replace_cmd_two_args(s, "dfrac", "frac")
@@ -330,6 +423,21 @@ def _translate_commands(s: str) -> str:
     for latex_cmd, typst_rep in sorted(_COMMANDS, key=lambda x: -len(x[0])):
         s = s.replace(latex_cmd, typst_rep)
 
+    return s
+
+
+def _replace_cmd_passthrough(s: str, latex_name: str) -> str:
+    """Replace \\cmd{arg} → arg (strip the command wrapper, keep content)."""
+    pattern = re.compile(rf"\\{latex_name}\{{")
+    while True:
+        m = pattern.search(s)
+        if not m:
+            break
+        brace_start = m.end() - 1
+        arg, end = _extract_braced(s, brace_start)
+        if arg is None:
+            break
+        s = s[:m.start()] + arg + s[end:]
     return s
 
 

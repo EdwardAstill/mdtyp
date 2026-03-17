@@ -204,7 +204,7 @@ def _render_inline(children: list[Token]) -> str:
         t = tok.type
 
         if t == "text":
-            out += tok.content
+            out += tok.content.replace("$", r"\$")
 
         elif t == "softbreak":
             out += " "
