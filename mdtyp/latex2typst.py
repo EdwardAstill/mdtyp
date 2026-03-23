@@ -1,13 +1,29 @@
-"""Translate LaTeX math expressions to Typst math syntax."""
+"""Translate LaTeX math expressions to Typst math syntax.
+
+Pipeline stages (must run in this order — each assumes prior stages completed):
+
+1. **Environments** — ``\\begin{aligned}``, matrices, cases → Typst equivalents.
+   Must run first because environments contain raw LaTeX that later stages process.
+2. **Structured commands** — ``\\frac``, ``\\sqrt``, accents, font commands, ``\\mathbb``.
+   Must run before simple replacements to avoid partial matches on inner braces.
+3. **Simple symbol replacements** — ``_COMMANDS`` list (operators, Greek, arrows, …).
+   Sorted longest-first to prevent partial matches.
+4. **Script conversion** — ``_{...}`` → ``_(...)``, ``^{...}`` → ``^(...)``.
+   Must run after commands so ``\\frac{a}{b}`` isn't mis-parsed as a superscript.
+5. **Multi-character identifier quoting** — wraps unknown multi-letter identifiers
+   in ``"..."`` since Typst math treats consecutive letters as separate variables.
+"""
+
+from __future__ import annotations
 
 import re
 
-# LaTeX command → Typst replacement (order matters for overlapping prefixes)
-_COMMANDS: list[tuple[str, str]] = [
-    # Fractions, roots, special forms (must come before simple replacements)
-    # Handled by _translate_commands
+# ---------------------------------------------------------------------------
+# LaTeX command → Typst replacement tables
+# ---------------------------------------------------------------------------
 
-    # Operators
+_COMMANDS: list[tuple[str, str]] = [
+    # --- Operators ---
     (r"\cdot", "dot"),
     (r"\times", "times"),
     (r"\div", "div"),
@@ -19,7 +35,7 @@ _COMMANDS: list[tuple[str, str]] = [
     (r"\oplus", "plus.circle"),
     (r"\otimes", "times.circle"),
 
-    # Relations
+    # --- Relations ---
     (r"\leq", "<="),
     (r"\geq", ">="),
     (r"\neq", "!="),
@@ -37,10 +53,10 @@ _COMMANDS: list[tuple[str, str]] = [
     (r"\notin", "in.not"),
     (r"\ni", "in.rev"),
 
-    # Escaped characters in math
+    # --- Escaped characters ---
     (r"\%", "%"),
 
-    # Arrows
+    # --- Arrows ---
     (r"\implies", "=>"),
     (r"\iff", "<=>"),
     (r"\to", "->"),
@@ -54,7 +70,7 @@ _COMMANDS: list[tuple[str, str]] = [
     (r"\uparrow", "arrow.t"),
     (r"\downarrow", "arrow.b"),
 
-    # Big operators
+    # --- Big operators ---
     (r"\int", "integral"),
     (r"\iint", "integral.double"),
     (r"\iiint", "integral.triple"),
@@ -65,7 +81,7 @@ _COMMANDS: list[tuple[str, str]] = [
     (r"\bigcup", "union.big"),
     (r"\bigcap", "sect.big"),
 
-    # Limits, log, trig
+    # --- Functions (limits, log, trig, etc.) ---
     (r"\lim", "lim"),
     (r"\sup", "sup"),
     (r"\inf", "inf"),
@@ -94,12 +110,12 @@ _COMMANDS: list[tuple[str, str]] = [
     (r"\gcd", "gcd"),
     (r"\mod", "mod"),
 
-    # Currency
+    # --- Currency ---
     (r"\pounds", "£"),
     (r"\euro", "€"),
     (r"\yen", "¥"),
 
-    # Misc symbols
+    # --- Misc symbols ---
     (r"\infty", "infinity"),
     (r"\partial", "diff"),
     (r"\nabla", "nabla"),
@@ -123,7 +139,7 @@ _COMMANDS: list[tuple[str, str]] = [
     (r"\Im", "Im"),
     (r"\aleph", "aleph"),
 
-    # Delimiters (sizing commands just removed)
+    # --- Delimiters (sizing commands just removed) ---
     (r"\left(", "("),
     (r"\right)", ")"),
     (r"\left[", "["),
@@ -144,18 +160,20 @@ _COMMANDS: list[tuple[str, str]] = [
     (r"\}", "}"),
     (r"\|", "||"),
 
-    # Accents / decorations
+    # --- Accents / decorations (handled as simple replacements only when
+    #     they appear without braces; braced forms like \overline{x} are
+    #     handled by _translate_commands as structured one-arg commands) ---
     (r"\overline", "overline"),
     (r"\underline", "underline"),
 
-    # Spacing
+    # --- Spacing ---
     (r"\quad", "quad"),
     (r"\qquad", "wide"),
     (r"\,", "thin"),
     (r"\;", "med"),
     (r"\!", ""),
 
-    # Greek lowercase
+    # --- Greek lowercase ---
     (r"\alpha", "alpha"),
     (r"\beta", "beta"),
     (r"\gamma", "gamma"),
@@ -186,7 +204,7 @@ _COMMANDS: list[tuple[str, str]] = [
     (r"\psi", "psi"),
     (r"\omega", "omega"),
 
-    # Greek uppercase
+    # --- Greek uppercase ---
     (r"\Gamma", "Gamma"),
     (r"\Delta", "Delta"),
     (r"\Theta", "Theta"),
@@ -200,24 +218,43 @@ _COMMANDS: list[tuple[str, str]] = [
     (r"\Omega", "Omega"),
 ]
 
+# Precompile: sorted longest-first to prevent partial matches, with compiled regex.
+_COMPILED_COMMANDS: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(re.escape(cmd)), rep)
+    for cmd, rep in sorted(_COMMANDS, key=lambda x: -len(x[0]))
+]
+
 # Blackboard bold: \mathbb{X} → XX
 _MATHBB: dict[str, str] = {
     "R": "RR", "N": "NN", "Z": "ZZ", "Q": "QQ", "C": "CC",
     "F": "FF", "P": "PP", "E": "EE", "1": "bb(1)",
 }
 
+# ---------------------------------------------------------------------------
+# Precompiled environment patterns
+# ---------------------------------------------------------------------------
 
-def latex_to_typst(latex: str) -> str:
-    """Convert a LaTeX math string to Typst math syntax."""
-    s = latex.strip()
-    s = _translate_environments(s)
-    s = _translate_commands(s)
-    s = _translate_scripts(s)
-    s = _quote_multichar_identifiers(s)
-    # Clean up excess whitespace
-    s = re.sub(r"  +", " ", s)
-    return s.strip()
+_RE_ALIGNED = re.compile(
+    r"\\begin\{(aligned|align\*?)\}(.*?)\\end\{\1\}", re.DOTALL,
+)
+_RE_CASES = re.compile(
+    r"\\begin\{cases\}(.*?)\\end\{cases\}", re.DOTALL,
+)
+_MATRIX_DELIMS: dict[str, str] = {
+    "pmatrix": '"("',
+    "bmatrix": '"["',
+    "vmatrix": '"|"',
+    "matrix": '"("',
+}
+_RE_MATRICES: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(rf"\\begin\{{{env}\}}(.*?)\\end\{{{env}\}}", re.DOTALL), delim)
+    for env, delim in _MATRIX_DELIMS.items()
+]
 
+_RE_TEXT = re.compile(r"\\text\{([^}]*)\}")
+_RE_MATHBB = re.compile(r"\\mathbb\{([^}]*)\}")
+_RE_SQRT = re.compile(r"\\sqrt")
+_RE_MULTI_SPACE = re.compile(r"  +")
 
 # Known Typst math identifiers that must NOT be quoted.
 _TYPST_MATH_IDENTS: frozenset[str] = frozenset({
@@ -226,8 +263,8 @@ _TYPST_MATH_IDENTS: frozenset[str] = frozenset({
     "hat", "macron", "arrow", "diaer", "tilde",
     "overline", "underline", "overbrace", "underbrace",
     "upright", "bold", "italic", "cal", "op", "bb",
-    "mat", "pmat", "bmat", "vmat", "cases",
-    # Math operator functions (from _COMMANDS)
+    "mat", "cases", "delim",
+    # Math operator functions
     "lim", "sup", "inf", "min", "max",
     "log", "ln", "exp",
     "sin", "cos", "tan", "sec", "csc", "cot",
@@ -245,6 +282,7 @@ _TYPST_MATH_IDENTS: frozenset[str] = frozenset({
     "dots", "quad", "wide", "thin", "med",
     "Re", "Im",
     "and", "or", "not", "in",
+    "plus", "minus",
     # Greek lowercase
     "alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta",
     "iota", "kappa", "lambda", "mu", "nu", "xi", "pi", "rho", "sigma",
@@ -257,76 +295,36 @@ _TYPST_MATH_IDENTS: frozenset[str] = frozenset({
 })
 
 
-def _quote_multichar_identifiers(s: str) -> str:
-    """Wrap multi-letter identifiers not known to Typst math in double quotes.
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
 
-    In Typst math mode consecutive letters like ``EX`` are parsed as separate
-    multiplied variables.  User-defined multi-letter names (e.g. ``EX``, ``IM``,
-    ``GNI``) must be written as ``"EX"``, ``"IM"``, ``"GNI"`` to render as a
-    single identifier.
-    """
-    result = []
-    i = 0
-    while i < len(s):
-        # Pass already-quoted strings through unchanged.
-        if s[i] == '"':
-            j = i + 1
-            while j < len(s) and s[j] != '"':
-                j += 1
-            result.append(s[i:j + 1])
-            i = j + 1
-            continue
-        # Collect a run of letters.
-        if s[i].isalpha():
-            j = i
-            while j < len(s) and s[j].isalpha():
-                j += 1
-            word = s[i:j]
-            # Skip whitespace, then check whether a '(' follows (function call).
-            k = j
-            while k < len(s) and s[k] == ' ':
-                k += 1
-            is_func_call = k < len(s) and s[k] == '('
-            if len(word) >= 2 and word not in _TYPST_MATH_IDENTS and not is_func_call:
-                result.append(f'"{word}"')
-            else:
-                result.append(word)
-            i = j
-            continue
-        result.append(s[i])
-        i += 1
-    return ''.join(result)
+
+def latex_to_typst(latex: str) -> str:
+    """Convert a LaTeX math string to Typst math syntax."""
+    s = latex.strip()
+    s = _translate_environments(s)
+    s = _translate_commands(s)
+    s = _translate_scripts(s)
+    s = _quote_multichar_identifiers(s)
+    s = _RE_MULTI_SPACE.sub(" ", s)
+    return s.strip()
+
+
+# ---------------------------------------------------------------------------
+# Stage 1: Environments
+# ---------------------------------------------------------------------------
 
 
 def _translate_environments(s: str) -> str:
-    """Handle LaTeX environments like aligned, cases, matrix, etc."""
-    # \begin{aligned}...\end{aligned} and similar
-    s = re.sub(
-        r"\\begin\{(aligned|align\*?)\}(.*?)\\end\{\1\}",
-        lambda m: _convert_aligned(m.group(2)),
-        s,
-        flags=re.DOTALL,
-    )
-    # \begin{cases}...\end{cases}
-    s = re.sub(
-        r"\\begin\{cases\}(.*?)\\end\{cases\}",
-        lambda m: _convert_cases(m.group(1)),
-        s,
-        flags=re.DOTALL,
-    )
-    # matrices
-    for env, delim in [
-        ("pmatrix", "pmat"),
-        ("bmatrix", "bmat"),
-        ("vmatrix", "vmat"),
-        ("matrix", "mat"),
-    ]:
-        s = re.sub(
-            rf"\\begin\{{{env}\}}(.*?)\\end\{{{env}\}}",
-            lambda m, d=delim: _convert_matrix(m.group(1), d),
-            s,
-            flags=re.DOTALL,
-        )
+    """Replace LaTeX environments (aligned, cases, matrices) with Typst equivalents.
+
+    Must run first: environments contain raw LaTeX that later stages will process.
+    """
+    s = _RE_ALIGNED.sub(lambda m: _convert_aligned(m.group(2)), s)
+    s = _RE_CASES.sub(lambda m: _convert_cases(m.group(1)), s)
+    for pattern, delim in _RE_MATRICES:
+        s = pattern.sub(lambda m, d=delim: _convert_matrix(m.group(1), d), s)
     return s
 
 
@@ -336,7 +334,6 @@ def _convert_aligned(body: str) -> str:
     for line in lines:
         line = line.strip()
         if line:
-            # Remove alignment &
             line = line.replace("&", "")
             converted.append(line)
     return " \\\n".join(converted)
@@ -348,12 +345,11 @@ def _convert_cases(body: str) -> str:
     for line in lines:
         line = line.strip()
         if line:
-            # Split on & for condition
             chunks = line.split("&")
             val = chunks[0].strip()
             cond = chunks[1].strip() if len(chunks) > 1 else ""
             if cond:
-                parts.append(f"  {val} &\"if\" {cond}")
+                parts.append(f"  {val} & {cond}")
             else:
                 parts.append(f"  {val}")
     return "cases(\n" + ",\n".join(parts) + "\n)"
@@ -361,131 +357,132 @@ def _convert_cases(body: str) -> str:
 
 def _convert_matrix(body: str, delim: str) -> str:
     rows = body.strip().split(r"\\")
-    entries = []
+    row_strs = []
     for row in rows:
         row = row.strip()
         if row:
             cells = [c.strip() for c in row.split("&")]
-            entries.extend(cells)
-    joined = ", ".join(entries)
-    return f"{delim}({joined})"
+            row_strs.append(", ".join(cells))
+    return f"mat(delim: {delim}, {'; '.join(row_strs)})"
+
+
+# ---------------------------------------------------------------------------
+# Stage 2 & 3: Structured + simple command replacements
+# ---------------------------------------------------------------------------
 
 
 def _translate_commands(s: str) -> str:
-    """Handle structured commands like \\frac, \\sqrt, \\text, \\mathbb, etc."""
+    """Replace LaTeX commands with Typst equivalents.
 
-    # \boxed{x} → x  (Typst math has no direct equivalent)
+    Structured commands (``\\frac``, ``\\sqrt``, accents, font commands) are
+    handled first because they consume brace-delimited arguments.  Simple
+    symbol replacements follow, sorted longest-first to prevent partial matches.
+    """
+    # Passthrough: \boxed{x} → x
     s = _replace_cmd_passthrough(s, "boxed")
 
-    # \frac{a}{b} → frac(a, b)
-    s = _replace_cmd_two_args(s, "frac", "frac")
-    s = _replace_cmd_two_args(s, "dfrac", "frac")
-    s = _replace_cmd_two_args(s, "tfrac", "frac")
-    s = _replace_cmd_two_args(s, "binom", "binom")
+    # Two-arg commands: \frac{a}{b} → frac(a, b)
+    for latex_name, typst_name in [
+        ("frac", "frac"), ("dfrac", "frac"), ("tfrac", "frac"), ("binom", "binom"),
+    ]:
+        s = _replace_cmd_two_args(s, latex_name, typst_name)
 
-    # \sqrt[n]{x} → root(n, x)  and  \sqrt{x} → sqrt(x)
+    # Square root: \sqrt[n]{x} → root(n, x), \sqrt{x} → sqrt(x)
     s = _replace_sqrt(s)
 
-    # \hat{x} → hat(x), \bar{x} → macron(x), \vec{x} → arrow(x), \dot{x} → dot(x), \ddot{x} → diaer(x), \tilde{x} → tilde(x)
-    for latex_cmd, typst_cmd in [
+    # One-arg accent/decoration commands
+    for latex_name, typst_name in [
         ("hat", "hat"), ("bar", "macron"), ("vec", "arrow"),
         ("dot", "dot"), ("ddot", "diaer"), ("tilde", "tilde"),
         ("overline", "overline"), ("underline", "underline"),
         ("overbrace", "overbrace"), ("underbrace", "underbrace"),
     ]:
-        s = _replace_cmd_one_arg(s, latex_cmd, typst_cmd)
+        s = _replace_cmd_one_arg(s, latex_name, typst_name)
 
     # \text{...} → "..."
-    s = re.sub(
-        r"\\text\{([^}]*)\}",
-        lambda m: f'"{m.group(1)}"',
-        s,
-    )
-    # \mathrm{...} → upright(...)
-    s = _replace_cmd_one_arg(s, "mathrm", "upright")
-    s = _replace_cmd_one_arg(s, "operatorname", "op")
-    # \mathbf{...} → bold(...)
-    s = _replace_cmd_one_arg(s, "mathbf", "bold")
-    s = _replace_cmd_one_arg(s, "boldsymbol", "bold")
-    # \mathit{...} → italic(...)
-    s = _replace_cmd_one_arg(s, "mathit", "italic")
-    # \mathcal{...} → cal(...)
-    s = _replace_cmd_one_arg(s, "mathcal", "cal")
+    s = _RE_TEXT.sub(lambda m: f'"{m.group(1)}"', s)
+
+    # Font commands
+    for latex_name, typst_name in [
+        ("mathrm", "upright"), ("operatorname", "op"),
+        ("mathbf", "bold"), ("boldsymbol", "bold"),
+        ("mathit", "italic"), ("mathcal", "cal"),
+    ]:
+        s = _replace_cmd_one_arg(s, latex_name, typst_name)
 
     # \mathbb{X} → XX or bb(X)
-    s = re.sub(
-        r"\\mathbb\{([^}]*)\}",
-        lambda m: _MATHBB.get(m.group(1), f"bb({m.group(1)})"),
-        s,
+    s = _RE_MATHBB.sub(
+        lambda m: _MATHBB.get(m.group(1), f"bb({m.group(1)})"), s,
     )
 
-    # Simple command replacements (sorted longest-first to avoid partial matches)
-    for latex_cmd, typst_rep in sorted(_COMMANDS, key=lambda x: -len(x[0])):
-        s = s.replace(latex_cmd, typst_rep)
+    # Simple command replacements (precompiled, longest-first)
+    for pattern, typst_rep in _COMPILED_COMMANDS:
+        s = _replace_with_spacing(s, pattern, typst_rep)
 
     return s
 
 
+# ---------------------------------------------------------------------------
+# Command replacement helpers
+# ---------------------------------------------------------------------------
+
+
+def _replace_with_spacing(
+    s: str, pattern: re.Pattern[str], typst_rep: str,
+) -> str:
+    """Replace a LaTeX command, adding spaces to prevent identifier merging."""
+    def _padded(m: re.Match[str]) -> str:
+        before = " " if m.start() > 0 and m.string[m.start() - 1].isalpha() else ""
+        after = " " if m.end() < len(m.string) and m.string[m.end()].isalpha() else ""
+        return before + typst_rep + after
+    return pattern.sub(_padded, s)
+
+
 def _replace_cmd_passthrough(s: str, latex_name: str) -> str:
-    """Replace \\cmd{arg} → arg (strip the command wrapper, keep content)."""
+    """Replace ``\\cmd{arg}`` → ``arg`` (strip the command wrapper)."""
     pattern = re.compile(rf"\\{latex_name}\{{")
-    while True:
-        m = pattern.search(s)
-        if not m:
-            break
-        brace_start = m.end() - 1
-        arg, end = _extract_braced(s, brace_start)
+    while (m := pattern.search(s)):
+        arg, end = _extract_braced(s, m.end() - 1)
         if arg is None:
             break
-        s = s[:m.start()] + arg + s[end:]
+        s = s[: m.start()] + arg + s[end:]
     return s
 
 
 def _replace_cmd_one_arg(s: str, latex_name: str, typst_name: str) -> str:
-    """Replace \\cmd{arg} → typst_name(arg)."""
+    """Replace ``\\cmd{arg}`` → ``typst_name(arg)``."""
     pattern = re.compile(rf"\\{latex_name}\{{")
-    while True:
-        m = pattern.search(s)
-        if not m:
-            break
+    while (m := pattern.search(s)):
         start = m.start()
-        brace_start = m.end() - 1
-        arg, end = _extract_braced(s, brace_start)
+        arg, end = _extract_braced(s, m.end() - 1)
         if arg is None:
             break
-        s = s[:start] + f"{typst_name}({arg})" + s[end:]
+        prefix = " " if start > 0 and s[start - 1].isalpha() else ""
+        s = s[:start] + f"{prefix}{typst_name}({arg})" + s[end:]
     return s
 
 
 def _replace_cmd_two_args(s: str, latex_name: str, typst_name: str) -> str:
-    """Replace \\cmd{a}{b} → typst_name(a, b)."""
+    """Replace ``\\cmd{a}{b}`` → ``typst_name(a, b)``."""
     pattern = re.compile(rf"\\{latex_name}\{{")
-    while True:
-        m = pattern.search(s)
-        if not m:
-            break
+    while (m := pattern.search(s)):
         start = m.start()
-        brace_start = m.end() - 1
-        arg1, after1 = _extract_braced(s, brace_start)
+        arg1, after1 = _extract_braced(s, m.end() - 1)
         if arg1 is None:
             break
         arg2, after2 = _extract_braced(s, after1)
         if arg2 is None:
             break
-        s = s[:start] + f"{typst_name}({arg1}, {arg2})" + s[after2:]
+        prefix = " " if start > 0 and s[start - 1].isalpha() else ""
+        s = s[:start] + f"{prefix}{typst_name}({arg1}, {arg2})" + s[after2:]
     return s
 
 
 def _replace_sqrt(s: str) -> str:
-    """Replace \\sqrt[n]{x} → root(n, x) and \\sqrt{x} → sqrt(x)."""
-    pattern = re.compile(r"\\sqrt")
-    while True:
-        m = pattern.search(s)
-        if not m:
-            break
+    """Replace ``\\sqrt[n]{x}`` → ``root(n, x)`` and ``\\sqrt{x}`` → ``sqrt(x)``."""
+    while (m := _RE_SQRT.search(s)):
         pos = m.end()
         if pos < len(s) and s[pos] == "[":
-            # \sqrt[n]{x}
             bracket_end = s.index("]", pos)
             n_arg = s[pos + 1 : bracket_end]
             arg, after = _extract_braced(s, bracket_end + 1)
@@ -503,8 +500,10 @@ def _replace_sqrt(s: str) -> str:
 
 
 def _extract_braced(s: str, pos: int) -> tuple[str | None, int]:
-    """Extract content from balanced braces starting at pos. Returns (content, end_pos)."""
-    # Skip whitespace
+    """Extract content from balanced braces starting at *pos*.
+
+    Returns ``(content, end_pos)`` on success or ``(None, pos)`` on failure.
+    """
     while pos < len(s) and s[pos] == " ":
         pos += 1
     if pos >= len(s) or s[pos] != "{":
@@ -523,9 +522,14 @@ def _extract_braced(s: str, pos: int) -> tuple[str | None, int]:
     return None, pos
 
 
+# ---------------------------------------------------------------------------
+# Stage 4: Script conversion
+# ---------------------------------------------------------------------------
+
+
 def _translate_scripts(s: str) -> str:
-    """Convert LaTeX brace-grouped sub/superscripts: _{...} → _(...) and ^{...} → ^(...)."""
-    result = []
+    """Convert LaTeX brace-grouped sub/superscripts: ``_{...}`` → ``_(...)``."""
+    result: list[str] = []
     i = 0
     while i < len(s):
         if i < len(s) - 1 and s[i] in ("_", "^") and s[i + 1] == "{":
@@ -535,6 +539,58 @@ def _translate_scripts(s: str) -> str:
                 result.append(f"{marker}({content})")
                 i = end
                 continue
+        result.append(s[i])
+        i += 1
+    return "".join(result)
+
+
+# ---------------------------------------------------------------------------
+# Stage 5: Multi-character identifier quoting
+# ---------------------------------------------------------------------------
+
+
+def _quote_multichar_identifiers(s: str) -> str:
+    """Wrap multi-letter identifiers not known to Typst math in double quotes.
+
+    In Typst math mode consecutive letters like ``EX`` are parsed as separate
+    multiplied variables.  Unknown multi-letter names must be quoted so they
+    render as a single identifier.
+    """
+    result: list[str] = []
+    i = 0
+    while i < len(s):
+        # Pass already-quoted strings through unchanged.
+        if s[i] == '"':
+            j = i + 1
+            while j < len(s) and s[j] != '"':
+                j += 1
+            result.append(s[i : j + 1])
+            i = j + 1
+            continue
+        # Collect a run of letters.
+        if s[i].isalpha():
+            j = i
+            while j < len(s) and s[j].isalpha():
+                j += 1
+            word = s[i:j]
+            # Skip whitespace, then check whether a '(' follows (function call).
+            k = j
+            while k < len(s) and s[k] == " ":
+                k += 1
+            is_func_call = k < len(s) and s[k] == "("
+            # Don't quote modifiers after a dot (e.g. subset.eq, in.not)
+            is_dot_modifier = i > 0 and s[i - 1] == "."
+            if (
+                len(word) >= 2
+                and word not in _TYPST_MATH_IDENTS
+                and not is_func_call
+                and not is_dot_modifier
+            ):
+                result.append(f'"{word}"')
+            else:
+                result.append(word)
+            i = j
+            continue
         result.append(s[i])
         i += 1
     return "".join(result)
