@@ -127,7 +127,7 @@ def _convert_all(config: Config, paper: str | None, pdf: bool) -> None:
         typer.echo("No .md files found in the current directory.", err=True)
         raise typer.Exit(1)
     for md_file in md_files:
-        typst_text = _convert_source(md_file.read_text(), config, paper)
+        typst_text = _convert_source(md_file.read_text(encoding="utf-8"), config, paper)
         _emit_to_file(typst_text, md_file.with_suffix(".typ"), pdf)
 
 
@@ -153,8 +153,11 @@ def _convert_file(
     to_stdout: bool,
     pdf: bool,
 ) -> None:
-    typst_text = _convert_source(input.read_text(), config, paper)
-    if to_stdout and not pdf:
+    if to_stdout and pdf:
+        typer.echo("Error: --stdout and --pdf are incompatible.", err=True)
+        raise typer.Exit(1)
+    typst_text = _convert_source(input.read_text(encoding="utf-8"), config, paper)
+    if to_stdout:
         sys.stdout.write(typst_text)
     else:
         _emit_to_file(typst_text, output or input.with_suffix(".typ"), pdf)

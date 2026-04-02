@@ -266,4 +266,6 @@ def render_tokens(ctx: Ctx) -> None:
         if handler:
             handler(ctx)
         else:
+            import warnings
+            warnings.warn(f"Unsupported block token type: {ctx.current().type}", stacklevel=2)
             ctx.advance()

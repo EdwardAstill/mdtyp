@@ -14,7 +14,7 @@ class Ctx:
         self.tokens = tokens
         self.config = config
         self.i = 0
-        self.out = ""
+        self._parts: list[str] = []
         self.list_stack: list[str] = []  # "bullet" | "ordered"
         self.item_first_para: bool = False  # True right after list_item_open
 
@@ -31,8 +31,12 @@ class Ctx:
     def has_more(self) -> bool:
         return self.i < len(self.tokens)
 
+    @property
+    def out(self) -> str:
+        return "".join(self._parts)
+
     def write(self, s: str) -> None:
-        self.out += s
+        self._parts.append(s)
 
     def sub_context(self, tokens: list[Token]) -> Ctx:
         """Create a child context for recursive rendering (e.g. blockquotes)."""

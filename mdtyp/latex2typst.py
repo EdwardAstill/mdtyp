@@ -483,7 +483,9 @@ def _replace_sqrt(s: str) -> str:
     while (m := _RE_SQRT.search(s)):
         pos = m.end()
         if pos < len(s) and s[pos] == "[":
-            bracket_end = s.index("]", pos)
+            bracket_end = s.find("]", pos)
+            if bracket_end == -1:
+                break
             n_arg = s[pos + 1 : bracket_end]
             arg, after = _extract_braced(s, bracket_end + 1)
             if arg is None:
@@ -512,6 +514,9 @@ def _extract_braced(s: str, pos: int) -> tuple[str | None, int]:
     start = pos + 1
     i = pos
     while i < len(s):
+        if s[i] == "\\" and i + 1 < len(s) and s[i + 1] in "{}":
+            i += 2
+            continue
         if s[i] == "{":
             depth += 1
         elif s[i] == "}":
