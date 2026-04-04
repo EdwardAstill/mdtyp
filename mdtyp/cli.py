@@ -116,6 +116,10 @@ def mdtyp(
     if all:
         _convert_all(config, effective_paper, pdf)
     elif input is None:
+        if sys.stdin.isatty() and not output and not stdout:
+            from mdtyp.tui import MdtypBrowser
+            MdtypBrowser().run()
+            return
         _convert_stdin(config, effective_paper, output, pdf)
     else:
         _convert_file(input, config, effective_paper, output, stdout, pdf)
