@@ -117,14 +117,16 @@ def _handle_strong(
     children: list[Token], i: int, config: Config,
 ) -> tuple[str, int]:
     inner, j = _collect_until(children, i + 1, "strong_close")
-    return f"*{render_inline(inner, config)}*", j + 1
+    content = render_inline(inner, config)
+    return (f"*{content}*" if content else ""), j + 1
 
 
 def _handle_em(
     children: list[Token], i: int, config: Config,
 ) -> tuple[str, int]:
     inner, j = _collect_until(children, i + 1, "em_close")
-    return f"_{render_inline(inner, config)}_", j + 1
+    content = render_inline(inner, config)
+    return (f"_{content}_" if content else ""), j + 1
 
 
 def _handle_strikethrough(

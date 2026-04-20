@@ -256,6 +256,29 @@ _RE_MATHBB = re.compile(r"\\mathbb\{([^}]*)\}")
 _RE_SQRT = re.compile(r"\\sqrt")
 _RE_MULTI_SPACE = re.compile(r"  +")
 
+# \not + following symbol → negated Typst symbol (longest-first to avoid partial matches)
+_NOT_MAP: list[tuple[str, str]] = sorted([
+    (r"\Leftrightarrow", "arrow.lr.double.not"),
+    (r"\Rightarrow", "arrow.r.double.not"),
+    (r"\Leftarrow", "arrow.l.double.not"),
+    (r"\subseteq", "subset.eq.not"),
+    (r"\supseteq", "supset.eq.not"),
+    (r"\implies", "arrow.r.double.not"),
+    (r"\subset", "subset.not"),
+    (r"\supset", "supset.not"),
+    (r"\equiv", "eq.not"),
+    (r"\leq", "lt.eq.not"),
+    (r"\geq", "gt.eq.not"),
+    (r"\iff", "arrow.lr.double.not"),
+    (r"\in", "in.not"),
+    ("=", "eq.not"),
+    ("<", "lt.not"),
+    (">", "gt.not"),
+], key=lambda x: -len(x[0]))
+_NOT_ALTS = "|".join(re.escape(sym) for sym, _ in _NOT_MAP)
+_RE_NOT = re.compile(rf"\\not\s*({_NOT_ALTS})|\\not\b")
+_NOT_LOOKUP: dict[str, str] = dict(_NOT_MAP)
+
 # Known Typst math identifiers that must NOT be quoted.
 _TYPST_MATH_IDENTS: frozenset[str] = frozenset({
     # Typst math functions
@@ -274,6 +297,7 @@ _TYPST_MATH_IDENTS: frozenset[str] = frozenset({
     # Symbols
     "dot", "times", "div", "compose", "ast", "star",
     "approx", "equiv", "prop",
+    "eq", "lt", "gt",
     "subset", "supset",
     "forall", "exists",
     "sum", "product", "integral",
@@ -415,6 +439,13 @@ def _translate_commands(s: str) -> str:
         lambda m: _MATHBB.get(m.group(1), f"bb({m.group(1)})"), s,
     )
 
+    # {,} is a LaTeX spacing trick for thousands separators; render as plain comma
+    s = s.replace("{,}", ",")
+
+    # \not + following symbol (must run before simple commands so \not\Rightarrow
+    # is handled before \Rightarrow gets converted to =>)
+    s = _translate_not(s)
+
     # Simple command replacements (precompiled, longest-first)
     for pattern, typst_rep in _COMPILED_COMMANDS:
         s = _replace_with_spacing(s, pattern, typst_rep)
@@ -527,13 +558,25 @@ def _extract_braced(s: str, pos: int) -> tuple[str | None, int]:
     return None, pos
 
 
+def _translate_not(s: str) -> str:
+    """Replace ``\\not X`` with negated Typst symbol, or bare ``not`` as fallback."""
+    def _replace(m: re.Match[str]) -> str:
+        sym = m.group(1)
+        return _NOT_LOOKUP[sym] if sym is not None else "not"
+    return _RE_NOT.sub(_replace, s)
+
+
 # ---------------------------------------------------------------------------
 # Stage 4: Script conversion
 # ---------------------------------------------------------------------------
 
+_RE_BARE_STAR_SUPER = re.compile(r"\^\*")
+
 
 def _translate_scripts(s: str) -> str:
     """Convert LaTeX brace-grouped sub/superscripts: ``_{...}`` → ``_(...)``."""
+    # Bare ^* → ^ast: prevents */ from being parsed as a Typst block comment end.
+    s = _RE_BARE_STAR_SUPER.sub("^ast", s)
     result: list[str] = []
     i = 0
     while i < len(s):

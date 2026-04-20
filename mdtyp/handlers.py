@@ -223,7 +223,7 @@ def _format_table(
     if header_cells:
         lines.append("  table.header(")
         for cell in header_cells:
-            if config.table.header_bold:
+            if config.table.header_bold and cell:
                 lines.append(f"    [*{cell}*],")
             else:
                 lines.append(f"    [{cell}],")

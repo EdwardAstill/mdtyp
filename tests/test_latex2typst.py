@@ -254,3 +254,52 @@ def test_misc_symbols(latex: str, expected: str) -> None:
 ])
 def test_delimiters(latex: str, expected: str) -> None:
     assert latex_to_typst(latex) == expected
+
+
+# --- \not negation ---
+
+@pytest.mark.parametrize("latex, expected", [
+    (r"\not\Rightarrow", "arrow.r.double.not"),
+    (r"\not\implies", "arrow.r.double.not"),
+    (r"\not\Leftarrow", "arrow.l.double.not"),
+    (r"\not\Leftrightarrow", "arrow.lr.double.not"),
+    (r"\not\in", "in.not"),
+    (r"\not\equiv", "eq.not"),
+    (r"\not\subseteq", "subset.eq.not"),
+    (r"\not =", "eq.not"),
+    (r"\not <", "lt.not"),
+    (r"\not >", "gt.not"),
+])
+def test_not_negation(latex: str, expected: str) -> None:
+    assert latex_to_typst(latex) == expected
+
+
+def test_not_in_expression() -> None:
+    result = latex_to_typst(r"A \not\subseteq B")
+    assert "subset.eq.not" in result
+
+
+# --- Bare superscript star ---
+
+@pytest.mark.parametrize("latex, expected", [
+    ("P^*", "P^ast"),
+    ("x^*", "x^ast"),
+])
+def test_bare_star_superscript(latex: str, expected: str) -> None:
+    assert latex_to_typst(latex) == expected
+
+
+def test_star_super_no_comment_syntax() -> None:
+    result = latex_to_typst(r"E \cdot P^*/P")
+    assert "^ast" in result
+    assert "^*" not in result
+
+
+# --- {,} thousands-separator grouping ---
+
+@pytest.mark.parametrize("latex, expected", [
+    (r"15{,}000", "15,000"),
+    (r"1{,}500{,}000", "1,500,000"),
+])
+def test_grouped_comma(latex: str, expected: str) -> None:
+    assert latex_to_typst(latex) == expected

@@ -33,6 +33,10 @@ def test_bold() -> None:
     assert "*bold*" in convert("**bold**")
 
 
+def test_bold_empty() -> None:
+    assert "**" not in convert("**")
+
+
 def test_italic() -> None:
     assert "_italic_" in convert("_italic_")
 
