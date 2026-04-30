@@ -9,16 +9,10 @@ Convert Markdown documents to [Typst](https://typst.app/) format from the comman
 Requires Python ≥ 3.14 and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone <repo>
-cd md2typ
-uv sync
+uv tool install git+https://github.com/EdwardAstill/mdtyp
 ```
 
-To install the `mdtyp` command globally:
-
-```bash
-uv tool install .
-```
+To compile to PDF (`--pdf` and TUI `p` action), also install [Typst](https://github.com/typst/typst).
 
 ---
 
