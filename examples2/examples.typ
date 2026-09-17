@@ -1,13 +1,18 @@
-#set page(paper: "a4", margin: 16mm, numbering: "1")
-#set text(size: 10.5pt)
-#show raw: set text(size: 8pt)
-#show table: set text(size: 9pt)
+#set page(paper: "a4")
 
-= Worked examples — one route through each problem type
+#set page(margin: 15mm)
+#set page(numbering: "1")
+#set text(size: 12pt)
+
+= Worked examples — core methods and further problem types
+
+#outline(title: [Table of contents])
 
 #link("cheatsheet.md")[Cheat sheet] · #link("questions.md")[All questions] · #link("engineering-content.md")[Engineering notes] · #link("R.md")[R guide]
 
 Use the recognition cue to choose a method, then cover the solution and try the calculation. Examples use supplied course questions unless marked *adapted* or *toy*. Extra subparts show closely related skills without repeating whole questions. Numerical results were checked using R; retain full precision until the final answer. In $N(mu,sigma^2)$ the second parameter is *variance*.
+
+*New practice: Examples 30–50.* These are original *toy extensions*, with a different central reasoning step from the worked processes in #link("questions.md")[questions.md] and Examples 1–29. Each identifies that new step; familiar probability identities still appear as supporting tools. Some extensions go beyond the supplied midsemester questions, so they are additional practice rather than evidence of examinable scope. The existing course-based examples are retained above them.
 
 
 == Problem index
@@ -77,22 +82,64 @@ Use the recognition cue to choose a method, then cover the solution and try the 
   [#link("#28-shifted-weibull-and-age-replacement-cost")[28]],
   [Discounted costs, availability, engineering judgement],
   [#link("#29-engineering-calculations-and-short-answer-patterns")[29]],
+  [A CDF containing a jump and a continuous part],
+  [#link("#30-point-mass-and-continuous-lifetime-in-one-model")[30]],
+  [Transforming a random speed into a travel time],
+  [#link("#31-a-decreasing-nonlinear-transformation")[31]],
+  [Lognormal parameters from an ordinary mean and SD],
+  [#link("#32-recover-lognormal-parameters-from-original-scale-moments")[32]],
+  [Variation within and between repair categories],
+  [#link("#33-total-variance-for-a-mixture-of-repair-types")[33]],
+  [Randomly classifying events in a Poisson stream],
+  [#link("#34-thinning-a-poisson-stream")[34]],
+  [Which failure mode occurs first, and by when],
+  [#link("#35-competing-failure-modes-and-cause-specific-probability")[35]],
+  [Shared failures that defeat independent redundancy],
+  [#link("#36-common-cause-failure-and-the-limit-of-redundancy")[36]],
+  [Two required survivors with unequal reliabilities],
+  [#link("#37-two-out-of-three-with-unequal-components")[37]],
+  [A spare that starts ageing only when activated],
+  [#link("#38-cold-standby-and-imperfect-switching")[38]],
+  [Minimum number of parallel units for a target],
+  [#link("#39-design-the-number-of-redundant-units")[39]],
+  [Falling fleet hazard despite constant individual hazards],
+  [#link("#40-survivor-selection-in-a-mixed-fleet")[40]],
+  [Expected additional life of an already surviving item],
+  [#link("#41-mean-remaining-life")[41]],
+  [Failures only located between inspection times],
+  [#link("#42-interval-censoring-and-the-likelihood")[42]],
+  [Units entering observation at different ages],
+  [#link("#43-delayed-entry-changes-the-risk-set")[43]],
+  [Mean lifetime limited to an observed horizon],
+  [#link("#44-restricted-mean-from-a-survival-curve")[44]],
+  [A reliability test with no observed failures],
+  [#link("#45-zero-failures-and-a-test-exposure-requirement")[45]],
+  [A probability guarantee without a distribution model],
+  [#link("#46-a-distribution-free-bound-for-a-sample-mean")[46]],
+  [Random strength compared with random load],
+  [#link("#47-stress-strength-interference")[47]],
+  [Hidden failure averaged over a proof-test interval],
+  [#link("#48-proof-test-spacing-and-average-unavailability")[48]],
+  [Detection and repair before a P–F interval ends],
+  [#link("#49-inspection-timing-with-a-repair-lead-time")[49]],
+  [Constructing an F–N curve and expected annual loss],
+  [#link("#50-fn-exceedance-frequencies-and-potential-loss-of-life")[50]],
 )
 
 == 1. Event algebra and valid probabilities
 
 *Recognise:* “$A$ or $B$, given $C$” requires a union inside a conditional probability. *Source:* #link("../questions/midsem/Mid-Sem-2025-Sem-1-questions-and-answers.md")[2025 paper Q13–14].
 
-Given $P(A)=0.2$, $P(B)=0.1$, $P(C)=0.4$, $A ∩ B=nothing$, $B$ independent of $C$, and $P(A ∩ C)=0.1$:
+Given $P(A)=0.2$, $P(B)=0.1$, $P(C)=0.4$, $A inter B=emptyset$, $B$ independent of $C$, and $P(A inter C)=0.1$:
 
-$ P(B ∩ C)=P(B)P(C)=0.04, $
+$ P(B inter C)=P(B)P(C)=0.04, $
 
-$ P(A union B ∣ C)=frac(P(A ∩ C)+P(B ∩ C), P(C))
+$ P(A union B | C)=frac(P(A inter C)+P(B inter C), P(C))
 =frac(0.10+0.04, 0.40)=0.35. $
 
 There is no triple-intersection subtraction because $A$ and $B$ are disjoint. To check any proposed assignment, use
 
-$ max(0,P(A)+P(B)-1)<= P(A ∩ B)<= min(P(A),P(B)). $
+$ max(0,P(A)+P(B)-1)<= P(A inter B)<= min(P(A),P(B)). $
 
 For $P(A)=0.5$, $P(B)=0.7$, the intersection must be at least $0.2$: a proposed $0.1$ is invalid because it would make the union $1.1$. The assignment $0.7,0.2,0.1$ is valid and gives union $0.8$.
 
@@ -103,9 +150,9 @@ For $P(A)=0.5$, $P(B)=0.7$, the intersection must be at least $0.2$: a proposed 
 
 *Recognise:* an imperfect test gives conditional probabilities; the observed positive-test frequency can reveal prevalence. *Source:* #link("../questions/probability-questions/prac/prac-sheet-1.pdf")[Prac 1 Q1].
 
-Let $A$ = pipe has corrosion and $B$ = test indicates corrosion. Given $P(B ∣ A)=0.7$, $P(B ∣ A')=0.2$, $P(B)=0.25$, set $p=P(A)$.
+Let $A$ = pipe has corrosion and $B$ = test indicates corrosion. Given $P(B | A)=0.7$, $P(B | A')=0.2$, $P(B)=0.25$, set $p=P(A)$.
 
-$ 0.25=P(B ∣ A)p+P(B ∣ A')(1-p)=0.7p+0.2(1-p),
+$ 0.25=P(B | A)p+P(B | A')(1-p)=0.7p+0.2(1-p),
 wide p=0.1. $
 
 The tree's terminal branches are:
@@ -120,25 +167,25 @@ The tree's terminal branches are:
   ),
   [Corrosion $A$: $0.1$],
   [Positive $B$: $0.7$],
-  [$P(A ∩ B)=0.07$],
+  [$P(A inter B)=0.07$],
   [Corrosion $A$: $0.1$],
   [Negative $B'$: $0.3$],
-  [$P(A ∩ B')=0.03$],
+  [$P(A inter B')=0.03$],
   [No corrosion $A'$: $0.9$],
   [Positive $B$: $0.2$],
-  [$P(A' ∩ B)=0.18$],
+  [$P(A'inter B)=0.18$],
   [No corrosion $A'$: $0.9$],
   [Negative $B'$: $0.8$],
-  [$P(A' ∩ B')=0.72$],
+  [$P(A'inter B')=0.72$],
 )
 Add the positive branches: $P(B)=0.07+0.18=0.25$. Reverse the condition by dividing the appropriate joint probability by the observed event:
 
-$ P(A ∣ B)=frac(0.07, 0.25)=0.28,wide
-P(A ∣ B')=frac(0.03, 0.75)=0.04. $
+$ P(A | B)=frac(0.07, 0.25)=0.28,wide
+P(A | B')=frac(0.03, 0.75)=0.04. $
 
-*Trap:* $P(B ∣ A)$ is not $P(A ∣ B)$. The identity to memorise is
+*Trap:* $P(B | A)$ is not $P(A | B)$. The identity to memorise is
 
-$ P(B ∣ A)P(A)=P(A ∩ B)=P(A ∣ B)P(B). $
+$ P(B | A)P(A)=P(A inter B)=P(A | B)P(B). $
 
 The multiplier on the right is $P(B)$.
 
@@ -149,12 +196,12 @@ The multiplier on the right is $P(B)$.
 
 Treat the four stated causes $A,B,C,D$ as mutually exclusive and exhaustive, with probabilities $0.30,0.40,0.15,0.15$. Conditional explosion probabilities are $0.25,0.20,0.40,0.75$.
 
-$ P(E)=sum_i P(i)P(E ∣ i)
+$ P(E)=sum_i P(i)P(E | i)
 =0.075+0.080+0.060+0.1125=0.3275. $
 
 Given that an explosion occurred, the probability assigned to static electricity is
 
-$ P(A ∣ E)=frac(0.075, 0.3275)=0.2290. $
+$ P(A | E)=frac(0.075, 0.3275)=0.2290. $
 
 *Adapted event-tree extension:* a leak occurs with probability $0.02$ per mission; ignition given a leak has probability $0.3$; suppression fails given an ignited leak with probability $0.1$. The major-fire path is
 
@@ -173,7 +220,11 @@ $ 1=integral_0^8 "cx" thin "dx"=32c quad =>quad c=frac(1, 32). $
 
 Then
 
-$ F(x)=cases(0 quad x <= 0, x^2/64 quad 0<x<8, 1 quad x >= 8.) $
+$ F(x)=cases(
+ 0, & x <= 0,,
+ x^2/64, & 0<x<8,,
+ 1, & x >= 8.
+) $
 
 $ P(1.6<X<4.1)=frac(4.1^2-1.6^2, 64)=0.22265625 approx 0.22. $
 
@@ -194,7 +245,12 @@ For the median, $F(m)=0.5$ gives $m=sqrt(32)approx 5.6569$.
 
 Repair time has $f(x)=x/1600$ for $0<x <= 40$ and $(80-x)/1600$ for $40<x<80$, zero elsewhere. Integrating from the beginning of the support gives
 
-$ F(x)=cases(0 quad x <= 0, x^2/3200 quad 0<x <= 40, 1-(80-x)^2/3200 quad 40<x<80, 1 quad x >= 80.) $
+$ F(x)=cases(
+ 0, & x <= 0,,
+ x^2/3200, & 0<x <= 40,,
+ 1-(80-x)^2/3200, & 40<x<80,,
+ 1, & x >= 80.
+) $
 
 The second branch includes the area already accumulated to $40$. Therefore
 
@@ -362,7 +418,7 @@ Mean life and standard deviation are both $1/lambda=1287.78$ h; median life is $
 
 For an item already aged $1000$ h,
 
-$ P(T>1336 ∣ T>1000)=frac(e^(-1336 lambda), e^(-1000 lambda))
+$ P(T>1336 | T>1000)=frac(e^(-1336 lambda), e^(-1000 lambda))
 =e^(-336 lambda)=0.770347. $
 
 Its chance of failing in the next $336$ h is again $0.229653$. By contrast, the unconditional chance of failing between ages $1000$ and $1336$ is $R(1000)-R(1336)=0.46(0.229653)approx 0.105640$.
@@ -383,7 +439,7 @@ $ R(t)=e^(-(t/10)^{2.5}),wide h(t)=frac(2.5, 10)(t/10)^(1.5). $
   align: (right, right,),
   table.header(
     [*Age*],
-    [*Hazard, year${}^(-1)$*],
+    [*Hazard, year$""^(-1)$*],
   ),
   [5 yr],
   [0.088388],
@@ -408,7 +464,7 @@ For any Weibull, the $p$th failure quantile is $t_p=eta[-ln(1-p)]^(1/beta)$. The
 
 *Adapted residual-life check:* for $beta=2,eta=5$, compare
 
-$ P(T>6 ∣ T>4)=e^(-[(6/5)^2-(4/5)^2])=e^(-0.8)=0.449329 $
+$ P(T>6 | T>4)=e^(-[(6/5)^2-(4/5)^2])=e^(-0.8)=0.449329 $
 
 with $P(T>2)=e^(-0.16)=0.852144$. The Weibull is memoryless only at $beta=1$.
 
@@ -452,7 +508,7 @@ $ R_(upright("sys"))(500)=e^(-500 lambda_{upright("sys")})=0.579604 approx 0.580
 
 The same argument handles $Y=min(X_1,X_2,X_3)$ with rates $0.002,0.003,0.005$: $Y tilde.op op("Exp")(0.010)$, $P(Y>300)=e^(-3)=0.049787$, and $E[Y]=100$ h. The Prac 2 solution's printed $0.0005$ in one product is inconsistent with its stated $0.005$ and numerical result.
 
-*Units/checking variant:* five sensors each at $1.91$ failures per million hours give $lambda_(upright("module"))=9.55 times 10^(-6)$ h${}^(-1)$. Using $365.25$ days/year,
+*Units/checking variant:* five sensors each at $1.91$ failures per million hours give $lambda_(upright("module"))=9.55 times 10^(-6)$ h$""^(-1)$. Using $365.25$ days/year,
 
 $ R(10" yr")=e^(-9.55 times 10^{-6}(10)(365.25)(24))=0.432941. $
 
@@ -491,16 +547,16 @@ Five independent links have reliability $0.9$. Two paths connect source $S$ to d
 
 When $E$ fails, the two series paths act in parallel:
 
-$ R_(upright("sys") ∣ E')=1-(1-R_A R_B)(1-R_C R_(D_1))
+$ R_(upright("sys")| E')=1-(1-R_A R_B)(1-R_C R_(D_1))
 =1-(1-0.9^2)^2=0.9639. $
 
 When $E$ works, $U$ and $V$ effectively merge. The input links $A,C$ are parallel, followed in series by parallel output links $B,D_1$:
 
-$ R_(upright("sys") ∣ E)=[1-(1-0.9)^2]^2=0.9801. $
+$ R_(upright("sys")| E)=[1-(1-0.9)^2]^2=0.9801. $
 
 Total probability gives
 
-$ R_(upright("sys"))=R_E R_(upright("sys") ∣ E)+(1-R_E)R_(upright("sys") ∣ E')
+$ R_(upright("sys"))=R_E R_(upright("sys")| E)+(1-R_E)R_(upright("sys")| E')
 =0.9(0.9801)+0.1(0.9639)=0.97848. $
 
 *Trap:* paths sharing a component are not independent, even if components are independent. Condition on the shared component or bridge, simplify each state, then combine.
@@ -524,7 +580,7 @@ For $x=(10,17,24,30,14,18,15,13,21)$ minutes, $n=9$ and $macron(x)=18$.
   [Lognormal],
   [$hat(mu)=op("mean")(ln x)=2.840222$; $hat(sigma)=sqrt(sum(ln x_i-hat(mu))^2/9)=0.315505$],
   [Exponential],
-  [$hat(lambda)=n/sum x_i=1/18=0.055556$ min${}^(-1)$],
+  [$hat(lambda)=n/sum x_i=1/18=0.055556$ min$""^(-1)$],
 )
 The ordinary sample standard deviation is $s=sqrt(sum(x_i-18)^2/8)=6.164414$ min. Report which estimator is requested; R's `sd(x)` uses $n-1$.
 
@@ -581,7 +637,7 @@ $ hat(op("MTBF"))=frac(17.5, 5)=3.5. $
 
 For the separate timestamps $2,3,6,9,10$, observed to $11$, completed interfailure durations are
 
-$ 2,thin 3-2,thin 6-3,thin 9-6,thin 10-9=2,1,3,3,1. $
+$ 2,\ 3-2,\ 6-3,\ 9-6,\ 10-9=2,1,3,3,1. $
 
 Their mean is $2$. The population-divisor descriptive SD used in the local answer is $sqrt(4/5)=0.894427$. The conventional sample SD, which R's `sd` returns, is $sqrt(4/4)=1$.
 
@@ -733,7 +789,7 @@ $ ell(beta,eta)=sum_i delta_i [ln beta-beta ln eta+(beta-1)ln t_i ]
 
 *Recognise:* the random variable is an average of $n$ measurements. *Source:* #link("../questions/midsem/Mid-Sem-2025-Sem-1-questions-and-answers.md")[2025 Q17]; sum subpart added from the Prac 5 method.
 
-Loaded bucket volumes are iid $N(11.5,1.4^2)$ m${}^3$. For $n=12$:
+Loaded bucket volumes are iid $N(11.5,1.4^2)$ m$""^3$. For $n=12$:
 
 $ macron(X)tilde.op N ( 11.5,frac(1.4^2, 12)),wide
 op("SE")(macron(X))=frac(1.4, sqrt(12)). $
@@ -797,7 +853,7 @@ sigma^2=25[Gamma(2)-Gamma(1.5)^2]=5.365046. $
 
 For *one* board, $P(T_1>5)=e^(-1)=0.367879$. For the *sample average*, the CLT gives
 
-$ macron(T)thin dot(tilde.op)thin N ( 4.431135,frac(5.365046, 50)), $
+$ macron(T)\ dot(tilde.op)\ N ( 4.431135,frac(5.365046, 50)), $
 
 $ P(macron(T)>5)approx 1-Phi ( frac(5-4.431135, sqrt(5.365046/50)))
 =0.041226. $
@@ -816,7 +872,10 @@ wide n_(min)approx 83. $
 
 A cable has shape $beta=1.8$, scale $eta=500$ h and threshold $gamma=50$ h. Corrective replacement costs \$6000, scheduled replacement \$600; operation is $H=5000$ h/year. Candidate ages are $50,75,dots,300$ h.
 
-$ R(t)=cases(1 quad t<50, e^(-((t-50)/500)^{1.8}) quad t >= 50.) $
+$ R(t)=cases(
+ 1, & t<50,,
+ e^(-((t-50)/500)^{1.8}), & t >= 50.
+) $
 
 Each replacement restores the cable to new condition. Ignoring downtime, the long-run annual cost is
 
@@ -912,3 +971,640 @@ Availability allows repair and return to operation; mission reliability is the p
   [Inspection spacing alone is insufficient if repair preparation takes longer than the remaining warning time],
 )
 Engineering answers should connect the observed fact to the definition, then state the decision. Where a decision uses failure probability, hazard, reliability, availability, expected cost or uncertainty, the statistical calculations in this document provide the quantitative input.
+
+
+== 30. Point mass and continuous lifetime in one model
+
+*Recognise:* some items fail immediately; the others have a continuous lifetime. *Toy extension. New step:* retain a CDF jump separately from the continuous density.
+
+A device has probability $0.1$ of failing at start-up, recorded as $T=0$. Conditional on starting successfully, its lifetime is uniform between 1 and 5 hours. Find the CDF, the probability of failure by 2 h, and the mean life.
+
+The start-up failures create a jump of $0.1$ at zero. The remaining probability $0.9$ is spread over $(1,5)$:
+
+$ F_T(t)=cases(
+ 0, & t<0,,
+ 0.1, & 0 <= t<1,,
+ 0.1+0.9(t-1)/4, & 1 <= t<5,,
+ 1, & t >= 5.
+) $
+
+Thus $P(T=0)=F_T(0)-F_T(0^-)=0.1$, and
+
+$ P(T <= 2)=0.1+0.9frac(2-1, 4)=0.325. $
+
+But $P(0<T <= 2)=0.325-0.1=0.225$: including the endpoint zero matters here.
+
+The mean averages the two parts:
+
+$ E[T]=0.1(0)+0.9frac(1+5, 2)=2.7" h". $
+
+*Trap:* differentiating the CDF gives density $0.225$ on $(1,5)$, whose area is only $0.9$. The missing $0.1$ is the atom at zero; an ordinary PDF alone cannot describe this whole distribution.
+
+
+== 31. A decreasing nonlinear transformation
+
+*Recognise:* the required variable is the reciprocal of another random measurement. *Toy extension. New step:* transform the event, reverse the inequality, and determine the new support.
+
+A vehicle travels 12 km at a random constant speed $V tilde.op U(2,4)$ km/h. Find the distribution and mean of travel time $T=12/V$.
+
+The fastest and slowest speeds give $3 <= T <= 6$ h. For $3<t<6$,
+
+$ F_T(t)=P(12/V <= t)=P(V >= 12/t)
+=frac(4-12/t, 4-2)=2-frac(6, t). $
+
+Outside the support, $F_T(t)=0$ for $t <= 3$ and $F_T(t)=1$ for $t >= 6$. Differentiating within it gives
+
+$ f_T(t)=frac(6, t^2),wide 3<t<6. $
+
+For example, $P(T <= 4)=2-6/4=0.5$. The mean is
+
+$ E[T]=integral_3^6 t frac(6, t^2)thin "dt"
+=6 ln(6/3)=4.158883" h". $
+
+*Trap:* $12/E[V]=12/3=4$ h is not $E[12/V]$. Nonlinear transformations generally cannot be applied directly to a mean. A uniform speed also does not imply a uniform travel time.
+
+
+== 32. Recover lognormal parameters from original-scale moments
+
+*Recognise:* a lognormal model is specified using the ordinary mean and SD, rather than `meanlog` and `sdlog`. *Toy extension. New step:* invert the moment equations before calculating a probability.
+
+Repair time $T$ is lognormal with mean 10 h and SD 6 h. Find the parameters of $ln T$ and the chance that repair exceeds 20 h. Take logarithms of the numerical time measured in hours.
+
+Write $ln T tilde.op N(mu,sigma^2)$. If $m=E[T]$ and $s=op("SD")(T)$, then
+
+$ m=e^(mu+sigma^2/2),wide
+frac(s^2, m^2)=e^(sigma^2)-1. $
+
+Solve the second equation first, then substitute into the first:
+
+$ sigma^2=ln ( 1+frac(6^2, 10^2))=ln 1.36,
+wide sigma=0.554513, $
+
+$ mu=ln 10-frac(1, 2)ln 1.36=2.148843. $
+
+Now the upper tail is
+
+$ P(T>20)=1-Phi ( frac(ln 20-2.148843, 0.554513))
+=0.063347. $
+
+```r
+sdlog <- sqrt(log(1 + (6 / 10)^2))
+meanlog <- log(10) - sdlog^2 / 2
+plnorm(20, meanlog = meanlog, sdlog = sdlog, lower.tail = FALSE)
+```
+
+*Trap:* passing `meanlog = 10, sdlog = 6` describes a completely different repair-time model. Changing time units shifts `meanlog`; it does not change `sdlog`.
+
+
+== 33. Total variance for a mixture of repair types
+
+*Recognise:* observations come from categories with different means and spreads. *Toy extension. New step:* include both variation within categories and variation between category means.
+
+Seventy percent of repairs are minor, with mean 2 h and SD 1 h. The other 30% are major, with mean 10 h and SD 3 h. Find the overall mean and SD. No distribution shape within either category is assumed.
+
+Let $G$ denote the repair category. First,
+
+$ E[T]=E[E(T | G)]=0.7(2)+0.3(10)=4.4" h". $
+
+The law of total variance is
+
+$ op("Var")(T)
+=E[op("Var")(T | G)]
++op("Var")(E[T | G]). $
+
+The within-category contribution is $0.7(1^2)+0.3(3^2)=3.4$ h$""^2$. The between-category contribution is
+
+$ 0.7(2-4.4)^2+0.3(10-4.4)^2=13.44" h"^2. $
+
+Therefore,
+
+$ op("Var")(T)=16.84" h"^2,wide
+op("SD")(T)=sqrt(16.84)=4.103657" h". $
+
+*Trap:* averaging the two variances gives only 3.4 and misses most of the spread. Averaging the two SDs is also incorrect. This is a randomly selected repair from a mixture, not a weighted sum of two repairs.
+
+
+== 34. Thinning a Poisson stream
+
+*Recognise:* a random number of events occurs, and each event independently receives a label. *Toy extension. New step:* combine a Poisson event count with random classification to derive a new count distribution.
+
+Alarms arrive as a Poisson process at 4 per hour. Each alarm is independently serious with probability $p=0.1$, independently of arrival times. Let $K$ count serious alarms in two hours. Find its distribution and $P(K >= 1)$.
+
+The total alarm count is $N tilde.op op("Poisson")(8)$. Conditional on $N=n$, $K | N=n tilde.op op("Binomial")(n,p)$. Remove the condition by summing over all possible totals:
+
+$ P(K=k)
+=sum_(n=k)^(infinity)binom(n, k) p^k(1-p)^(n-k)
+frac(8^n e^(-8), n!) \
+=frac((8p)^k e^(-8), k!)
+sum_(j=0)^(infinity)frac([8(1-p)]^j, j!) \
+=frac((8p)^k e^(-8p), k!). $
+
+Thus $K tilde.op op("Poisson")(0.8)$, and
+
+$ P(K >= 1)=1-e^(-0.8)=0.550671. $
+
+*Trap:* $op("Binomial")(8,0.1)$ would treat the expected total of eight alarms as a fixed total. The classification must be independent with a constant probability for this thinning result to apply.
+
+
+== 35. Competing failure modes and cause-specific probability
+
+*Recognise:* more than one mode can end a life, and the question asks which one acts first. *Toy extension. New step:* multiply one mode's failure density by survival against the competing mode, then integrate.
+
+An item can fail electrically or mechanically. Its independent latent failure times are exponential with rates $lambda_E=0.002$ h$""^(-1)$ and $lambda_M=0.003$ h$""^(-1)$. The first failure ends service. Find the probability that electrical failure ends service by 100 h.
+
+For electrical failure at age $u$ to be the observed cause, the mechanical mode must not yet have occurred. Hence
+
+$ P(T_E<T_M,\ T_E <= 100)
+=integral_0^(100) f_E(u)R_M(u)thin "du" \
+=integral_0^(100)0.002e^(-0.002u)e^(-0.003u)thin "du" \
+=frac(0.002, 0.005)(1-e^(-0.005(100))) \
+=0.157388. $
+
+Over an unlimited time horizon, electrical failure wins the race with probability $lambda_E/(lambda_E+lambda_M)=0.4$. In this constant-rate model, the same fraction $0.4$ of failures observed by 100 h are electrical, since dividing by $P(min(T_E,T_M)<= 100)$ cancels the bracket.
+
+*Trap:* $1-e^(-0.002(100))$ ignores items already removed by mechanical failure. Cause-specific cumulative failure probability depends on all competing hazards; the constant rate-ratio answer is not a general rule for time-varying hazards.
+
+
+== 36. Common-cause failure and the limit of redundancy
+
+*Recognise:* a shared event can disable all redundant units. *Toy extension. New step:* model dependence explicitly and identify the reliability ceiling.
+
+Two backup pumps serve one mission. A shared flood disables both with probability $q=0.02$. Conditional on no flood, their individual failure probabilities are each $p=0.1$, independently. Find the probability both are unavailable and the best reliability achievable by adding more such pumps.
+
+Both pumps are unavailable either because of the flood or because both fail individually without a flood. These cases are disjoint:
+
+$ P("system fails")=q+(1-q)p^2
+=0.02+0.98(0.1)^2=0.0298. $
+
+Thus system reliability is $0.9702$. Each pump's marginal failure probability is $q+(1-q)p=0.118$, but multiplying these marginals gives $0.118^2=0.013924$, which is too low because the pumps are dependent.
+
+For $n$ pumps,
+
+$ R_n=(1-q)(1-p^n),wide
+lim_(n -> infinity)R_n=1-q=0.98. $
+
+A target of $0.99$ is therefore impossible by adding pumps alone under this model; the shared flood vulnerability must also change.
+
+*Trap:* physical duplication does not establish statistical independence. The stated individual probability $p$ is conditional on no flood, so the flood contribution must be accounted for separately.
+
+
+== 37. Two-out-of-three with unequal components
+
+*Recognise:* at least two units must work, but they have different success probabilities. *Toy extension. New step:* enumerate disjoint functioning states instead of substituting into an identical-trial binomial model.
+
+Three independent sensors have mission reliabilities $R_A=0.9$, $R_B=0.8$ and $R_C=0.7$. The system requires any two functioning sensors. Find system reliability.
+
+There are four successful states:
+
+#table(
+  columns: 2,
+  align: (auto, right,),
+  table.header(
+    [*Working sensors*],
+    [*State probability*],
+  ),
+  [$A,B$ only],
+  [$0.9(0.8)(0.3)=0.216$],
+  [$A,C$ only],
+  [$0.9(0.7)(0.2)=0.126$],
+  [$B,C$ only],
+  [$0.8(0.7)(0.1)=0.056$],
+  [All three],
+  [$0.9(0.8)(0.7)=0.504$],
+)
+Add the disjoint states:
+
+$ R_(upright("sys"))=0.216+0.126+0.056+0.504=0.902. $
+
+Equivalently,
+
+$ R_(upright("sys"))=R_A R_B+R_A R_C+R_B R_C-2R_A R_B R_C. $
+
+The subtraction removes two extra counts of the all-working state. Using the average reliability $0.8$ in a binomial formula would give $3(0.8)^2(0.2)+(0.8)^3=0.896$, not the exact answer.
+
+*Trap:* “at least two work” is neither ordinary series nor ordinary parallel. State explicitly what counts as system success before calculating.
+
+
+== 38. Cold standby and imperfect switching
+
+*Recognise:* one unit operates while a spare waits without ageing or failing. *Toy extension. New step:* integrate over the time of transfer to the spare.
+
+An operating unit and a cold spare each have independent exponential operating lives with rate $lambda=0.001$ h$""^(-1)$. The spare cannot fail while waiting. There is no repair during the mission. Find reliability at 1000 h, first with perfect switching and then with switching success probability $c=0.95$ independent of the lifetimes.
+
+The system survives to $t$ if the first unit lasts throughout, or if it fails at some $u<t$, transfer succeeds, and the spare lasts the remaining $t-u$:
+
+$ R_(upright("standby"))(t)
+=e^(-lambda t)
++c integral_0^t lambda e^(-lambda u)e^(-lambda(t-u))thin "du" \
+=e^(-lambda t)(1+c lambda t). $
+
+At $t=1000$ h,
+
+$ c=1:quad R=2e^(-1)=0.735759,
+wide
+c=0.95:quad R=1.95e^(-1)=0.717365. $
+
+With perfect switching, total life is the *sum* of two operating lives. By comparison, if both units age and operate from time zero, active-parallel reliability is $2e^(-1)-e^(-2)=0.600424$.
+
+*Trap:* cold standby does not follow the active-parallel formula. Spare deterioration, switch failure, transfer delay or load changes require their own model assumptions.
+
+
+== 39. Design the number of redundant units
+
+*Recognise:* the number of components is the unknown, with an integer reliability requirement. *Toy extension. New step:* invert the parallel formula, handle the logarithm's sign, and check the neighbouring integer.
+
+Independent identical units each have mission reliability $r=0.85$. At least one must survive. Find the smallest total number $n$ that achieves system reliability at least $0.999$.
+
+$ 1-(1-r)^n >= 0.999
+quad <=>quad 0.15^n <= 0.001. $
+
+Taking logarithms gives $n ln 0.15 <=ln 0.001$. Since $ln 0.15<0$, division reverses the inequality:
+
+$ n >= frac(ln 0.001, ln 0.15)=3.641180. $
+
+Thus $n_(min)=4$. Verify minimality:
+
+$ R_3=1-0.15^3=0.996625<0.999,
+wide
+R_4=1-0.15^4=0.99949375 >= 0.999. $
+
+*Trap:* $n$ counts all units, including the original one. This design needs three added spares if one unit already exists. Shared failures invalidate the independence calculation; check the ceiling in Example 36 before solving for a larger $n$.
+
+
+== 40. Survivor selection in a mixed fleet
+
+*Recognise:* the fleet contains persistent subgroups with different hazards. *Toy extension. New step:* weight subgroup hazards by the composition of the surviving population, which changes with age.
+
+Forty percent of new units are a fragile type with exponential rate $0.02$ h$""^(-1)$; 60% are a robust type with rate $0.002$ h$""^(-1)$. A unit stays in its original type. Find the fleet hazard at ages 0 and 100 h.
+
+The fleet survival and density are
+
+$ R(t)=0.4e^(-0.02t)+0.6e^(-0.002t), $
+
+$ f(t)=0.4(0.02)e^(-0.02t)+0.6(0.002)e^(-0.002t). $
+
+Initially $h(0)=0.4(0.02)+0.6(0.002)=0.0092$ h$""^(-1)$. At 100 h, only
+
+$ w_F(100)=frac(0.4e^(-2), 0.4e^(-2)+0.6e^(-0.2))
+=0.099261 $
+
+of survivors are fragile. Therefore,
+
+$ h(100)=w_F(100)(0.02)+[1-w_F(100)](0.002)
+=0.00378669" h"^(-1). $
+
+The fleet hazard falls because fragile units disappear faster. Neither subgroup's individual hazard improves with age. As $t -> infinity$, the fleet hazard approaches the robust rate $0.002$ h$""^(-1)$.
+
+*Trap:* continuing to use the original 40%/60% weights at every age is wrong. A mixture of exponentials need not itself be exponential, and a falling aggregate hazard does not by itself prove that individual items become more reliable as they age.
+
+
+== 41. Mean remaining life
+
+*Recognise:* the question asks for expected additional life after an item has survived, rather than a survival probability at one future time. *Toy extension. New step:* integrate the entire conditional remaining-life tail.
+
+A lifetime has survival $R(t)=(1+t/100)^(-3)$ for $t >= 0$, with $t$ in hours. An item is still working at age 200 h. Find its expected remaining life.
+
+For age $a$, define $Y=T-a$ conditional on $T>a$. Its tail is $P(Y>u | T>a)=R(a+u)/R(a)$. Consequently,
+
+$ m(a)=E[T-a | T>a]
+=integral_0^infinity frac(R(a+u), R(a))thin "du"
+=frac(integral_a^infinity R(t)thin "dt", R(a)). $
+
+Here,
+
+$ integral_a^infinity(1+t/100)^(-3)thin "dt"
+=50(1+a/100)^(-2), $
+
+so
+
+$ m(a)=50(1+a/100)=frac(100+a, 2). $
+
+At $a=200$, $m(200)=150" h"$, and expected total life given survival is $200+150=350$ h.
+
+*Trap:* the unconditional mean is only $m(0)=50$ h, but $50-200=-150$ h is not a remaining-life estimate. Surviving to 200 h supplies information; conditioning must come before taking the expectation.
+
+
+== 42. Interval censoring and the likelihood
+
+*Recognise:* an inspection finds an item failed, but its exact failure time is unknown. *Toy extension. New step:* use probability over an interval as the likelihood contribution.
+
+Ten independent new components have exponential lifetimes with rate $lambda$. They are inspected once at 10 h. Two have failed sometime in $(0,10]$; eight remain working. Estimate $lambda$ from exactly this information.
+
+Each failed unit contributes
+
+$ P(0<T <= 10)=F(10)-F(0)=1-e^(-10 lambda), $
+
+and each survivor contributes $R(10)=e^(-10 lambda)$. Ignoring a factor constant in $lambda$,
+
+$ L(lambda)prop(1-e^(-10 lambda))^2(e^(-10 lambda))^8. $
+
+Set $s=e^(-10 lambda)$, the survival probability to inspection. Then
+
+$ frac(d, "ds")ln L=-frac(2, 1-s)+frac(8, s)=0
+quad =>quad hat(s)=0.8. $
+
+Thus
+
+$ hat(lambda)=-frac(ln 0.8, 10)
+=0.0223144" h"^(-1). $
+
+More generally, failure known only to lie in $(L,U]$ contributes $F(U)-F(L)=R(L)-R(U)$. An exact continuous failure time contributes $f(t)$; right-censoring contributes $R(t)$.
+
+*Trap:* recording both failures as occurring exactly at 10 h would give the wrong likelihood and rate $2/100=0.02$. Substituting interval midpoints also discards the actual observation mechanism.
+
+
+== 43. Delayed entry changes the risk set
+
+*Recognise:* units first become observable after different amounts of life have already elapsed. *Toy extension beyond the basic KM exercises. New step:* exclude units from risk sets before their entry ages.
+
+The following records use *age since installation*, not time since joining the study. Assume entry and censoring are noninformative for lifetime estimation.
+
+#table(
+  columns: 4,
+  align: (auto, right, right, auto,),
+  table.header(
+    [*Unit*],
+    [*Entry age (h)*],
+    [*Exit age (h)*],
+    [*Exit outcome*],
+  ),
+  [A],
+  [0],
+  [4],
+  [Failure],
+  [B],
+  [0],
+  [7],
+  [Censored],
+  [C],
+  [2],
+  [5],
+  [Failure],
+  [D],
+  [4.5],
+  [8],
+  [Failure],
+  [E],
+  [6],
+  [9],
+  [Censored],
+)
+At failure age $t$, a unit is at risk if it has entered and has not already exited. There are no tied entry/failure ages in this dataset.
+
+#table(
+  columns: 3,
+  align: (right, auto, auto,),
+  table.header(
+    [*Failure age*],
+    [*Units at risk*],
+    [*Survival update*],
+  ),
+  [4],
+  [A, B, C],
+  [$1(1-1/3)=2/3$],
+  [5],
+  [B, C, D],
+  [$(2/3)(1-1/3)=4/9$],
+  [8],
+  [D, E],
+  [$(4/9)(1-1/2)=2/9$],
+)
+Hence $hat(R)(6)=4/9$ and $hat(R)(8)=2/9$. Entry itself does not cause a jump, and neither does B's censoring at age 7.
+
+```r
+library(survival)
+entry <- c(0, 0, 2, 4.5, 6)
+exit_age <- c(4, 7, 5, 8, 9)
+failed <- c(1, 0, 1, 1, 0)
+fit_entry <- survfit(Surv(entry, exit_age, failed) ~ 1)
+summary(fit_entry, times = c(6, 8))$surv
+# 0.4444444 0.2222222
+```
+
+*Trap:* counting all five units at age 4 gives credit for survival to units not yet observed. Resetting every entry age to zero also changes the time scale. Delayed entry needs its own risk-set accounting in addition to ordinary right-censoring.
+
+
+== 44. Restricted mean from a survival curve
+
+*Recognise:* follow-up ends while estimated survival is still positive. *Toy extension. New step:* estimate expected life up to a specified horizon by adding rectangular areas under the survival curve.
+
+Suppose an estimated survival curve has the following values through the last observation at 10 h:
+
+#table(
+  columns: 2,
+  align: (auto, right,),
+  table.header(
+    [*Age interval (h)*],
+    [*$hat(R)(t)$*],
+  ),
+  [$[0,2)$],
+  [1],
+  [$[2,5)$],
+  [0.8],
+  [$[5,8)$],
+  [0.5],
+  [$[8,10]$],
+  [0.25],
+)
+Find the restricted mean lifetime to $tau=10$ h. This estimates $E[min(T,10)]$, where an item lasting beyond 10 contributes 10 hours:
+
+$ hat(op("RMST"))(10)
+=integral_0^(10)hat(R)(t)thin "dt" \
+=2(1)+3(0.8)+3(0.5)+2(0.25) \
+=6.4" h". $
+
+It is not $E[T | T <= 10]$: the restricted mean includes the first 10 h of those who outlive the horizon. It is also not the full MTTF, whose integral continues beyond 10 h.
+
+*Trap:* setting survival to zero after follow-up invents an unobserved terminal failure. Keeping a positive final KM step forever gives an infinite integral without establishing an infinite population mean. The area to the supported horizon is identifiable without inventing the tail.
+
+
+== 45. Zero failures and a test-exposure requirement
+
+*Recognise:* all tested items survive, but a finite reliability statement is still required. *Toy extension beyond point estimation. New step:* invert the probability of a zero-failure result to obtain a one-sided confidence bound.
+
+Twenty independent components each complete a fixed 1000-hour test with zero failures. Assume identical exponential lifetimes. Find a one-sided 95% upper confidence bound for the failure rate, then design the exposure needed to make that bound at most $10^(-4)$ h$""^(-1)$ if no failures occur.
+
+The observed total exposure is $E=20000$ component-hours. Under rate $lambda$, the probability that all survive their fixed tests is
+
+$ P("zero failures"| lambda)=e^(-lambda E). $
+
+For this zero-failure outcome, the one-sided upper bound solves $e^(-lambda_U E)=alpha$ with $alpha=0.05$:
+
+$ lambda_U=-frac(ln 0.05, 20000)
+=1.497866 times 10^(-4)" h"^(-1). $
+
+The corresponding 95% lower confidence bound on mean life is $1/lambda_U=6676.16$ h. The MLE $hat(lambda)=0$ alone would provide no finite upper estimate of mean life.
+
+For the design target,
+
+$ frac(-ln 0.05, E)<= 10^(-4)
+quad =>quad
+E >= 29957.32" component-hours". $
+
+With fixed 1000-hour tests, use at least $ceil.l 29.95732 ceil.r=30$ independent units; the claimed bound requires zero observed failures.
+
+*Trap:* zero observed failures does not establish a true zero failure rate. A 95% confidence bound describes a repeated-sampling procedure, not a posterior 95% probability for the parameter. Pooling component-hours this way depends on the common constant-hazard model and the fixed test design.
+
+
+== 46. A distribution-free bound for a sample mean
+
+*Recognise:* a rigorous bound is requested, but the population distribution is unspecified. *Toy extension beyond the CLT exercises. New step:* use an inequality rather than an approximate sampling distribution.
+
+Independent identically distributed measurements have finite mean $mu$ and known SD $sigma=12$. Find a sufficient sample size to guarantee
+
+$ P(|macron(X)-mu|<4)>= 0.99 $
+
+without assuming normality or relying on a CLT approximation.
+
+Chebyshev's inequality states $P(|Y-E[Y]|>= d)<= op("Var")(Y)/d^2$. Since $op("Var")(macron(X))=144/n$,
+
+$ P(|macron(X)-mu|>= 4)<= frac(144/n, 16)=frac(9, n). $
+
+It is sufficient to make $9/n <= 0.01$, giving
+
+$ n >= 900. $
+
+For comparison, a normal-population or CLT design using the same moments gives $n=60$. The much larger bound pays for protection across arbitrary population shapes with those moments.
+
+*Trap:* 900 is sufficient under Chebyshev's bound; this calculation does not prove it is the smallest possible universal sample size. A CLT approximation and a distribution-free guarantee answer different requirements. Replacing known $sigma$ by an uncertain sample SD does not preserve this guarantee automatically.
+
+
+== 47. Stress-strength interference
+
+*Recognise:* both the load and the strength are random, and failure occurs when load exceeds strength. *Toy extension. New step:* integrate conditional failure over the overlapping supports of two distributions.
+
+Let independent strength $S tilde.op U(80,120)$ kN and load $L tilde.op U(60,100)$ kN. Find $P(L>S)$.
+
+For strength $s >= 100$, the load cannot exceed it. For $80<s<100$,
+
+$ P(L>s | S=s)=P(L>s)=frac(100-s, 40). $
+
+Average this over the strength density $f_S(s)=1/40$:
+
+$ P(L>S)
+=integral_(80)^(100)frac(100-s, 40)frac(1, 40)thin "ds" \
+=frac(1, 1600)[ 100s-frac(s^2, 2)]_(80)^(100) \
+=0.125. $
+
+Equivalently, the failure region is a triangle of area $frac(1, 2)(20)(20)=200$ inside a joint-support rectangle of area $40(40)=1600$. Mission success probability is $P(S>L)=0.875$; equality has probability zero.
+
+*Trap:* comparing means, $E[S]=100$ and $E[L]=80$, does not calculate failure probability. Independence is what permits using the marginal load tail inside the integral.
+
+
+== 48. Proof-test spacing and average unavailability
+
+*Recognise:* a protective device can fail silently and remains failed until its next test. *Toy extension. New step:* average hidden-failure probability over all times within the testing cycle.
+
+A trip device is restored to working condition at every perfect proof test, spaced $tau$ hours apart. Between tests its constant hidden-failure rate is $lambda=0.0002$ h$""^(-1)$. Tests and restoration take negligible time. Demands are independent and equally likely at any point in the interval. Find average unavailability for $tau=100$ h and the largest interval giving at most $0.005$ average unavailability.
+
+At age $u$ since the last test, the device is unavailable with probability $1-e^(-lambda u)$. For a uniformly timed demand,
+
+$ overline(Q)(tau)=frac(1, tau)integral_0^tau(1-e^(-lambda u))thin "du"
+=1-frac(1-e^(-lambda tau), lambda tau). $
+
+For $tau=100$ h,
+
+$ overline(Q)(100)=1-frac(1-e^(-0.02), 0.02)
+=0.00993367. $
+
+For small $lambda tau$, expand the exponential to get $overline(Q)(tau)approx lambda tau/2$. This gives an initial design estimate $tau approx 2(0.005)/0.0002=50$ h. Solve the exact expression for the boundary:
+
+```r
+average_Q <- function(tau) {
+  1 - (-expm1(-0.0002 * tau)) / (0.0002 * tau)
+}
+uniroot(function(tau) average_Q(tau) - 0.005, c(1, 100))$root
+# 50.16736 hours
+```
+
+Since average unavailability increases with interval length, the requirement is $tau <= 50.16736" h"$; 50 h meets it.
+
+*Trap:* end-of-interval unavailability $1-e^(-lambda tau)$ is not the average seen by randomly timed demands. The factor-of-two approximation depends on small $lambda tau$ and the stated perfect-test assumptions.
+
+
+== 49. Inspection timing with a repair lead time
+
+*Recognise:* deterioration must be detected early enough to finish an intervention. *Toy extension. New step:* treat the delay to the next inspection as a random variable and reserve time for the repair.
+
+Once deterioration becomes detectable, functional failure follows exactly $D=20$ days later. Inspections occur every $Delta=14$ days and always detect existing deterioration. Detection-to-completed-repair lead time is $L=8$ days. Assume the onset of detectable deterioration is uniformly located within an inspection interval. Find the probability of preventing failure and the largest interval meeting a 95% prevention target.
+
+Under the random-onset assumption, the delay $W$ from detectable deterioration to the next inspection is uniform on $[0,Delta]$. Successful intervention requires
+
+$ W+L<D quad <=>quad W<D-L. $
+
+Thus
+
+$ P("prevent failure")=
+cases(
+ 0, & D <= L,,
+ min { 1,(D-L)/Delta }, & D>L.
+) $
+
+For the proposed interval,
+
+$ P("prevent failure")=frac(20-8, 14)
+=0.857143. $
+
+To reach 95%, require $12/Delta >= 0.95$, so $Delta <= 12.63158" days"$. A 12-day interval gives probability one under the continuous-phase model; a strict worst-case margin requires $Delta+L<D$, so $Delta<12$ days.
+
+*Trap:* choosing an inspection interval merely shorter than the 20-day P–F interval ignores the eight-day repair lead time. Imperfect detection or uncertain deterioration/repair times would change these answers.
+
+
+== 50. F–N exceedance frequencies and potential loss of life
+
+*Recognise:* scenarios have annual frequencies and different fatality counts. *Toy extension connected to the engineering notes. New step:* accumulate frequencies by consequence threshold, then distinguish that curve from expected annual loss.
+
+For a hypothetical facility, three disjoint accident outcome categories have the following frequencies. Treat these as supplied model inputs, not measured risk estimates.
+
+#table(
+  columns: 3,
+  align: (auto, right, right,),
+  table.header(
+    [*Outcome category*],
+    [*Fatalities per event $N_i$*],
+    [*Frequency $f_i$ (year$""^(-1)$)*],
+  ),
+  [A],
+  [1],
+  [$2 times 10^(-3)$],
+  [B],
+  [5],
+  [$3 times 10^(-4)$],
+  [C],
+  [20],
+  [$1 times 10^(-5)$],
+)
+Here $F_N(n)$ means the annual *frequency of events with at least $n$ fatalities*. Construct it by summing the categories meeting the threshold:
+
+$ F_N(n)=sum_(i:N_i >= n)f_i. $
+
+#table(
+  columns: 3,
+  align: (right, auto, right,),
+  table.header(
+    [*Fatality threshold $n$*],
+    [*Categories included*],
+    [*$F_N(n)$ (year$""^(-1)$)*],
+  ),
+  [1],
+  [A, B, C],
+  [$0.00231$],
+  [5],
+  [B, C],
+  [$0.00031$],
+  [20],
+  [C],
+  [$0.00001$],
+  [21],
+  [None],
+  [$0$],
+)
+Potential loss of life (PLL) weights each event frequency by its fatality count:
+
+$ op("PLL")=sum_i f_i N_i
+=0.002(1)+0.0003(5)+0.00001(20)
+=0.0037" expected fatalities/year". $
+
+The discrete tail-sum check recovers the same value: $F_N(1)+4F_N(5)+15F_N(20)=0.00231+4(0.00031)+15(0.00001)=0.0037$. The multiples account for thresholds 2–5 and 6–20, over which the exceedance frequency is constant.
+
+*Trap:* an F–N curve uses cumulative exceedance frequencies, not each category's isolated frequency. PLL is neither an individual's annual fatality probability nor a guarantee about what happens in a particular year. Scenarios must avoid counting the same accident outcome twice.

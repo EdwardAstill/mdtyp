@@ -41,6 +41,8 @@ _COMMANDS: list[tuple[str, str]] = [
     (r"\geq", ">="),
     (r"\ge", ">="),
     (r"\neq", "!="),
+    (r"\ne", "!="),
+    (r"\mid", "|"),
     (r"\approx", "approx"),
     (r"\equiv", "equiv"),
     (r"\sim", "tilde.op"),
@@ -81,7 +83,7 @@ _COMMANDS: list[tuple[str, str]] = [
     (r"\prod", "product"),
     (r"\coprod", "product.co"),
     (r"\bigcup", "union.big"),
-    (r"\bigcap", "sect.big"),
+    (r"\bigcap", "inter.big"),
 
     # --- Functions (limits, log, trig, etc.) ---
     (r"\lim", "lim"),
@@ -127,9 +129,9 @@ _COMMANDS: list[tuple[str, str]] = [
     (r"\land", "and"),
     (r"\lor", "or"),
     (r"\cup", "union"),
-    (r"\cap", "sect"),
-    (r"\emptyset", "nothing"),
-    (r"\varnothing", "nothing"),
+    (r"\cap", "inter"),
+    (r"\emptyset", "emptyset"),
+    (r"\varnothing", "emptyset"),
     (r"\ldots", "dots"),
     (r"\cdots", "dots.c"),
     (r"\vdots", "dots.v"),
@@ -305,7 +307,7 @@ _TYPST_MATH_IDENTS: frozenset[str] = frozenset({
     "subset", "supset",
     "forall", "exists",
     "sum", "product", "integral",
-    "union", "sect",
+    "union", "inter", "emptyset", "floor", "ceil",
     "nabla", "infinity", "diff", "ell", "aleph", "nothing",
     "dots", "quad", "wide", "thin", "med",
     "Re", "Im",
@@ -471,6 +473,7 @@ def _translate_commands(s: str) -> str:
         s = _replace_cmd_two_args(s, latex_name, typst_name)
     for latex_name, typst_name in [
         ("frac", "frac"), ("dfrac", "frac"), ("tfrac", "frac"),
+        ("binom", "binom"),
     ]:
         s = _replace_cmd_two_bare_atoms(s, latex_name, typst_name)
 
@@ -509,8 +512,8 @@ def _translate_commands(s: str) -> str:
         lambda m: _MATHBB.get(m.group(1), f"bb({m.group(1)})"), s,
     )
 
-    # {,} is a LaTeX spacing trick for thousands separators; render as plain comma
-    s = s.replace("{,}", ",")
+    # Quote thousands separators so commas cannot become function arguments.
+    s = s.replace("{,}", '","')
 
     # \not + following symbol (must run before simple commands so \not\Rightarrow
     # is handled before \Rightarrow gets converted to =>)
@@ -749,6 +752,8 @@ _RE_BARE_STAR_SUPER = re.compile(r"\^\*")
 
 def _translate_scripts(s: str) -> str:
     """Convert LaTeX brace-grouped sub/superscripts: ``_{...}`` → ``_(...)``."""
+    # An empty LaTeX base supports standalone unit exponents, e.g. m${}^3$.
+    s = re.sub(r"\{\}(?=[_^])", '""', s)
     # Bare ^* → ^ast: prevents */ from being parsed as a Typst block comment end.
     s = _RE_BARE_STAR_SUPER.sub("^ast", s)
     result: list[str] = []
@@ -828,10 +833,14 @@ def _quote_multichar_identifiers(s: str) -> str:
             if (
                 len(word) >= 2
                 and word not in _TYPST_MATH_IDENTS
-                and not is_func_call
                 and not is_dot_modifier
             ):
-                result.append(f'"{word}"')
+                if is_func_call and word.isalpha():
+                    # Unmarked LaTeX letters are multiplied variables, including
+                    # products immediately before a parenthesized expression.
+                    result.append(" ".join(word))
+                else:
+                    result.append(f'"{word}"')
             else:
                 result.append(word)
             i = j

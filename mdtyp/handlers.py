@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+import json
+import re
 
 from mdtyp.config import Config
 from mdtyp.ctx import Ctx
@@ -18,8 +20,18 @@ def _handle_heading(ctx: Ctx) -> None:
     prefix = "=" * level
     inline_tok = ctx.peek()
     content = render_inline(inline_tok.children or [], ctx.config) if inline_tok else ""
+    annotation = ctx.peek(3)
+    question = (
+        re.fullmatch(r"<!--\s*Question:\s*([^|\n]+)\|\s*(.+?)\s*-->",
+                     annotation.content.strip(), re.IGNORECASE)
+        if annotation and annotation.type == "html_block" else None
+    )
+    if question:
+        identifier, summary = (json.dumps(part.strip(), ensure_ascii=False)
+                               for part in question.groups())
+        content += f' #metadata((kind: "mdtyp-question", id: {identifier}, summary: {summary}))'
     ctx.write(f"\n{prefix} {content}\n\n")
-    ctx.advance(3)  # heading_open + inline + heading_close
+    ctx.advance(4 if question else 3)  # heading tokens + optional annotation
 
 
 # --- Paragraphs ---
@@ -134,7 +146,39 @@ def _handle_hr(ctx: Ctx) -> None:
 
 
 def _handle_html_block(ctx: Ctx) -> None:
-    ctx.write(f"/* HTML: {ctx.current().content.strip()} */\n\n")
+    content = ctx.current().content.strip()
+    directive = " ".join(content[4:-3].split()).casefold()
+    if content.startswith("<!--") and content.endswith("-->") and (
+        directive == "table of contents"
+    ):
+        ctx.write('#outline(title: [Table of contents])\n\n')
+    elif content.startswith("<!--") and content.endswith("-->") and (
+        directive == "question index"
+    ):
+        ctx.write('''#heading(level: 2, outlined: false)[Question index]
+Find a similar question by its topic, then turn to the page shown.
+
+#context table(
+  columns: (auto, 1fr, auto),
+  align: (left, left, right),
+  stroke: none,
+  inset: (x: 5pt, y: 3pt),
+  table.header([*Question*], [*What it asks*], [*Page*]),
+  ..query(metadata).filter(q => type(q.value) == dictionary and q.value.at("kind", default: none) == "mdtyp-question").map(q => {
+    let fmt = q.location().page-numbering()
+    (
+      link(q.location(), q.value.id),
+      link(q.location(), q.value.summary),
+      link(q.location(), numbering(if fmt == none { "1" } else { fmt },
+        ..counter(page).at(q.location()))),
+    )
+  }).flatten(),
+)
+#pagebreak()
+
+''')
+    else:
+        ctx.write(f"/* HTML: {content} */\n\n")
     ctx.advance()
 
 

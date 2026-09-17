@@ -1,609 +1,604 @@
-#set page(paper: "a4", margin: 16mm, numbering: "1")
-#set text(size: 10.5pt)
-#show raw: set text(size: 8pt)
-#show table: set text(size: 9pt)
+#set page(paper: "a4")
 
-= R guide for GENG5507 midsemester revision
+#set page(margin: 15mm)
+#set page(numbering: "1")
+#set text(size: 12pt)
 
-Use this alongside #link("cheatsheet.md")[the statistics cheat sheet], #link("questions.md")[the question bank] and #link("examples.md")[worked examples]. This guide covers the R commands in the supplied statistics slides, lecture question PDFs and Practice Sheets 1–5. Extra commands that make the examples complete are labelled. Code examples are illustrative unless a practice-sheet question is identified.
+= R Probability and Statistics Cheat Sheet
 
-*Run code in RStudio:* type in the Console, or select script lines and press Ctrl+Enter (Cmd+Enter on macOS). Read a result by entering the object name. R is case-sensitive. Run each fenced block from its first line; later lines in that block may use its setup.
+#outline(title: [Table of contents])
+
+This is the working subset of R used in the probability notes. Start with the syntax section, then use the remaining sections as lookup tables and calculation patterns.
+
+In RStudio, place code in an R script and run the current line or selection with `Ctrl+Enter` (`Cmd+Enter` on macOS). A bare object name displays its value:
+
+```r
+life_time
+```
 
 
-== 1. Decide what the question needs
+== Minimum R syntax
+
+```r
+# A comment starts with #
+x <- 5                         # assign 5 to x
+answer <- sqrt(x)              # call a function
+pnorm(2, mean = 0, sd = 1)     # named function arguments
+
+values <- c(4.8, 3.9, 2.2)     # combine values into a vector
+values[1]                      # first value; R counts from 1
+values[values > 3]             # values satisfying a condition
+```
+
+#table(
+  columns: 2,
+  align: (auto, auto,),
+  table.header(
+    [*Syntax*],
+    [*Meaning*],
+  ),
+  [`name <- value`],
+  [Store a value. Prefer `<-` for assignment.],
+  [`function_name(arguments)`],
+  [Call a function.],
+  [`c(a, b, c)`],
+  [Combine values into a vector.],
+  [`x[i]`],
+  [Select element `i`; the first element is `x[1]`.],
+  [`x[a:b]`],
+  [Select positions `a` through `b`.],
+  [`data$time`],
+  [Select the `time` column of a data frame.],
+  [`package::function()`],
+  [Use a function without first calling `library(package)`.],
+  [`# comment`],
+  [R ignores the rest of the line.],
+  [`?pnorm`],
+  [Open help for a function.],
+)
+R is case-sensitive: `x`, `X` and `mean_x` are different names. A decimal uses a full stop, and scientific notation such as `2.5e-3` means $2.5 times 10^(-3)$.
+
+
+=== Operators
+
+#table(
+  columns: 2,
+  align: (auto, auto,),
+  table.header(
+    [*Operation*],
+    [*R*],
+  ),
+  [Add, subtract, multiply, divide],
+  [`+`, `-`, `*`, `/`],
+  [Power],
+  [`x^2`],
+  [Integer sequence],
+  [`1:10`],
+  [Equal / not equal],
+  [`==`, `!=`],
+  [Less / greater],
+  [`<`, `>`, `<=`, `>=`],
+  [And / or / not],
+  [`&`, `|`, `!`],
+  [Is one of these values],
+  [`x %in% c(1, 3, 5)`],
+)
+Use parentheses to make the order explicit:
+
+```r
+standard_error <- sigma / sqrt(n)
+z <- (boundary - mu) / standard_error
+```
+
+
+=== Common mathematical functions
+
+```r
+sqrt(x)          # square root
+abs(x)           # absolute value
+log(x)           # natural logarithm, ln(x)
+exp(x)           # e^x
+gamma(x)         # Gamma(x)
+factorial(n)     # n!
+choose(n, k)     # n choose k
+ceiling(x)       # round up
+round(x, 3)      # round to 3 decimal places
+```
+
+R applies arithmetic and most functions to every element of a vector:
+
+```r
+x <- c(1, 2, 3)
+x^2                 # 1, 4, 9
+(x - mean(x))^2     # squared deviation of each observation
+```
+
+
+== Creating and selecting data
+
+```r
+x <- c(10, 17, 24, 30, 14)
+1:5
+seq(0, 1, by = 0.2)
+rep(4, times = 3)
+
+length(x)
+sort(x)
+x[2]
+x[c(1, 3, 5)]
+x[x >= 17]
+```
+
+Useful special values are `NA` for a missing value, `NaN` for an undefined numeric result and `Inf` for infinity. Many summaries need `na.rm = TRUE` when missing values are present.
+
+```r
+x <- c(2, 4, NA, 8)
+is.na(x)
+mean(x, na.rm = TRUE)
+```
+
+
+== Describing a sample
+
+```r
+life_time <- c(4.8, 3.9, 2.2, 5.1, 4.6,
+               5.3, 6.3, 4.3, 6.8, 4.7)
+
+length(life_time)
+mean(life_time)
+median(life_time)
+var(life_time)
+sd(life_time)
+min(life_time)
+max(life_time)
+range(life_time)
+quantile(life_time)
+summary(life_time)
+```
+
+`var(x)` and `sd(x)` use denominator $n-1$. For the normal maximum-likelihood estimate of σ, the denominator is $n$:
+
+```r
+sigma_sample <- sd(life_time)
+sigma_mle <- sqrt(mean((life_time - mean(life_time))^2))
+```
+
+
+== Quick plots
+
+```r
+hist(life_time,
+     main = "Histogram of lifetimes",
+     xlab = "Lifetime (years)")
+
+boxplot(life_time, horizontal = TRUE)
+stem(life_time)
+plot(life_time, type = "o")
+```
+
+To draw a mathematical function:
+
+```r
+f_X <- function(x) {
+  ifelse(x <= 0 | x >= 80, 0,
+         ifelse(x <= 40, x / 1600, (80 - x) / 1600))
+}
+
+curve(f_X, from = -5, to = 85,
+      xlab = "x", ylab = "f_X(x)")
+```
+
+`par(mfrow = c(1, 2))` divides the plotting window into one row and two columns. In `curve()`, `add = TRUE` draws on the current plot.
+
+
+== Reading tabular data
+
+These commands assume the required packages are already available.
+
+```r
+# CSV with column headings
+failure_data <- read.csv("exa1.csv")
+
+# Whitespace- or tab-separated text with column headings
+microwaves <- read.table("microwaves.txt", header = TRUE)
+
+# Excel workbook
+streetlamps <- readxl::read_excel("streetlamps.xlsx")
+
+head(failure_data)
+names(failure_data)
+str(failure_data)
+summary(failure_data)
+
+failure_data$time
+failure_data$status
+failure_data[failure_data$status == 1, ]
+```
+
+Relative file paths start from `getwd()`. Use `getwd()` to check the current working directory and prefer project-relative paths over changing it in a script.
+
+
+== R distribution functions: `d`, `p`, `q`, `r`
+
+R uses the same four prefixes for nearly every distribution.
 
 #table(
   columns: 3,
   align: (auto, auto, auto,),
   table.header(
-    [*Asked for*],
-    [*Use*],
-    [*Main trap*],
+    [*Prefix*],
+    [*Question answered*],
+    [*Normal example*],
   ),
-  [Probability of exactly $k$ discrete events],
-  [`d...`],
-  [A continuous density height is not a probability.],
-  [Probability below a boundary],
-  [`p...`],
-  [Default is $P(X <= x)$.],
-  [Probability above a boundary; reliability],
-  [`p...(..., lower.tail = FALSE)`],
-  [For discrete $X$, “at least $k$” needs boundary $k-1$.],
-  [Boundary with a specified probability],
-  [`q...`],
-  [Default probability is the lower-tail area.],
-  [Random observations or simulation],
-  [`r...`],
-  [First argument is the number of draws.],
-  [Sample mean and variability],
-  [`mean`, `var`, `sd`],
-  [`sd` uses $n-1$; standard error is $s/sqrt(n)$.],
-  [Estimated survival with suspensions],
-  [`Surv`, `survfit`],
-  [A suspension is a censored observation, not a failure.],
+  [`d`],
+  [What is the PMF/PDF value at $x$?],
+  [`dnorm(x, mean, sd)`],
+  [`p`],
+  [What is $P(X <= x)$?],
+  [`pnorm(x, mean, sd)`],
+  [`q`],
+  [Which $x$ has a given lower-tail probability?],
+  [`qnorm(p, mean, sd)`],
+  [`r`],
+  [Generate random observations.],
+  [`rnorm(N, mean, sd)`],
+)
+#quote[
+Given a boundary, use `p`. Given a probability and asked for the boundary, use `q`. Use `d` only for a PMF/PDF height, not an accumulated probability.
+]
+
+
+=== Tail and interval patterns
+
+```r
+# P(X <= x)
+pnorm(x, mean = mu, sd = sigma)
+
+# P(X > x): use the upper tail directly
+pnorm(x, mean = mu, sd = sigma, lower.tail = FALSE)
+
+# P(a < X <= b)
+pnorm(b, mean = mu, sd = sigma) -
+  pnorm(a, mean = mu, sd = sigma)
+
+# x such that P(X <= x) = p
+qnorm(p, mean = mu, sd = sigma)
+
+# x such that P(X > x) = alpha
+qnorm(alpha, mean = mu, sd = sigma, lower.tail = FALSE)
+```
+
+For a discrete variable, the CDF includes its boundary:
+
+```r
+# X ~ Binomial(10, 0.08)
+pbinom(1, size = 10, prob = 0.08)                    # P(X <= 1)
+pbinom(1, size = 10, prob = 0.08, lower.tail = FALSE) # P(X > 1)
+pbinom(4, size = 10, prob = 0.08) -
+  pbinom(1, size = 10, prob = 0.08)                  # P(2 <= X <= 4)
+```
+
+
+=== Course distribution lookup
+
+Replace the first letter with `d`, `p`, `q` or `r`. For an `r` function, the first argument is the number of observations `N` rather than `x` or a probability.
+
+#table(
+  columns: 3,
+  align: (auto, auto, auto,),
+  table.header(
+    [*Distribution*],
+    [*R pattern*],
+    [*Parameter note*],
+  ),
+  [Discrete uniform],
+  [`sample(values, N, replace = TRUE)`],
+  [Each listed value is equally likely.],
+  [Continuous uniform],
+  [`punif(x, min = a, max = b)`],
+  [Bounds are (a,b).],
+  [Binomial],
+  [`pbinom(x, size = n, prob = p)`],
+  [Trials $n$, success probability $p$.],
+  [Poisson],
+  [`ppois(x, lambda = mu)`],
+  [`lambda` is the expected count for the interval.],
+  [Normal],
+  [`pnorm(x, mean = mu, sd = sigma)`],
+  [`sd` is σ, not σ².],
+  [Student's t],
+  [`pt(x, df = nu)`],
+  [Degrees of freedom `df`.],
+  [Lognormal],
+  [`plnorm(x, meanlog = mu, sdlog = sigma)`],
+  [`mu` and `sigma` describe `log(X)`.],
+  [Weibull],
+  [`pweibull(x, shape = beta, scale = eta)`],
+  [Shape β, characteristic life η.],
+  [Exponential],
+  [`pexp(x, rate = lambda)`],
+  [Mean and scale are $1/lambda$.],
+  [Gamma],
+  [`pgamma(x, shape = beta, rate = lambda)`],
+  [Scale θ is $1/lambda$. Do not supply both.],
+  [Beta],
+  [`pbeta(x, shape1 = alpha, shape2 = beta)`],
+  [Support is $0 <= x <= 1$.],
+)
+Examples of the other prefixes:
+
+```r
+dweibull(t, shape = beta, scale = eta)
+qgamma(0.78, shape = beta, rate = lambda)
+rlnorm(1000, meanlog = mu, sdlog = sigma)
+```
+
+
+== Reliability and hazard
+
+For a lifetime $T$, reliability is the upper tail:
+
+```r
+# R(t) = P(T > t)
+R_exponential <- pexp(t, rate = lambda, lower.tail = FALSE)
+R_weibull <- pweibull(t, shape = beta, scale = eta,
+                      lower.tail = FALSE)
+R_lognormal <- plnorm(t, meanlog = mu, sdlog = sigma,
+                     lower.tail = FALSE)
+```
+
+Common reliability formulas:
+
+```r
+# Exponential
+h_exponential <- lambda
+mttf_exponential <- 1 / lambda
+
+# Weibull
+h_weibull <- (beta / eta) * (t / eta)^(beta - 1)
+mttf_weibull <- eta * gamma(1 + 1 / beta)
+sd_weibull <- eta * sqrt(
+  gamma(1 + 2 / beta) - gamma(1 + 1 / beta)^2
 )
 
-== 2. Syntax, vectors and small mathematical tools
-
-```r
-x <- c(2, 4, 8)             # c(): combine values
-x[1]                       # 2; indexing starts at 1
-x[x > 3]                   # 4, 8; logical selection
-x^2                        # elementwise powers: 4, 16, 64
-x == 4                     # equality test; assignment uses <-
-1:4                        # integer sequence
-length(c(2, 4, 8))          # 3 observations
-sum(c(2, 4, 8))             # 14
-sqrt(9)                    # 3
-exp(0)                     # 1; exp(x) = e^x
-log(exp(2))                # 2; log() means natural logarithm
-gamma(3)                  # 2; Gamma(3) = 2!
-```
-
-Use `*` for multiplication, `/` for division and parentheses to make the numerator and denominator clear. `&`, `|` and `!` mean elementwise AND, OR and NOT. `NA` means missing, `Inf` means infinity. A comment starts with `#`.
-
-Helpful extras, each with a minimal example:
-
-```r
-abs(-2)                    # 2
-choose(10, 2)              # 45 ways to choose two from ten
-factorial(4)               # 24
-ceiling(59.72)             # 60; round UP a required sample size
-floor(2.8)                 # 2
-round(0.123456, 3)         # 0.123; round only the final answer
-seq(0, 3, by = 1.5)        # 0, 1.5, 3
-rep(5, times = 3)          # 5, 5, 5
-prod(c(0.9, 0.8))          # 0.72; product
-sort(c(8, 2, 4))           # 2, 4, 8
-min(c(2, 4, 8))            # 2
-max(c(2, 4, 8))            # 8
-range(c(2, 4, 8))          # 2, 8
-is.na(c(2, NA))            # FALSE, TRUE
-mean(c(2, NA, 4), na.rm = TRUE) # 3
+# Independent systems at one time t
+R_series <- prod(component_reliabilities)
+R_parallel <- 1 - prod(1 - component_reliabilities)
 ```
 
 
-=== Define a function; vectorise a piecewise formula
+== Choosing and fitting a distribution to data
 
-`function()` defines a reusable calculation. `if` handles one condition; the helpful extra `ifelse()` handles a vector of conditions.
+To "assign a distribution" to data, choose a probability model for the variable and estimate its parameters from the observations. The data do not uniquely determine a distribution: use what the variable measures, its possible values, and the observed shape. If a question specifies the distribution, use that model.
+
+
+=== 1. Choose plausible distributions
+
+#table(
+  columns: 3,
+  align: (auto, auto, auto,),
+  table.header(
+    [*What the data represent*],
+    [*Candidate model*],
+    [*What to check*],
+  ),
+  [Successes out of a fixed number of trials],
+  [Binomial],
+  [Independent trials with the same success probability; known trial count.],
+  [Event counts in equal exposure intervals],
+  [Poisson],
+  [Independent events at a constant rate; variance roughly equal to the mean.],
+  [Continuous measurements with roughly symmetric, bell-shaped variation],
+  [Normal],
+  [No strong skew or outliers; negative model values must be acceptable or negligible.],
+  [Positive measurements with right skew and multiplicative variation],
+  [Lognormal],
+  [`log(x)` is approximately normal.],
+  [Nonnegative waiting times or lifetimes],
+  [Exponential],
+  [Approximately constant failure/event rate; standard deviation roughly equals the mean.],
+  [Positive lifetimes with a changing failure rate],
+  [Weibull],
+  [Can represent decreasing, constant or increasing hazard.],
+  [Positive, right-skewed measurements or waiting times],
+  [Gamma],
+  [Flexible positive model; compare its fit with other plausible candidates.],
+  [Continuous proportions strictly between 0 and 1],
+  [Beta],
+  [Exact zeros and ones need separate treatment.],
+  [Values within known bounds with no favoured region],
+  [Uniform],
+  [Equal density throughout the interval is justified by the process.],
+)
+A histogram is a starting point, not proof. Check units, missing values and recording errors first. Look at `plot(x, type = "o")` if observations are in time order: trends or dependence can invalidate a single independent, identically distributed model. Do not remove valid outliers just to improve fit.
+
+
+=== 2. Estimate parameters and check the fit in R
+
+This example uses complete, uncensored observations and fits a normal model. The estimates describe individual observations, so use the fitted standard deviation, not the standard error of the mean.
 
 ```r
-square <- function(x) { x^2 }
-square(3)                  # 9
-ifelse(c(-1, 2) > 0, 1, 0) # 0, 1
+x <- life_time
+mu_hat <- mean(x)
+sigma_hat <- sqrt(mean((x - mu_hat)^2))   # normal MLE
+
+# Compare the fitted density with the observed histogram
+hist(x, probability = TRUE,
+     main = "Normal fit to lifetimes", xlab = "Lifetime (years)")
+curve(dnorm(x, mean = mu_hat, sd = sigma_hat),
+      add = TRUE, col = "red", lwd = 2)
+
+# Normal Q-Q plot: points should be approximately on a straight line
+qqnorm(x)
+qqline(x, col = "red")
+
+# Compare the empirical CDF with the fitted CDF
+plot(ecdf(x), main = "Observed and fitted CDF", xlab = "Lifetime (years)")
+curve(pnorm(x, mean = mu_hat, sd = sigma_hat),
+      add = TRUE, col = "red", lwd = 2)
 ```
 
-Practice Sheet 2 uses $f(x)="xe"^(-x)$ for $x>0$. Include its support when implementing it:
+Systematic curvature in a Q-Q plot suggests a mismatch; inspect the tails as well as the centre. For a lognormal candidate with all `x > 0`, use `qqnorm(log(x))` and `qqline(log(x))`, then estimate parameters on the log scale as shown below. Small samples provide limited evidence about distribution shape. Choose a model that matches both the data and the generating process; a good visual fit does not prove the model is correct.
+
+
+=== 3. Use the fitted distribution
 
 ```r
-f_X <- function(x) ifelse(x > 0, x * exp(-x), 0)
-F_X <- function(x) ifelse(x > 0, 1 - (1 + x) * exp(-x), 0)
-f_X(2)                     # density height, about 0.2707
-F_X(3) - F_X(1)            # P(1 < X <= 3), about 0.5366
-plot(f_X, from = 0, to = 8, ylab = "f(x)",
-     main = expression(f(x) == x * e^{-x}))
+# Under the fitted normal model: probability lifetime exceeds 6 years
+pnorm(6, mean = mu_hat, sd = sigma_hat, lower.tail = FALSE)
+
+# Fitted 90th percentile
+qnorm(0.90, mean = mu_hat, sd = sigma_hat)
+
+# Observed fraction exceeding 6, for comparison
+mean(x > 6)
 ```
 
-`expression(f(x) == x^2)` is a minimal example of `expression()`: it creates mathematical plot annotation, rather than calculating a probability.
+These fitted probabilities treat the estimated parameters as fixed; they do not include parameter uncertainty. Calling `rnorm()` generates new simulated data, and calling `dnorm()` evaluates a density; neither fits a distribution. The usual one-sample `ks.test()` p-value is not valid when its distribution parameters were estimated from the same sample.
 
 
-== 3. Summaries and displays
-
-Each course summary function gets a separate minimal call:
-
-```r
-mean(c(2, 4, 6))            # 4
-median(c(2, 4, 20))         # 4
-var(c(2, 4, 6))             # 4; sample variance
-sd(c(2, 4, 6))              # 2; sample standard deviation
-summary(c(2, 4, 6))         # minimum, quartiles, median, mean, maximum
-head(c(2, 4, 6), 2)         # first two entries
-class(c(2, 4, 6))           # "numeric"
-options(digits = 6)         # display precision; does not round stored data
-```
-
-For complete observations $x_i$, the normal MLE uses $n$ in the variance denominator. Do not confuse that with the sample variance:
+== Model estimates from complete data
 
 ```r
 x <- c(10, 17, 24, 30, 14, 18, 15, 13, 21)
-mu_hat <- mean(x)
-sigma_hat_mle <- sqrt(mean((x - mu_hat)^2))
-s_sample <- sd(x)
-c(mu_hat = mu_hat, sigma_mle = sigma_hat_mle, sample_sd = s_sample)
+
+# Normal model
+mu_normal <- mean(x)
+sigma_normal_mle <- sqrt(mean((x - mu_normal)^2))
+sigma_normal_sample <- sd(x)
+
+# Lognormal model: estimate on the log scale
+log_x <- log(x)
+mu_lognormal <- mean(log_x)
+sigma_lognormal_mle <- sqrt(mean((log_x - mu_lognormal)^2))
+
+# Exponential model
+lambda_exponential <- 1 / mean(x)
 ```
 
-
-=== Plotting functions: minimal examples
+For exponential data with right-censoring, let `status` be 1 for failure and 0 for censored:
 
 ```r
-hist(c(2, 3, 3, 5, 8))       # histogram; counts by default
-boxplot(c(2, 3, 3, 5, 8))    # median, quartiles, whiskers/outliers
-stem(c(2, 3, 3, 5, 8))       # text stem-and-leaf display
-plot(c(1, 2, 3), c(2, 4, 3)) # scatterplot
-curve(x^2, from = 0, to = 2) # graph a formula
-text(1, 2, "annotation")    # add a label to the current plot
+failures <- sum(failure_data$status)
+total_time <- sum(failure_data$time)
+
+lambda_hat <- failures / total_time
+mttf_hat <- total_time / failures
 ```
 
-`lines()` adds to an existing plot; `density()` estimates a smooth density from observations:
+Do not apply `sd()` directly to censored recorded times as though every item failed.
+
+
+== Normal, t and CLT calculations
 
 ```r
-x <- c(1, 2, 2, 3, 4, 5, 6)
-density(x)                  # density() minimal example
-hist(x, freq = FALSE)
-lines(density(x), col = "red") # lines() minimal example
+# Sampling distribution of a mean when population sigma is known
+standard_error <- sigma / sqrt(n)
+z <- (x_bar - mu) / standard_error
+
+# P(X_bar > boundary)
+pnorm(boundary, mean = mu, sd = standard_error,
+      lower.tail = FALSE)
+
+# t statistic when sigma is unknown
+t_statistic <- (x_bar - mu) / (s / sqrt(n))
+pt(t_statistic, df = n - 1, lower.tail = FALSE)
+
+# Required n for two-sided error E and confidence 1 - alpha
+z_critical <- qnorm(1 - alpha / 2)
+n_required <- ceiling((z_critical * sigma / E)^2)
 ```
 
-Practice Sheet 1 normal simulation/overlay pattern:
+For $T tilde.op op("Weibull")(beta,eta)$, calculate the population mean and standard deviation before applying the CLT to a sample mean:
 
 ```r
-set.seed(5507)              # repeat the same pseudorandom sequence
-x <- rnorm(1000, mean = 20, sd = 5)
-boxplot(x)
-hist(x, freq = FALSE, main = "Normal simulation", xlab = "x")
-curve(dnorm(x, mean = 20, sd = 5), from = 5, to = 35,
-      add = TRUE, col = "red")
-text(26, 0.08, "N(20, 5^2) PDF", col = "red")
-```
-
-`freq = FALSE` gives *density*, so histogram area is one. It does not make every bar height a relative frequency. `nclass`/a single-number `breaks` is a suggested bin count; for an exact bin width of 1.5, supply explicit boundaries (Practice Sheet 4 style):
-
-```r
-x <- c(0.8, 1.6, 2.7, 3.2, 4.9, 6.1)
-hist(x, breaks = seq(0, 7.5, by = 1.5), freq = FALSE)
-```
-
-
-== 4. Distribution functions: every prefix with a minimal call
-
-The course explicitly uses `dnorm`, `pnorm`, `qnorm`, `rnorm`, `pbinom`, `qbinom`, `rbinom`, `dexp`, `rexp`, `dweibull`, `rweibull`, `rlnorm`, `pt` and `qt`. The remaining family members below are helpful extensions for calculating the distributions in the statistics notes.
-
-#table(
-  columns: 2,
-  align: (auto, auto,),
-  table.header(
-    [*Family*],
-    [*Parameter interpretation*],
-  ),
-  [Normal],
-  [`mean = mu`, *`sd = sigma`, not variance*.],
-  [Binomial],
-  [`size = n` trials, `prob = p` success chance. Bernoulli uses `size = 1`.],
-  [Poisson],
-  [`lambda` is the expected count over the specified interval.],
-  [Exponential],
-  [`rate = lambda`; mean $1/lambda$.],
-  [Weibull],
-  [`shape = beta`, `scale = eta`; eta is characteristic life, not usually mean.],
-  [Lognormal],
-  [`meanlog` and `sdlog` describe $log X$, not $X$.],
-  [Gamma],
-  [`shape = a`, `rate = lambda`, or `scale = 1/lambda`; never specify both.],
-  [Uniform],
-  [`min = a`, `max = b`.],
-  [Beta],
-  [`shape1 = a`, `shape2 = b`; support $[0,1]$.],
-  [Student's t],
-  [`df` is degrees of freedom, usually $n-1$ for a sample mean.],
+mu_T <- eta * gamma(1 + 1 / beta)
+sigma_T <- eta * sqrt(
+  gamma(1 + 2 / beta) - gamma(1 + 1 / beta)^2
 )
-Within every block: line 1 is a density/PMF height, line 2 a cumulative probability, line 3 a lower-tail quantile, line 4 five random draws.
-
-```r
-# Normal N(3, 2^2)
-dnorm(3, mean = 3, sd = 2)
-pnorm(3.5, mean = 3, sd = 2)
-qnorm(0.9, mean = 3, sd = 2)
-rnorm(5, mean = 3, sd = 2)
-
-# Binomial(10, 0.08)
-dbinom(2, size = 10, prob = 0.08)
-pbinom(2, size = 10, prob = 0.08)
-qbinom(0.95, size = 10, prob = 0.08)
-rbinom(5, size = 10, prob = 0.08)
-
-# Poisson: mean count 3
-dpois(2, lambda = 3)
-ppois(2, lambda = 3)
-qpois(0.95, lambda = 3)
-rpois(5, lambda = 3)
-
-# Exponential: mean lifetime 5
-dexp(5, rate = 0.2)
-pexp(5, rate = 0.2)
-qexp(0.9, rate = 0.2)
-rexp(5, rate = 0.2)
-
-# Weibull: beta = 2, eta = 5
-dweibull(5, shape = 2, scale = 5)
-pweibull(5, shape = 2, scale = 5)
-qweibull(0.9, shape = 2, scale = 5)
-rweibull(5, shape = 2, scale = 5)
-
-# Lognormal: log(X) ~ N(2, 0.2^2)
-dlnorm(8, meanlog = 2, sdlog = 0.2)
-plnorm(8, meanlog = 2, sdlog = 0.2)
-qlnorm(0.9, meanlog = 2, sdlog = 0.2)
-rlnorm(5, meanlog = 2, sdlog = 0.2)
-
-# Gamma: shape 2, rate 1
-dgamma(2, shape = 2, rate = 1)
-pgamma(2, shape = 2, rate = 1)
-qgamma(0.9, shape = 2, rate = 1)
-rgamma(5, shape = 2, rate = 1)
-
-# Continuous uniform on [0, 10]
-dunif(3, min = 0, max = 10)
-punif(3, min = 0, max = 10)
-qunif(0.9, min = 0, max = 10)
-runif(5, min = 0, max = 10)
-
-# Beta(2, 3)
-dbeta(0.5, shape1 = 2, shape2 = 3)
-pbeta(0.5, shape1 = 2, shape2 = 3)
-qbeta(0.9, shape1 = 2, shape2 = 3)
-rbeta(5, shape1 = 2, shape2 = 3)
-
-# Student's t: 13 degrees of freedom
-dt(2.16, df = 13)
-pt(2.16, df = 13)
-qt(0.975, df = 13)
-rt(5, df = 13)
-```
-
-Discrete uniform sampling uses `sample()` rather than `runif()`:
-
-```r
-sample(1:6, size = 5, replace = TRUE) # five independent fair-die rolls
+standard_error <- sigma_T / sqrt(n)
 ```
 
 
-=== Tail, interval and quantile patterns from the practice questions
-
-```r
-# Practice Sheet 1: normal probabilities and quantiles
-pnorm(2, lower.tail = FALSE)          # P(Z > 2) = 0.0227501
-pnorm(0.57) - pnorm(0.2)             # P(0.2 < Z < 0.57) = 0.136401
-qnorm(0.975)                         # central 95% boundary = 1.959964
-pnorm(1, 3, 2) + pnorm(5, 3, 2, lower.tail = FALSE) # P(|X-3| >= 2)
-qnorm(0.1, 3, 2, lower.tail = FALSE) # P(X > x) = 0.1: x = 5.563103
-
-# Practice Sheet 2: ten resistors, defect probability 0.08
-pbinom(1, 10, 0.08, lower.tail = FALSE) # P(X >= 2)
-pbinom(4, 10, 0.08) - pbinom(1, 10, 0.08) # P(2 <= X <= 4)
-
-# Practice Sheet 5: t-table questions
-pt(2.160, df = 13)                   # 0.974983
-pt(1.943, df = 6, lower.tail = FALSE) # 0.0500125
-pt(2.750, df = 30) - pt(-2.750, df = 30)
-qt(0.01, df = 29)                    # -2.462021
-```
-
-For continuous distributions, including or excluding an endpoint gives the same probability. For discrete distributions it can change the answer. `qbinom(p, ...)` returns the smallest integer $k$ for which $P(X <= k)>= p$; exact equality to the requested probability is not generally possible.
-
-
-== 5. Reliability, hazard and lifetime estimates
-
-Reliability $R(t)=P(T>t)$ is an upper tail. For a nonnegative lifetime, MTTF is the population mean $E[T]$. Hazard is $h(t)=f(t)/R(t)$, a rate rather than a probability.
-
-```r
-# Weibull example: beta = 2, eta = 5
-beta <- 2
-eta <- 5
-time <- 5
-reliability <- pweibull(time, beta, eta, lower.tail = FALSE)
-hazard <- dweibull(time, beta, eta) / reliability
-mttf <- eta * gamma(1 + 1 / beta)
-sigma <- eta * sqrt(gamma(1 + 2 / beta) - gamma(1 + 1 / beta)^2)
-B10 <- qweibull(0.1, beta, eta) # 10% failed, 90% surviving
-c(R = reliability, h = hazard, MTTF = mttf, SD = sigma, B10 = B10)
-
-# Exponential lifetime with rate 0.2
-pexp(5, rate = 0.2, lower.tail = FALSE) # R(5)
-1 / 0.2                                # MTTF = 5
-
-# Independent components at a specified time
-R_components <- c(0.9, 0.8, 0.95)
-prod(R_components)                     # series reliability
-1 - prod(1 - R_components)             # active parallel reliability
-```
-
-Complete-data model estimates (illustrative observations):
-
-```r
-x <- c(2, 3, 4, 6, 8, 10)
-1 / mean(x)                            # exponential rate MLE
-mean(log(x))                           # lognormal meanlog MLE
-sqrt(mean((log(x) - mean(log(x)))^2))    # lognormal sdlog MLE
-```
-
-
-== 6. Import, inspect and export data
-
-The course refers to `microwaves.txt`, `streetlamps.xlsx` and failure-data CSVs. Those external datasets are not included in this workspace. Do not interpret the small data below as those real files or as their answers.
-
-
-=== Self-contained minimal examples
-
-```r
-getwd() # relative paths start here
-read.csv(text = "time,status\n2,1\n5,0")
-read.table(text = "time status\n2 1\n5 0", header = TRUE)
-
-# data.frame() is a helpful extra: make a table without an external file
-failure_data <- data.frame(time = c(2, 5, 8), status = c(1, 0, 1))
-head(failure_data)
-class(failure_data)                      # "data.frame"
-class(failure_data$time)                 # "numeric"
-names(failure_data)                      # column names
-summary(failure_data)
-subset(failure_data, status == 1)        # failures only for inspection
-failure_data$time                        # numeric column
-failure_data[failure_data$status == 1, ] # equivalent row selection
-
-# names() also renames a column, as in the streetlamps screenshot
-streetlamps <- data.frame(id = 1:3, old_name = c(2, 5, 8))
-names(streetlamps)[2] <- "Time"
-streetlamps$Time
-
-# tempfile() is a helpful extra: safe disposable export destinations
-csv_path <- tempfile(fileext = ".csv")
-txt_path <- tempfile(fileext = ".txt")
-write.csv(failure_data, csv_path, row.names = FALSE)
-write.table(failure_data, txt_path, sep = "\t", row.names = FALSE)
-read.csv(csv_path)
-read.table(txt_path, header = TRUE)
-```
-
-
-=== External-file examples: require the named file and optional package
-
-These commands are intentionally commented so the rest of this document can run without missing LMS files:
-
-```r
-# microwaves <- read.table("microwaves.txt", header = TRUE)
-# failure_data <- read.csv("exa1.csv")
-# install.packages("readxl")        # install once, with internet access
-# library(readxl)                   # load each new R session
-# streetlamps <- readxl::read_xlsx("streetlamps.xlsx")
-# head(streetlamps)
-# names(streetlamps)[2] <- "Time"   # inspect names first
-```
-
-`read_xlsx("streetlamps.xlsx")` is the exact function used in the Practice Sheet 4 screenshot. `readxl::read_excel("streetlamps.xlsx")` is a helpful alternative supporting both XLS and XLSX. `package::function` selects a function without attaching the package. Minimal setup calls are `install.packages("survival")` (installation, only when needed) and `library(survival)` (load).
-
-
-== 7. Suspensions, Kaplan–Meier and Weibull fitting
-
-*Status coding:* `1` = observed failure, `0` = right-censored/suspended. A censored unit survived at least its recorded time. Use numeric 0/1, not factors or ambiguous text labels.
-
-
-=== Exponential MLE with right-censoring
-
-Practice Sheet 4's total-time calculation assumes an exponential model, not an arbitrary lifetime distribution:
-
-$ hat(lambda)=frac(d, sum_i t_i),wide hat(upright("MTTF"))=frac(sum_i t_i, d),quad d=sum_i upright("status")_i. $
-
-```r
-failure_data <- data.frame(time = c(2, 4, 5, 7, 8, 10),
-                           status = c(1, 1, 0, 1, 0, 1))
-d <- sum(failure_data$status)
-exposure <- sum(failure_data$time)
-c(rate = d / exposure, MTTF = exposure / d) # 0.111111, 9
-```
-
-Dropping suspended units loses exposure; pretending they failed distorts the likelihood. If no failures are observed, there is no finite MTTF estimate from this formula.
-
-
-=== `Surv()`, `survfit()`, `summary()` and `plot()`
-
-Requires the `survival` package (available in the environment used to check these notes). This block creates all its data:
-
-```r
-library(survival)
-Surv(c(2, 5), c(1, 0))       # minimal Surv(): 5+ denotes censored at 5
-failure_data <- data.frame(time = c(2, 4, 5, 7, 8, 10),
-                           status = c(1, 1, 0, 1, 0, 1))
-fit <- survfit(Surv(time, status) ~ 1, data = failure_data)
-summary(fit, times = c(3, 6, 9)) # estimated R(t): 5/6, 2/3, 4/9
-plot(fit, xlab = "Time", ylab = "Estimated reliability R(t)",
-     conf.int = TRUE)
-plot(Surv(failure_data$time, failure_data$status)) # slide shortcut also works
-```
-
-`~ 1` means one overall survival curve without groups. Kaplan–Meier does not assume exponential or Weibull lifetimes; interpreting censoring requires noninformative censoring. Query actual observed time ranges. In the real Practice Sheet 4 dataset the requested times are 20, 50 and 100; use `summary(fit, times = c(20, 50, 100))` after fitting that dataset. The six-row example above does not cover those times.
-
-
-=== `weibull.mle()`: course command, uncensored observations only
-
-Optional package example; not executed during verification:
-
-```r
-# install.packages("weibullness")
-# library(weibullness)
-# weibullness::weibull.mle(c(2, 3, 4, 6, 8, 10), threshold = 0)
-```
-
-Setting `threshold = 0` fits a two-parameter Weibull. *Source correction:* the course's `weibull.mle(q3data$time, 0)` passes only times, so it treats every time as a failure. It does not account for suspensions. Fitting only the subset of failures also discards censoring information. The documented function has no `status` argument. #link("https://search.r-project.org/CRAN/refmans/weibullness/html/weibull.mle.html")[CRAN: weibull.mle].
-
-
-=== Helpful extension: correctly fit a Weibull with censored observations
-
-`survreg()` fits an accelerated-failure-time parameterisation; convert its parameters before using `pweibull()`. Its `scale` is the reciprocal of Weibull shape, not the Weibull lifetime scale. The conversion below follows the package documentation. #link("https://search.r-project.org/CRAN/refmans/survival/html/survreg.html")[CRAN: survreg].
-
-```r
-library(survival)
-failure_data <- data.frame(time = c(2, 4, 5, 7, 8, 10),
-                           status = c(1, 1, 0, 1, 0, 1))
-fit_w <- survreg(Surv(time, status) ~ 1, data = failure_data,
-                 dist = "weibull")              # survreg() minimal fit
-coef(fit_w)                                    # coef(): intercept
-beta_hat <- 1 / fit_w$scale
-eta_hat <- exp(coef(fit_w)[1])
-pweibull(5, shape = beta_hat, scale = eta_hat, lower.tail = FALSE)
-eta_hat * gamma(1 + 1 / beta_hat)               # fitted MTTF
-```
-
-
-=== `estimate_cdf()` and `plot_prob()`: current package syntax
-
-The course shows an older vector-based `estimate_cdf(time, status=...)` call. The current documented API expects a `reliability_data()` object. Its `"kaplan"` plotting positions use a modification of Kaplan–Meier; use `survival::survfit()` for the standard survival estimate above. #link("https://search.r-project.org/CRAN/refmans/weibulltools/html/estimate_cdf.html")[CRAN: estimate\_cdf].
-
-Optional package block; each of the three functions has its own minimal call after setup. Not executed during verification:
-
-```r
-# install.packages("weibulltools")
-# library(weibulltools)
-# wt_data <- weibulltools::reliability_data(
-#   x = c(2, 4, 5, 7, 8, 10), status = c(1, 1, 0, 1, 0, 1))
-# cdf_est <- weibulltools::estimate_cdf(wt_data, methods = "kaplan")
-# weibulltools::plot_prob(cdf_est, distribution = "weibull")
-```
-
-`reliability_data()` constructs the required data class; `plot_prob()` draws estimated failure probabilities on transformed distribution axes. Approximately straight points support the chosen distribution as a candidate, but are not proof. #link("https://search.r-project.org/CRAN/refmans/weibulltools/html/reliability_data.html")[CRAN: reliability\_data], #link("https://search.r-project.org/CRAN/refmans/weibulltools/html/plot_prob.html")[CRAN: plot\_prob].
-
-
-== 8. Sample means, standard errors, Z and t
-
-Practice Sheet 5 Q2: carbide tips have population standard deviation 12; a sample of 36 has standard error 2. Find the probability the sample mean is within 4 of the true mean, then the sample size for 99% coverage:
-
-```r
-sigma <- 12
-n <- 36
-error <- 4
-SE <- sigma / sqrt(n)
-2 * pnorm(error / SE) - 1             # 0.9544997
-ceiling((qnorm(0.995) * sigma / error)^2) # 60 tips
-```
-
-For iid normal observations and unknown population standard deviation, $(macron(X)-mu)/(S/sqrt(n))$ is exactly $t_(n-1)$. A t calculation example (illustrative measurements) is:
-
-```r
-x <- c(9, 10, 12, 11, 8)
-mu0 <- 9
-n <- length(x)
-t_stat <- (mean(x) - mu0) / (sd(x) / sqrt(n))
-pt(t_stat, df = n - 1, lower.tail = FALSE) # upper-tail probability
-# Helpful extension: two-sided 95% confidence interval for the mean
-mean(x) + c(-1, 1) * qt(0.975, df = n - 1) * sd(x) / sqrt(n)
-```
-
-Practice Sheet 5 Q5: one Weibull circuitboard has shape 2, scale 5. Its sample mean for $n=50$ is approximately normal by the CLT:
-
-```r
-beta <- 2
-eta <- 5
-n <- 50
-mu <- eta * gamma(1 + 1 / beta)
-sigma <- eta * sqrt(gamma(1 + 2 / beta) - gamma(1 + 1 / beta)^2)
-pweibull(5, shape = beta, scale = eta, lower.tail = FALSE) # one: 0.367879
-pnorm(5, mean = mu, sd = sigma / sqrt(n), lower.tail = FALSE) # mean: about 0.0412
-ceiling((qnorm(0.975) * sigma / 0.5)^2) # 83 boards, CLT approximation
-```
-
-The small difference from the printed answer 0.0409 comes from rounded Gamma values/Z-table entries. Keep full precision in R. The “$n >= 30$” rule is a course heuristic; strongly skewed/heavy-tailed populations can need larger samples. A strict requirement $n>a$ uses `floor(a) + 1`; `ceiling(a)` is sufficient for $n >= a$ and for the noninteger thresholds above.
-
-
-== 9. CLT simulation: each slide function in context
-
-`numeric()` allocates a zero-filled vector; `for` repeats code and is a language construct, not a statistical function:
-
-```r
-numeric(3)                  # 0, 0, 0
-out <- numeric(3)
-for (i in 1:3) { out[i] <- i^2 }
-out                         # 1, 4, 9
-```
-
-Exponential population with rate 2: population mean and SD are both 0.5. Use the *current sample* in each repetition. The slide's `sd(expn)` inside a loop generating a different object can accidentally use an old sample.
+== Random sampling and reproducible simulation
 
 ```r
 set.seed(5507)
+
+rnorm(20, mean = 10, sd = 5)
+rexp(20, rate = 2)
+sample(1:6, size = 20, replace = TRUE)
+
 n <- 40
-m <- 2000
-lambda <- 2
-mu <- 1 / lambda
-sigma <- 1 / lambda
-sample_means <- numeric(m)
-z_means <- numeric(m)
-for (i in 1:m) {
-  draw <- rexp(n, rate = lambda)
-  sample_means[i] <- mean(draw)
-  z_means[i] <- (mean(draw) - mu) / (sigma / sqrt(n))
-}
-hist(sample_means, freq = FALSE, nclass = 30)
-lines(density(sample_means), col = "red")
-hist(z_means, freq = FALSE, nclass = 30)
-curve(dnorm(x), add = TRUE, col = "blue")
-c(mean = mean(z_means), sd = sd(z_means)) # approximately 0 and 1
+repetitions <- 10000
+sample_means <- replicate(
+  repetitions,
+  mean(rexp(n, rate = 2))
+)
+
+hist(sample_means, freq = FALSE,
+     main = "Sampling distribution of the mean",
+     xlab = "Sample mean")
+
+curve(dnorm(x, mean = 1 / 2, sd = (1 / 2) / sqrt(n)),
+      add = TRUE, col = "red")
 ```
 
-For a normal population and unknown sigma, use `sd(draw)` in the denominator to simulate a t statistic. Using a fixed known sigma simulates Z even if a slide comment says “sigma unknown”.
+`set.seed()` makes the generated sequence repeatable. Change or remove it when you want a different simulation.
 
-Lognormal CLT example from Week 5, with corrected parameter names. *Always pass log-scale parameters to `rlnorm`*, including in the unknown-sigma simulation:
+
+== Custom functions and conditions
 
 ```r
-set.seed(5507)
-n <- 100
-m <- 2000
-meanlog <- 2
-sdlog <- 0.2
-mu <- exp(meanlog + sdlog^2 / 2)
-sigma <- sqrt((exp(sdlog^2) - 1) * exp(2 * meanlog + sdlog^2))
-z_means <- numeric(m)
-studentised_means <- numeric(m)
-for (i in 1:m) {
-  draw <- rlnorm(n, meanlog = meanlog, sdlog = sdlog)
-  z_means[i] <- (mean(draw) - mu) / (sigma / sqrt(n))
-  studentised_means[i] <- (mean(draw) - mu) / (sd(draw) / sqrt(n))
+F_X <- function(x) {
+  if (x < 1) {
+    return(0)
+  } else {
+    return(1 - 2 / (x * (x + 1)))
+  }
 }
-c(mean = mean(z_means), sd = sd(z_means))
-c(mean = mean(studentised_means), sd = sd(studentised_means))
+
+probability <- F_X(2.7) - F_X(2.2)
 ```
 
-The studentised lognormal mean is approximately normal for large $n$; it is not exactly t, because the parent distribution is not normal. For Weibull simulations replace the generator with `rweibull(n, shape = 2, scale = 3)` and calculate its population mean/SD with `gamma()` as in section 5.
+Use `if` when testing one condition. Use vectorised `ifelse(condition, yes, no)` when `x` may contain many values.
 
 
-== 10. Coverage index and checks
+== Kaplan–Meier estimate for right-censored data
 
-#table(
-  columns: 2,
-  align: (auto, auto,),
-  table.header(
-    [*Course source*],
-    [*Functions/constructs covered here*],
-  ),
-  [Lecture 1 and Practice Sheet 1],
-  [`c`, `mean`, `median`, `var`, `sd`, `summary`, `head`, `options`, `stem`, `boxplot`, `hist`, `curve`, `text`, `set.seed`, `dnorm`, `pnorm`, `qnorm`, `rnorm`, `pbinom`, `qbinom`, `rbinom`.],
-  [Practice Sheets 2–3],
-  [`function`, `plot`, `expression`, `exp`, `log`, `gamma`, `dweibull`; probability, density, reliability and MTTF calculations.],
-  [Model Estimation slides and Practice Sheet 4],
-  [`getwd`, `read.csv`, `read.table`, `read_xlsx`, `write.csv`, `write.table`, `head`, `class`, `names`, `subset`, `sum`, `hist`, `dexp`, `install.packages`, `library`, `Surv`, `survfit`, `summary`, `plot`, `weibull.mle`, `estimate_cdf`, `plot_prob`.],
-  [CLT slides and Practice Sheet 5],
-  [`numeric`, `for`, `sample`, `length`, `mean`, `sd`, `sqrt`, `exp`, `gamma`, `hist`, `lines`, `density`, `rexp`, `rweibull`, `rlnorm`, `rnorm`, `pnorm`, `qnorm`, `pt`, `qt`.],
-  [Helpful extensions (not all explicitly called in slides)],
-  [Remaining `d/p/q/r` family members; `abs`, `choose`, `factorial`, `ceiling`, `floor`, `round`, `seq`, `rep`, `prod`, `sort`, `min`, `max`, `range`, `is.na`, `ifelse`, `data.frame`, `tempfile`, `read_excel`, `reliability_data`, `survreg`, `coef`.],
-)
-Mathematical notation such as $F(t)$, $op("Var")(X)$ and the word “function” in prose is not automatically an R command. The inventory above filters these false positives.
+This assumes the `survival` package is already available and `status` is 1 for failure and 0 for censored.
 
-Final calculation checks: probabilities must be between zero and one; `sd` takes a standard deviation; an exponential `rate` is the reciprocal of mean life; a Weibull `scale` is not generally MTTF; suspended observations retain their time exposure; sample-mean probabilities use the standard error. Keep units consistent and avoid overwriting useful names such as `mean`, `sd` or `c`.
+```r
+library(survival)
 
-Verification: all uncommented R code blocks were extracted and run successfully with Rscript, including plots, file round-trips, simulations and `survival` fits. Optional package and missing-file examples are explicitly commented and were checked against documentation rather than executed.
+fit <- survfit(Surv(time, status) ~ 1, data = failure_data)
+
+plot(fit,
+     xlab = "Time",
+     ylab = "Estimated reliability R(t)",
+     conf.int = TRUE)
+
+summary(fit, times = c(20, 50, 100))
+```
+
+
+== Printing a requested number of decimals
+
+```r
+p <- pnorm(0.21, lower.tail = FALSE)
+round(p, 2)                  # numeric value rounded for display
+cat(sprintf("%.2f\n", p))   # print exactly two decimal places
+```
+
+
+== Fast error checks
+
+- Check whether the question asks for a density, probability, quantile or random sample before choosing `d`, `p`, `q` or `r`.
+- Use `lower.tail = FALSE` for an upper tail instead of manually subtracting a value very close to 1.
+- For a discrete CDF, `pbinom(k, ...)` and `ppois(k, ...)` include (k).
+- R's normal functions take standard deviation, not variance.
+- R's exponential functions take a rate; mean $=1/lambda$.
+- Lognormal parameters belong to `log(X)`, not directly to `X`.
+- Weibull `scale = eta` is characteristic life, not generally the mean.
+- `sd(x)` uses (n-1); the normal MLE for σ uses (n).
+- Do not overwrite common function names with objects such as `c`, `mean`, `sd`, `F` or `q`.

@@ -137,6 +137,39 @@ The LaTeX renderer preserves Markdown math as LaTeX math and maps common Markdow
 | Tables | `#table(columns: N, ...)` |
 | Fenced code blocks | ` ```lang ... ``` ` |
 
+### Table of contents
+
+To insert a table of contents in Typst output, place this comment on its own
+line, with blank lines around it, where the contents should appear:
+
+```markdown
+<!-- Table of contents -->
+```
+
+It becomes `#outline(title: [Table of contents])`, which automatically lists
+headings with links and page numbers when compiled. The comment is hidden in
+rendered Markdown. Capitalisation and whitespace within the comment are ignored.
+
+For a question bank, use `<!-- Question index -->` instead. Annotate each question
+heading with a comment immediately after it (separated by a blank line):
+
+```markdown
+<!-- Question index -->
+
+#### Q1 — Lifetime probability
+
+<!-- Question: Q1 | Exponential lifetime: survival given current age -->
+
+The full question goes here, followed by its answer.
+```
+
+The index lists the question ID, the plain-text summary after `|`, and the
+question heading's page number. Entries are clickable and page numbers update
+when Typst compiles the document. Only annotated headings are included, so
+answer headings and answer text do not appear in the index. A page break separates
+the index from the body. Keep each annotation on one line and omit answers from
+its summary.
+
 ### LaTeX math translation
 
 Math expressions are translated from LaTeX to Typst syntax automatically:
@@ -180,6 +213,11 @@ block_function = ""  # e.g. "sourcecode" — wraps code blocks: #sourcecode[...]
 
 [page]
 paper = ""           # default paper size, e.g. "a4" (--paper flag overrides)
+margin = ""          # Typst length, e.g. "15mm"
+numbering = ""       # page-number pattern, e.g. "1"
+
+[text]
+size = ""            # Typst font size, e.g. "12pt"
 ```
 
 ---

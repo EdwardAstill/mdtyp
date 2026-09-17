@@ -58,7 +58,7 @@ def test_greek(latex: str, expected: str) -> None:
     (r"\in", "in"),
     (r"\notin", "in.not"),
     (r"\cup", "union"),
-    (r"\cap", "sect"),
+    (r"\cap", "inter"),
     (r"\cdot", "dot"),
     (r"\times", "times"),
     (r"\pm", "plus.minus"),
@@ -99,6 +99,7 @@ def test_big_operators(latex: str, expected: str) -> None:
 
 @pytest.mark.parametrize("latex, expected", [
     ("x^2", "x^2"),
+    ("{}^3", '""^3'),
     ("x_{12}", "x_(12)"),
     ("x^{2n}", "x^(2n)"),
     ("a_{i,j}^{k+1}", "a_(i,j)^(k+1)"),
@@ -271,7 +272,7 @@ def test_sum_with_limits() -> None:
     (r"\nabla", "nabla"),
     (r"\forall", "forall"),
     (r"\exists", "exists"),
-    (r"\emptyset", "nothing"),
+    (r"\emptyset", "emptyset"),
 ])
 def test_misc_symbols(latex: str, expected: str) -> None:
     assert latex_to_typst(latex) == expected
@@ -333,8 +334,8 @@ def test_star_super_no_comment_syntax() -> None:
 # --- {,} thousands-separator grouping ---
 
 @pytest.mark.parametrize("latex, expected", [
-    (r"15{,}000", "15,000"),
-    (r"1{,}500{,}000", "1,500,000"),
+    (r"15{,}000", '15","000'),
+    (r"1{,}500{,}000", '1","500","000'),
 ])
 def test_grouped_comma(latex: str, expected: str) -> None:
     assert latex_to_typst(latex) == expected

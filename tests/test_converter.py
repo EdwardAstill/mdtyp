@@ -206,6 +206,64 @@ def test_html_block() -> None:
     assert "/* HTML:" in result
 
 
+@pytest.mark.parametrize("marker", [
+    "<!-- Table of contents -->",
+    "<!-- table of contents -->",
+    "<!--\nTable of contents\n-->",
+])
+def test_table_of_contents(marker: str) -> None:
+    result = convert(f"# Notes\n\n{marker}\n\n## Section\n\nText")
+    assert result.count("#outline(") == 1
+    assert result.index("= Notes") < result.index("#outline(") < result.index("== Section")
+    assert "<!--" not in result
+
+
+def test_ordinary_comment_is_not_table_of_contents() -> None:
+    result = convert("<!-- Table of contents goes here later -->")
+    assert "#outline(" not in result
+    assert "/* HTML:" in result
+
+
+def test_table_of_contents_example_in_code_stays_literal() -> None:
+    result = convert("```markdown\n<!-- Table of contents -->\n```")
+    assert "#outline(" not in result
+    assert "<!-- Table of contents -->" in result
+
+
+def test_question_index_uses_only_explicit_summaries() -> None:
+    result = convert(
+        '# Notes\n\n<!-- Question index -->\n\n'
+        '#### Q1\n\n<!-- Question: Q1 | Normal upper-tail probability -->\n\n'
+        'Find the probability.\n\n##### Answer\n\nSecret answer.\n'
+    )
+    assert 'query(metadata).filter(q => type(q.value) == dictionary and q.value.at("kind", default: none) == "mdtyp-question")' in result
+    assert 'counter(page).at(q.location())' in result
+    assert result.count('#metadata(') == 1
+    assert '==== Q1 #metadata((kind: "mdtyp-question", id: "Q1", summary: "Normal upper-tail probability"))' in result
+    assert 'summary: "Secret answer' not in result
+    assert '===== Answer' in result
+    assert '<!-- Question:' not in result
+
+
+def test_question_summary_is_escaped_as_plain_text() -> None:
+    result = convert('## Q1\n\n<!-- Question: Q1 | Find "x"; #text[not code] -->')
+    assert r'summary: "Find \"x\"; #text[not code]"' in result
+
+
+def test_question_annotation_does_not_consume_following_content() -> None:
+    result = convert('## Q1\n\n<!-- Question: Q1 | Probability -->\n\nPrompt\n\n## Q2')
+    assert 'Prompt' in result
+    assert '== Q2' in result
+    assert result.count('#metadata(') == 1
+
+
+def test_question_markers_in_code_are_not_processed() -> None:
+    result = convert('```markdown\n<!-- Question index -->\n## Q1\n'
+                     '<!-- Question: Q1 | Probability -->\n```')
+    assert '#metadata(' not in result
+    assert 'query(' not in result
+
+
 # --- Special characters ---
 
 def test_escape_special_chars() -> None:

@@ -351,7 +351,7 @@ $ f(x) = cases(
 
 $<=, >=, !=, approx, equiv, tilde.op, prop$
 
-$in, in.not, subset, subset.eq, union, sect$
+$in, in.not, subset, subset.eq, union, inter$
 
 $forall, exists, nabla, diff, infinity$
 

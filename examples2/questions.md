@@ -1,5 +1,7 @@
 # GENG5507 midsemester statistics question bank
 
+<!-- Question index -->
+
 This bank compiles the actual questions saved in this workspace and the distinct worked examples/prompts in the supplied statistics slides. Questions come first within each item, followed by clearly labelled worked answers. Original numbers, data and available answer choices are retained; some practical wording is tightened without removing subparts. Source ambiguities and corrections are flagged. Course convention: $N(\mu,\sigma^2)$ uses **variance** as its second parameter.
 
 ## Contents and source coverage
@@ -93,6 +95,8 @@ Source: [Lecture1.pdf](../questions/probability-questions/lecture/Lecture1.pdf)
 
 #### L1.1 — Causes of an LNG tank explosion
 
+<!-- Question: L1.1 | Total probability and Bayes: LNG explosion and its possible causes -->
+
 ##### Problem
 
 An LNG tank explosion may result from static electricity ($A$), malfunctioning
@@ -159,6 +163,8 @@ conditional probability.
 ---
 
 #### L1.2 — LNG tank repair time
+
+<!-- Question: L1.2 | Piecewise repair-time PDF: derive CDF, interval probability and mean -->
 
 ##### Problem
 
@@ -257,6 +263,8 @@ This also follows from the symmetry of the triangular density about $x=40$.
 
 #### L1.3 — Car-battery lifetimes
 
+<!-- Question: L1.3 | Battery lifetime data: histogram, sample mean and standard deviation -->
+
 ##### Problem
 
 The lifetimes, in years, of ten car batteries are
@@ -312,6 +320,8 @@ Let $\Phi$ denote the standard normal CDF and $\Phi^{-1}$ its quantile
 function.
 
 #### L2.1 — Normal lifetime model
+
+<!-- Question: L2.1 | Normal hose lifetime: lower/upper tails and a survival quantile -->
 
 ##### Problem
 
@@ -386,6 +396,8 @@ Under the model, $99\%$ of hoses last longer than about $92.43$ hours.
 
 #### L2.2 — Uniform lifetime model
 
+<!-- Question: L2.2 | Uniform hose lifetime: failure probability and a survival quantile -->
+
 ##### Problem
 
 Suppose the flexible-hose lifetime is
@@ -425,7 +437,7 @@ Setting this probability equal to $0.99$ gives
 
 $$
 \frac{165-c}{80}=0.99
-\quad\Longrightarrow\quad
+\quad\Rightarrow\quad
 c=165-79.2=85.8.
 $$
 
@@ -440,6 +452,8 @@ Under the model, $99\%$ of hoses last longer than $85.8$ hours.
 ---
 
 #### L2.3 — Lognormal lifetime model
+
+<!-- Question: L2.3 | Lognormal hose lifetime: failure probability and a survival quantile -->
 
 ##### Problem
 
@@ -511,6 +525,8 @@ Source: [Lecture3.pdf](../questions/probability-questions/lecture/Lecture3.pdf)
 
 #### L3.1 — Exponential lifetime model
 
+<!-- Question: L3.1 | Exponential lifetime: PDF, reliability, hazard, median, MTTF and variance -->
+
 ##### Problem
 
 Suppose the flexible-hose lifetime $X$, in hours, is exponentially distributed
@@ -564,7 +580,7 @@ Thus,
 
 $$
 e^{-0.008m}=0.5
-\quad\Longrightarrow\quad
+\quad\Rightarrow\quad
 m=\frac{\ln2}{0.008}=86.6434.
 $$
 
@@ -633,6 +649,8 @@ that assumption.
 ---
 
 #### L3.2 — Weibull lifetime model
+
+<!-- Question: L3.2 | Weibull lifetime: PDF, reliability, hazard, median and MTTF -->
 
 ##### Problem
 
@@ -770,6 +788,8 @@ also reported where relevant.
 
 #### L4.1 — Normal model
 
+<!-- Question: L4.1 | Fit Normal mean and standard deviation to repair-time data -->
+
 ##### Problem
 
 Fit a normal model $N(\mu,\sigma^2)$ to the repair-time data. Estimate $\mu$ and
@@ -780,9 +800,9 @@ $\sigma$.
 For a normal model, the MLEs are
 
 $$
-\widehat\mu=\bar{x}
+\hat\mu=\bar{x}
 \qquad\text{and}\qquad
-\widehat\sigma
+\hat\sigma
 =\sqrt{\frac{1}{n}\sum_{i=1}^n(x_i-\bar{x})^2}.
 $$
 
@@ -795,7 +815,7 @@ $$
 Therefore,
 
 $$
-\widehat\sigma
+\hat\sigma
 =\sqrt{\frac{1}{9}\sum_{i=1}^9(x_i-18)^2}
 =5.8119.
 $$
@@ -816,6 +836,8 @@ $$
 
 #### L4.2 — Lognormal model
 
+<!-- Question: L4.2 | Fit lognormal parameters to repair-time data -->
+
 ##### Problem
 
 Fit a lognormal model $LN(\mu,\sigma^2)$ to the repair-time data. Estimate
@@ -833,15 +855,15 @@ The MLEs are therefore the mean and MLE standard deviation of the log-transforme
 observations:
 
 $$
-\widehat\mu=\frac{1}{n}\sum_{i=1}^n\ln x_i
+\hat\mu=\frac{1}{n}\sum_{i=1}^n\ln x_i
 =2.84022
 $$
 
 and
 
 $$
-\widehat\sigma
-=\sqrt{\frac{1}{n}\sum_{i=1}^n(\ln x_i-\widehat\mu)^2}
+\hat\sigma
+=\sqrt{\frac{1}{n}\sum_{i=1}^n(\ln x_i-\hat\mu)^2}
 =0.31551.
 $$
 
@@ -862,6 +884,8 @@ $$
 
 #### L4.3 — Exponential model
 
+<!-- Question: L4.3 | Fit an exponential rate to repair times and assess suitability -->
+
 ##### Problem
 
 Fit an exponential model $\operatorname{Exp}(\lambda)$ to the repair-time data.
@@ -872,13 +896,13 @@ Estimate $\lambda$ and explain whether the model appears suitable.
 For an exponential model parameterised by rate, the MLE is
 
 $$
-\widehat\lambda=\frac{1}{\bar{x}}.
+\hat\lambda=\frac{1}{\bar{x}}.
 $$
 
 Since $\bar{x}=18$ minutes,
 
 $$
-\boxed{\widehat\lambda=\frac{1}{18}=0.05556\text{ min}^{-1}}.
+\boxed{\hat\lambda=\frac{1}{18}=0.05556\text{ min}^{-1}}.
 $$
 
 The fitted exponential model has both mean and standard deviation equal to
@@ -926,6 +950,8 @@ Let $T$ denote the time between rigid-hose failures, with $E[T]=\mu$ and
 $\operatorname{Var}(T)=\sigma^2$.
 
 #### L5.1 — One normally distributed lifetime
+
+<!-- Question: L5.1 | One Normal lifetime: survival probability and an upper-tail quantile -->
 
 ##### Problem
 
@@ -977,6 +1003,8 @@ $$
 ---
 
 #### L5.2 — Mean lifetime with known standard deviation
+
+<!-- Question: L5.2 | Normal sample mean with known SD: tail probability and minimum sample size -->
 
 ##### Problem
 
@@ -1054,6 +1082,8 @@ below $0.005$.
 
 #### L5.3 — Mean lifetime with unknown standard deviation
 
+<!-- Question: L5.3 | Unknown population SD: standardised sample mean, t tails and sample size -->
+
 ##### Problem
 
 Suppose individual lifetimes are independent and normally distributed with mean
@@ -1124,6 +1154,8 @@ $$
 
 #### L5.4 — Unknown lifetime distribution
 
+<!-- Question: L5.4 | Unknown lifetime distribution: approximate sample-mean probability -->
+
 ##### Problem
 
 Suppose individual lifetimes have mean $300$ hours and standard deviation $15$
@@ -1176,6 +1208,8 @@ Sources: [question sheet](../questions/probability-questions/prac/prac-sheet-1.p
 
 #### P1.1 — corrosion test (Textbook Problem 3.79, adapted)
 
+<!-- Question: P1.1 | Corrosion screening: infer prevalence and reverse conditional probabilities -->
+
 Engineers maintaining nuclear submarines must check cooling-system pipes for internal corrosion. A non-destructive test is not infallible. Let $A$ mean actual corrosion and $B$ mean the test indicates corrosion. The test detects corrosion with $P(B\mid A)=0.7$ and falsely indicates corrosion with $P(B\mid A^c)=0.2$. One in every four tests indicates corrosion: $P(B)=0.25$.
 
 (a) Find $P(A)$, using a tree diagram and/or total probability. (b) Find the probability of corrosion given a positive test. (c) Find the probability of corrosion given a negative test.
@@ -1184,6 +1218,8 @@ Engineers maintaining nuclear submarines must check cooling-system pipes for int
 
 #### P1.2 — printed circuit boards (Textbook Problem 3.80)
 
+<!-- Question: P1.2 | Circuit-board screening: infer defect rate and probability given a test result -->
+
 Let $A$ mean a board is defective and $B$ mean it passes an automated verification test. Of 900 completed boards, 890 passed. In a separate study, 5 of 30 deliberately defective boards passed. Interpret long-run relative frequencies as probabilities.
 
 (a) Estimate $P(B\mid A)$. (b) Assuming $P(B\mid A^c)=1$ (a good board cannot fail), estimate $P(A)$ using total probability. (c) Estimate the probability that a board is defective given that it passed.
@@ -1191,6 +1227,8 @@ Let $A$ mean a board is defective and $B$ mean it passes an automated verificati
 **Answer notes.** $P(B\mid A)\approx1/6$; $890/900=p/6+(1-p)$ gives $p=1/75$; $P(A\mid B)\approx(1/450)/(89/90)=1/445\approx0.002247$.
 
 #### P1.3 — mercury discharge and financial risk
+
+<!-- Question: P1.3 | Mercury-discharge PDF: moments, exceedance probabilities and expected fines -->
 
 Mercury concentration $X$ (units/litre) in weekly tests of a water-treatment plant varies day to day without a long-term trend. Model it as Gamma with shape $\alpha=2$ and scale $\beta=1$.
 
@@ -1218,11 +1256,15 @@ A fine is imposed whenever the measured concentration exceeds $T$ units/litre.
 
 #### P1.R — explicit R demonstration prompts
 
+<!-- Question: P1.R | R exploration: Normal functions, standardisation and reproducible samples -->
+
 Run and compare `pnorm(0.3)`, `pnorm(2, lower.tail=FALSE)`, and `pnorm(9, mean=6, sd=10)`. Explain why the first and third agree, and why `pnorm(9)` differs from the third. Run `qnorm(0.025)`, `qnorm(0.05, lower.tail=FALSE)` and `qnorm(0.1, mean=6, sd=10)`; sketch the Normal symmetry behind the opposite-tail quantiles. Run `rnorm(4)` twice, then `mean(rnorm(4))`; explain why these are different samples. Store `x <- rnorm(4)` and reuse `x`. Repeat `set.seed(5507); x <- rnorm(6, mean=10, sd=5)` to check reproducibility. For `y <- c(4,3,3,7,5,2,1,0,1,2,4,3,2)`, try `mean(y)`, `median(y)`, `sd(y)` and `summary(y)`.
 
 **Answer notes.** Standardisation gives $(9-6)/10=0.3$; the default Normal has mean 0 and SD 1. Re-running a generator advances its random-number state; storing a sample or resetting the seed preserves reproducibility. See [R guide](R.md) for executable examples.
 
 #### P1.4 — Normal calculations and simulation
+
+<!-- Question: P1.4 | Normal probabilities and quantiles; simulate and summarise a sample in R -->
 
 (a) For $Z\sim N(0,1)$ find using R: (i) $P(Z>2)$; (ii) $P(0.2<Z<0.57)$; (iii) $z$ such that $P(Z<z)=0.975$.
 
@@ -1244,11 +1286,15 @@ Sources: [question sheet](../questions/probability-questions/prac/prac-sheet-2.p
 
 #### P2.1 — defective resistors (Textbook Problem 2.10)
 
+<!-- Question: P2.1 | Defective resistors: probability of more than one defect in ten -->
+
 A random sample of 10 resistors is tested; each has probability 0.08 of being defective. Let $X$ count defective resistors. (a) Recommend a distribution. (b) Find the probability of more than one defective resistor.
 
 **Answer notes.** Assuming independent outcomes and a common defect probability, $X\sim\operatorname{Bin}(10,0.08)$ and $P(X>1)=1-0.92^{10}-10(0.08)0.92^9\approx0.18788$.
 
 #### P2.2 — elevator and passenger arrivals (Textbook Problem 2.24, adapted)
+
+<!-- Question: P2.2 | Independent arrival streams: elevator and passenger counts in one minute -->
 
 A proposed 10-passenger elevator arrives in the lobby on average once per minute. Five passengers per minute are expected to use it; the company rejects the proposal.
 
@@ -1258,11 +1304,15 @@ A proposed 10-passenger elevator arrives in the lobby on average once per minute
 
 #### P2.3 — Gamma plots, continuing P1.3
 
+<!-- Question: P2.3 | Plot Gamma PDF and CDF in R; define and plot a function -->
+
 For $f_X(x)=xe^{-x}$ on $x\ge0$ and $F_X(x)=1-(1+x)e^{-x}$ on $x>0$ (zero outside their lower support), (a) plot the PDF using R; (b) plot the CDF using R.
 
 **Answer notes.** Use `curve(dgamma(x, shape=2, scale=1), 0, 10)` and `curve(pgamma(x, shape=2, scale=1), 0, 10)`. The introductory exercise also asks you to define `fn <- function(x) x^2` and plot it from $-2$ to $2$, labelling the axis and title with `ylab` and `main=expression(f(x)==x^2)`.
 
 #### P2.4 — chain-link lengths (Textbook Problem 2.22)
+
+<!-- Question: P2.4 | Uniform chain-link lengths: PDF, CDF, mean and variance -->
 
 Individual chain-link lengths have the uniform PDF shown in the [source figure, page 2](../questions/probability-questions/prac/prac-sheet-2.pdf#page=2): a rectangle from $m-a/2$ to $m+a/2$.
 
@@ -1272,6 +1322,8 @@ Individual chain-link lengths have the uniform PDF shown in the [source figure, 
 
 #### P2.5 — standard Normal and underweight cereal
 
+<!-- Question: P2.5 | Normal tails and quantiles; choose SD to limit underweight cereal -->
+
 For standard Normal $Z$: (a) find $P(-0.34<Z<0.68)$; (b) find $k$ such that $P(Z>k)=0.025$.
 
 A cereal-filling machine gives Normally distributed weights with mean 405 g and SD 10 g. Labels state 400 g; boxes below 398 g are “underweight”. (c) Find the long-run proportion underweight. (d) With the same mean, to what SD must the manufacturer reduce variability to make the proportion underweight 1%?
@@ -1280,11 +1332,15 @@ A cereal-filling machine gives Normally distributed weights with mean 405 g and 
 
 #### P2.6 — lognormal
 
+<!-- Question: P2.6 | Lognormal lifetime: probability, mean and standard deviation -->
+
 $T$ is lognormal with log-scale parameters $\mu=-1$, $\sigma=2$. (a) Find $P(T<3)$. (b) Find the mean and SD of $T$.
 
 **Answer notes.** $\Phi((\ln3+1)/2)\approx0.8530$; $E(T)=e^1\approx2.7183$; $\operatorname{SD}(T)=\sqrt{(e^4-1)e^2}\approx19.901$.
 
 #### P2.7 — exponential cycles and a series system
+
+<!-- Question: P2.7 | Exponential lifetime: mean, survival given age and series-system reliability -->
 
 A device's cycles-to-failure $T$ is exponential with rate $\lambda=0.003$ failures/cycle. (a) Determine mean cycles to failure. (b) Given survival through 300 cycles, find the probability that it fails after 1000 cycles. (c) Find the probability that a new device does not fail in its first 700 cycles.
 
@@ -1294,9 +1350,11 @@ Independent $X_1\sim\operatorname{Exp}(0.002)$, $X_2\sim\operatorname{Exp}(0.003
 
 #### P2.8 — Weibull lifetime
 
+<!-- Question: P2.8 | Weibull lifetime: PDF, mean, variance and failure probability -->
+
 A component's lifetime $T$ in years has shape $\beta=0.5$ and scale $\eta=0.25$. (a) Write its PDF. (b) Graph the PDF in R. (c) Find its mean and variance, using $\Gamma(n)=(n-1)!$. (d) Find the probability of failure within one year.
 
-**Answer notes.** For $t>0$, $f(t)=t^{-1/2}e^{-2\sqrt t}$, and zero for $t<0$; plot away from zero because the density diverges there. Mean $0.25\Gamma(3)=0.5$ yr; variance $0.25^2[\Gamma(5)-\Gamma(3)^2]=1.25$ yr$^2$; $F(1)=1-e^{-2}=0.864665$.
+**Answer notes.** For $t>0$, $f(t)=t^{-1/2}e^{-2\sqrt t}$, and zero for $t<0$; plot away from zero because the density diverges there. Mean $0.25\Gamma(3)=0.5$ yr; variance $0.25^2[\Gamma(5)-\Gamma(3)^2]=1.25$ yr${}^2$; $F(1)=1-e^{-2}=0.864665$.
 
 ### Practical 3 — hazard, MTTF and Weibull plots
 
@@ -1304,11 +1362,15 @@ Sources: [question sheet](../questions/probability-questions/prac/prac-sheet-3.p
 
 #### P3.1 — derive hazard functions
 
+<!-- Question: P3.1 | Derive exponential and Weibull hazard functions -->
+
 Use the expressions for PDF and CDF to derive hazard rates for (a) exponential lifetime with rate $1/\eta$; (b) Weibull lifetime with shape $\beta$ and characteristic life $\eta$.
 
 **Answer notes.** $h(t)=f(t)/[1-F(t)]$ gives $1/\eta$ and $(\beta/\eta)(t/\eta)^{\beta-1}$, respectively. **Source correction:** the background's alternative Weibull parameterisation mixes incompatible PDF/CDF expressions. If the CDF is $1-e^{-\alpha t^\beta}$, then $\eta=\alpha^{-1/\beta}$; if it is $1-e^{-(t/\alpha)^\beta}$, then $\alpha=\eta$.
 
 #### P3.2 — exponential hazard interpretation
+
+<!-- Question: P3.2 | Interpret an exponential hazard rate; find MTTF and standard deviation -->
 
 A component lifetime in years has $f(t)=\lambda e^{-\lambda t}$, $t>0$, with $\lambda=2$. This is Weibull with $\beta=1$, $\eta=1/\lambda$. (a) Write the hazard and interpret it. (b) Calculate MTTF and SD.
 
@@ -1316,19 +1378,25 @@ A component lifetime in years has $f(t)=\lambda e^{-\lambda t}$, $t>0$, with $\l
 
 #### P3.3 — solar-cell Weibull hazards
 
+<!-- Question: P3.3 | Solar-cell Weibull lifetime: hazard at different ages, MTTF and SD -->
+
 (a) Solar-cell lifetime in years is Weibull with $\beta=2.5$, $\eta=10$. (i) Write the hazard and evaluate it at 5, 10 and 20 years; interpret the trend. (ii) Find MTTF using $\Gamma(1.4)=0.8873$. (iii) Find SD using $\Gamma(1.8)=0.9314$.
 
 (b) Plot several Weibull hazards using Mathematica, MATLAB, R or another package. Explain changes caused by varying $\beta$ at fixed $\eta$, and varying $\eta$ at fixed $\beta$.
 
-**Answer notes.** $h(t)=0.25(t/10)^{1.5}$; the three rates are $0.08839$, $0.25$, $0.70711$ yr$^{-1}$, increasing with age. MTTF $8.873$ yr; SD $10\sqrt{0.9314-0.8873^2}\approx3.796$ yr. $\beta<1,=1,>1$ gives decreasing, constant, increasing hazard. Increasing $\eta$ lowers the hazard at any fixed positive $t$ and fixed $\beta$; changing $\beta$ changes the curve's shape, not simply its vertical height everywhere.
+**Answer notes.** $h(t)=0.25(t/10)^{1.5}$; the three rates are $0.08839$, $0.25$, $0.70711$ yr${}^{-1}$, increasing with age. MTTF $8.873$ yr; SD $10\sqrt{0.9314-0.8873^2}\approx3.796$ yr. $\beta<1,=1,>1$ gives decreasing, constant, increasing hazard. Increasing $\eta$ lowers the hazard at any fixed positive $t$ and fixed $\beta$; changing $\beta$ changes the curve's shape, not simply its vertical height everywhere.
 
 #### P3.4 — reliability and Weibull probability plots
+
+<!-- Question: P3.4 | Derive PDF from reliability; linearise and interpret a Weibull probability plot -->
 
 (a) A component has $R(t)=\exp[-(t/\eta)^\beta]$, $t>0$, for $\beta,\eta>0$. Show that its lifetime is Weibull. (b) Express $\log[-\log(1-F(t))]$ as a function of $\log t$. (c) Plot $\log t$ against $\log[-\log(1-F(t))]$ for $\beta=2$, $\eta=1$. (d) Explain how a Weibull plot checks model suitability. (e) Derive the corresponding relation for exponential lifetime of rate $1/\eta$.
 
 **Answer notes.** Differentiating $F=1-R$ gives the Weibull PDF. Set $x=\log t$, $y=\log[-\log(1-F(t))]$; then $y=\beta x-\beta\log\eta$. Thus $y=2x$ in (c), while the exponential case has $y=x-\log\eta$. Approximately straight empirical points support the model. **Axis clarification:** the usual Weibull plot puts $\log t$ horizontally; literally reversing the source's “against” wording changes the slope to $1/\beta$.
 
 #### P3.5 — lognormal light bulbs (Problem 2.37, adapted)
+
+<!-- Question: P3.5 | Lognormal bulbs: moments, survival and survival given current age -->
 
 A light-bulb lifetime $T$ is lognormal with $\mu=10$, $\sigma=0.2$ for $X=\ln T$. (a) Find $E(T)$ and $E(X)$. (b) Find $\operatorname{Var}(T)$ and $\operatorname{Var}(X)$. (c) Find the probability a bulb lasts 30,000 hours. (d) Given that it has worked for 20,000 hours, find the probability it lasts 30,000 hours.
 
@@ -1340,11 +1408,15 @@ Sources: [question sheet](../questions/probability-questions/prac/prac-sheet-4.p
 
 #### P4.setup — explicit software exploration
 
+<!-- Question: P4.setup | R exploration: import data, inspect variables and create histograms -->
+
 Install/run RStudio; set the working directory to the downloaded data folder and inspect it using `getwd()`. Import text with `read.table(..., header=TRUE)` or CSV with `read.csv`; examine `sep` for text files. Review `write.csv` and `write.table`. Load `microwaves <- read.table("microwaves.txt", header=TRUE)`, then run `microwaves`, `head(microwaves)`, `head(microwaves,10)`, `microwaves$FailureTimes`, `class(microwaves)` and `class(microwaves$FailureTimes)`.
 
 **Source issue.** The sheet alternates between `microwave.txt` and `microwaves.txt`; use the actual filename. A dataframe and one numeric column are different object types.
 
 #### P4.1 — microwave-transmitter lifetime and street lamps
+
+<!-- Question: P4.1 | Lifetime histograms and street-lamp failure/survival estimates -->
 
 (a) A life test on 200 microwave transmitters gives iid failure times in `microwave.txt`. (i) Construct a histogram in RStudio, trying `xlab`, `main` and `col="blue"`. (ii) Choose and justify a probability model from its shape.
 
@@ -1354,17 +1426,21 @@ Install/run RStudio; set the working directory to the downloaded data folder and
 
 #### P4.2 — street-lamp exponential MLE
 
+<!-- Question: P4.2 | Censored street-lamp data: exponential MLE and histogram/density scaling -->
+
 The bulbs in P4.1(b) have exponential lifetimes; right-censored data are in `streetlamps.xlsx`.
 
 (a) Sketch or plot a relative-frequency histogram with bin width 1.5 and explain its rightmost spike. Install/load `readxl`, import the spreadsheet, and rename its second column (“Street Lamp Failure Time (Years)”) to something manageable.
 
-(b) Find the maximum-likelihood estimate $\widehat\lambda$. Hint: the total exposure is the sum of the right-censored data recorded in the spreadsheet.
+(b) Find the maximum-likelihood estimate $\hat\lambda$. Hint: the total exposure is the sum of the right-censored data recorded in the spreadsheet.
 
-(c) Write $\widehat f(t)=\widehat\lambda e^{-\widehat\lambda t}$ and overlay it on the histogram. The source suggests $99\widehat f(t)$ if plotting counts.
+(c) Write $\hat f(t)=\hat\lambda e^{-\hat\lambda t}$ and overlay it on the histogram. The source suggests $99\hat f(t)$ if plotting counts.
 
-**Answer notes.** Survivors are recorded at the censoring time 18.34, causing the artificial spike; these are not failures. The supplied exposure is 1076.4 years, giving $\widehat\lambda=70/1076.4\approx0.065032$ yr$^{-1}$. **Plotting corrections:** `nclass` is only a suggested number of bins; specify `breaks` to enforce width 1.5. For equal-width count bins of width $w$, the matching density overlay is $nw\widehat f(t)$, not merely $n\widehat f(t)$ unless $w=1$. A density histogram (`freq=FALSE`) avoids that scale issue.
+**Answer notes.** Survivors are recorded at the censoring time 18.34, causing the artificial spike; these are not failures. The supplied exposure is 1076.4 years, giving $\hat\lambda=70/1076.4\approx0.065032$ yr${}^{-1}$. **Plotting corrections:** `nclass` is only a suggested number of bins; specify `breaks` to enforce width 1.5. For equal-width count bins of width $w$, the matching density overlay is $nw\hat f(t)$, not merely $n\hat f(t)$ unless $w=1$. A density histogram (`freq=FALSE`) avoids that scale issue.
 
 #### P4.3 — excavator ground-engaging tools (GET)
+
+<!-- Question: P4.3 | Excavator tools: censoring, MTTF, Kaplan-Meier and model comparison -->
 
 The LMS file `exa1.csv` has 127 time-to-failure/censoring observations from one hard-rock excavator over eight years. Bucket teeth functionally fail when their ability to penetrate rock and required power become unacceptable. There are usually five to eight teeth per bucket; each recorded replacement may involve one or more teeth, but the records do not specify how many. Columns are `time` and `status`, where 0 means censored and 1 means failed.
 
@@ -1390,11 +1466,15 @@ Sources: [question sheet](../questions/probability-questions/prac/prac-sheet-5.p
 
 #### P5.1 — know your Z-tables
 
+<!-- Question: P5.1 | Standard Normal tables: tail/interval probabilities and critical values -->
+
 For $Z\sim N(0,1)$ evaluate (a) $P(Z<1.282)$; (b) $P(Z>2.326)$; (c) $P(|Z|<0.1)$; (d) $z$ satisfying $P(|Z|<z)=0.95$.
 
 **Answer notes.** Approximately $0.900$, $0.010$, $0.07966$, $1.95996$.
 
 #### P5.2 — carbide drilling tips
+
+<!-- Question: P5.2 | Drilling-tip sample mean: accuracy probability and minimum sample size -->
 
 Drilling-depth lifetimes of 36 carbide tips are an iid Normal sample with unknown mean $\mu$ and known SD $\sigma=12$.
 
@@ -1404,17 +1484,23 @@ Drilling-depth lifetimes of 36 carbide tips are an iid Normal sample with unknow
 
 #### P5.3 — know your t-tables
 
+<!-- Question: P5.3 | Student's t tables: probabilities, quantiles and degrees of freedom -->
+
 For $T\sim t_n$ evaluate (a) $P(T<2.160)$ with $n=13$; (b) $P(T>1.943)$ with $n=6$; (c) $P(|T|<2.750)$ with $n=30$; (d) $t$ such that $P(T<t)=0.01$ with $n=29$.
 
 **Answer notes.** Approximately $0.975$, $0.05$, $0.99$, $-2.462$. Here $n$ labels the degrees of freedom in the question, not a sample size that needs another subtraction of one.
 
 #### P5.4 — hole-punch machine
 
+<!-- Question: P5.4 | Normal sample mean and estimated-SD statistic: exact or approximate laws? -->
+
 Hole diameters $X_1,\ldots,X_n$ are iid Normal with unknown mean $\mu$ and unknown variance $\sigma^2$. (a) State the distribution of $\bar X=n^{-1}\sum_iX_i$. (b) State the distribution of $(\bar X-\mu)/(S/\sqrt n)$. (c) Say whether each is exact or approximate and why.
 
 **Answer notes.** (a) $N(\mu,\sigma^2/n)$ exactly, even though parameters are unknown; (b) $t_{n-1}$ exactly, because the parent distribution is Normal and $S$ is its usual sample SD. Unknown parameters do not make the underlying Normal sampling law approximate.
 
 #### P5.5 — Weibull circuit-board CLT
+
+<!-- Question: P5.5 | Weibull circuit boards: individual survival, sample-mean CLT and sample size -->
 
 Fifty iid electronic circuit-board lifetimes $T_1,\ldots,T_{50}$ are Weibull with shape $\beta=2$ and characteristic life $\eta=5$.
 
@@ -1435,11 +1521,15 @@ Quiz numbers refer to the saved source Markdown, not newly generated practice.
 
 #### Q1.1 — disjoint events
 
+<!-- Question: Q1.1 | Disjoint events: identify a valid set/probability statement -->
+
 **Original prompt:** “Which is true about disjoint sets?” The saved note includes $P(A\cup B^c)=1-P(B^c)$, but does not save the answer options.
 
 **Correction / answer status.** The saved expression is not generally true. For disjoint $A,B$, $A\subseteq B^c$, so $P(A\cup B^c)=P(B^c)=1-P(B)$. Also $P(A\cap B)=0$ and $P(A\cup B)=P(A)+P(B)$. Without the missing choices an original option letter cannot be recovered.
 
 #### Q1.2 — union of independent events
+
+<!-- Question: Q1.2 | Independent events: probability of at least one among twenty -->
 
 $A_1,\ldots,A_{20}$ are independent events, each with probability $p$. Which expression for $P(A_1\cup\cdots\cup A_{20})$ is correct?
 
@@ -1447,17 +1537,23 @@ $A_1,\ldots,A_{20}$ are independent events, each with probability $p$. Which exp
 
 #### Q1.3 — independent intersection
 
+<!-- Question: Q1.3 | Independent events: find an intersection probability -->
+
 What is the intersection probability of two independent events?
 
 **Answer.** $P(A\cap B)=P(A)P(B)$.
 
 #### Q1.4 — reverse conditioning
 
+<!-- Question: Q1.4 | Reverse conditioning: recover an event probability from conditional data -->
+
 $P(A\mid B)=0.3$, $P(B\mid A)=0.1$ and $P(B)=0.1$. Find $P(A)$.
 
 **Answer added.** $P(A\cap B)=0.3(0.1)=0.03$, hence $P(A)=0.03/0.1=0.3$.
 
 #### Q1.5 — seeded Normal sample median
+
+<!-- Question: Q1.5 | R: generate a seeded Normal sample and find its median -->
 
 Set the R random seed to 5507 and generate 20 observations from a Normal distribution with mean 10 and SD 5. Find the sample median to three decimal places.
 
@@ -1470,6 +1566,8 @@ round(median(sample_data), 3)
 ```
 
 #### Q1.6 — interval probability from a CDF
+
+<!-- Question: Q1.6 | Piecewise CDF: find an interval probability -->
 
 Given the CDF below, find $P(2.2<X<2.7)$:
 
@@ -1488,6 +1586,8 @@ F(2.7) - F(2.2)
 
 #### Q1.7 — PDF from a CDF
 
+<!-- Question: Q1.7 | Piecewise CDF: derive the probability density -->
+
 Find the PDF for
 
 $$
@@ -1502,11 +1602,15 @@ $$
 
 #### Q1.8 — integrating a PDF
 
+<!-- Question: Q1.8 | Given a PDF: calculate probability over an interval -->
+
 A continuous random variable has $f(x)=x/32$ on $0<x<8$, zero elsewhere. Find $P(1.6<X<4.1)$ to two decimal places.
 
 **Answer completed.** Within the support, $F(x)=x^2/64$, so the probability is $(4.1^2-1.6^2)/64=0.22265625\approx0.22$.
 
 #### Q1.9 — reliability tail
+
+<!-- Question: Q1.9 | Lifetime distribution: find a reliability tail probability -->
 
 Given $R(t)=e^{-2t}$, find the chance that the component lasts more than 2.5 time units.
 
@@ -1517,6 +1621,8 @@ Given $R(t)=e^{-2t}$, find the chance that the component lasts more than 2.5 tim
 **Source transcription:** [stat-quiz-2.md](../questions/probability-questions/quizes/stat-quiz-2.md). Existing worked answers are study solutions, not a claim of an official marking key.
 
 #### Q2.1
+
+<!-- Question: Q2.1 | Standard Normal: upper-tail probability beyond 0.21 -->
 $Z\sim N(0,1)$. Find (to 2 decimal places):
 $P(Z>0.21)$
 
@@ -1537,6 +1643,8 @@ cat(sprintf("%.2f\n", p))
 
 
 #### Q2.2
+
+<!-- Question: Q2.2 | Standard Normal: find a positive cutoff from a two-sided tail probability -->
 $Z\sim N(0,1)$. Find (to 2 decimal places):
 Find the positive $z$ such that $P(|Z|>z)=0.85$.
 
@@ -1557,6 +1665,8 @@ cat(sprintf("%.2f\n", z))
 
 
 #### Q2.3
+
+<!-- Question: Q2.3 | Normal with given mean and variance: lower-tail probability -->
 $X\sim N(9,100)$.
 
 Evaluate the following (give answers correct to 4 decimal places):
@@ -1582,6 +1692,8 @@ cat(sprintf("%.4f\n", p))
 
 
 #### Q2.4
+
+<!-- Question: Q2.4 | Uniform on 0 to 13: probability between 3.2 and 8.9 -->
 X has a Uniform distribution on the interval from 0 to 13. Find $P(3.2<X<8.9)$. (Give your answer to 3 decimal places.)
 
 ##### Answer
@@ -1608,6 +1720,8 @@ cat(sprintf("%.3f\n", p))
 
 
 #### Q2.5
+
+<!-- Question: Q2.5 | Gamma with shape and rate: upper-tail probability using R -->
 The Gamma distributions were seen in the Week 2 lecture. The cdf of these distributions cannot generally be expressed as an elementary function, so we need to use software to evaluate Gamma probabilities and quantiles (just as we have already seen for the Normal distribution, in Practical Sheet 1). We can perform the calculation of Gamma probabilities and quantiles using the functions pgamma() and qgamma(). Use the command help(pgamma), or Google, to see how these functions are used.
 
 Suppose that X has a Gamma distribution with shape parameter $\beta=2.27$ and rate parameter $\lambda=1.22$. Find $P(X>2.48)$, giving your answer to 3 d.p. accuracy.
@@ -1631,6 +1745,8 @@ cat(sprintf("%.3f\n", p))
 
 
 #### Q2.6
+
+<!-- Question: Q2.6 | Gamma with shape and rate: find a quantile using R -->
 The Gamma distributions were seen in the Week 2 lecture. The cdf of these distributions cannot generally be expressed as an elementary function, so we need to use software to evaluate Gamma probabilities and quantiles (just as we have already seen for the Normal distribution, in Practical Sheet 1). We can perform the calculation of Gamma probabilities and quantiles using the functions pgamma() and qgamma(). Use the command help(pgamma), or Google, to see how these functions are used.
 
 X has a Gamma distribution with shape parameter $\beta=2.26$ and rate parameter $\lambda=1.27$. Find the value c such that $P(X\le c)=0.78$, giving your answer to 2 d.p. accuracy.
@@ -1654,6 +1770,8 @@ cat(sprintf("%.2f\n", c))
 
 
 #### Q2.7
+
+<!-- Question: Q2.7 | Lognormal T = exp(X): find the standard deviation -->
 Suppose that $X\sim N(5,1)$ and $T=e^X$.
 
 Find the standard deviation of T (give answers correct to 2 decimal places).
@@ -1701,6 +1819,8 @@ cat(sprintf("%.2f\n", sd_t))
 
 
 #### Q2.8
+
+<!-- Question: Q2.8 | Lognormal T = exp(X): probability of exceeding 35 -->
 Suppose that $X\sim N(6,16)$ and $T=e^X$.
 
 Find $P(T>35)$ (give answers correct to 2 decimal places).
@@ -1735,6 +1855,8 @@ cat(sprintf("%.2f\n", p))
 
 
 #### Q2.9
+
+<!-- Question: Q2.9 | Weibull with shape and characteristic life: find standard deviation -->
 X observes a Weibull distribution with shape parameter
 
 $\beta=7$
@@ -1769,6 +1891,8 @@ cat(sprintf("%.2f\n", sd_x))
 
 
 #### Q2.10
+
+<!-- Question: Q2.10 | Weibull with shape and characteristic life: survival beyond 4.7 -->
 X observes a Weibull distribution with shape parameter
 
 $\beta=0.4$
@@ -1809,6 +1933,8 @@ cat(sprintf("%.3f\n", p))
 
 
 #### Q2.11
+
+<!-- Question: Q2.11 | Exponential: infer the mean from a given failure probability -->
 X is an exponential random variable with $P(X<6.21)=0.632$. Find the mean of X (give answers correct to 2 decimal places).
 
 For an exponential distribution with mean $\mu$,
@@ -1857,6 +1983,8 @@ Answers
 **Source transcription:** [stat-quiz-3.md](../questions/probability-questions/quizes/stat-quiz-3.md). Existing worked answers are study solutions, not a claim of an official marking key.
 
 #### Q3.1
+
+<!-- Question: Q3.1 | Given a rational reliability function: find the PDF at a specified time -->
 
 *1 point*
 
@@ -1907,6 +2035,8 @@ $$
 
 #### Q3.2
 
+<!-- Question: Q3.2 | Given a rational reliability function: find hazard at a specified time -->
+
 *1 point*
 
 The lifetime of a component follows a probability distribution with reliability function
@@ -1956,6 +2086,8 @@ $$
 
 #### Q3.3
 
+<!-- Question: Q3.3 | Reliability and hazard: identify the correct interpretation -->
+
 *1 point*
 
 A component has reliability function $R(t)$ and hazard rate function $h(t)$.
@@ -1981,6 +2113,8 @@ $$
 A constant hazard rate means the failure tendency remains constant over time; it neither accelerates nor decelerates.
 
 #### Q3.4
+
+<!-- Question: Q3.4 | Exponential: find MTTF from a constant hazard rate -->
 
 *1 point*
 
@@ -2022,6 +2156,8 @@ $$
 
 #### Q3.5
 
+<!-- Question: Q3.5 | Exponential: survival until 17 weeks given survival to 7.9 weeks -->
+
 *1 point*
 
 The failure time $T$ (in weeks) of a particular component has an exponential distribution with rate $0.13$. The component has already been in use for some time and is still operational at time $t = 7.9$ weeks. Given this information, find the probability that the component survives until time $t = 17$ weeks.
@@ -2062,6 +2198,8 @@ $$
 
 #### Q3.6
 
+<!-- Question: Q3.6 | Exponential: evaluate the hazard function at a given age -->
+
 *1 point*
 
 A component has lifetime $T$, which has an exponential distribution with rate $2.7$.
@@ -2083,6 +2221,8 @@ $$
 $$
 
 #### Q3.7
+
+<!-- Question: Q3.7 | Weibull with shape and scale: identify its hazard function -->
 
 *1 point*
 
@@ -2128,6 +2268,8 @@ $$
 
 #### Q3.8
 
+<!-- Question: Q3.8 | Constant-hazard system: failure probability between times 1 and 2 -->
+
 *1 point*
 
 Let $T$ be the time to failure for a particular computer system. The system functions with the “good as new” property, namely, a constant hazard rate $h(t) = 0.6$.
@@ -2166,6 +2308,8 @@ $$
 $$
 
 #### Q3.9
+
+<!-- Question: Q3.9 | Weibull: calculate MTTF using a supplied Gamma-function value -->
 
 *1 point*
 
@@ -2207,6 +2351,8 @@ $$
 $$
 
 #### Q3.10
+
+<!-- Question: Q3.10 | Power-law reliability function: determine MTTF -->
 
 *1 point*
 
@@ -2253,6 +2399,8 @@ $$
 **Source transcription:** [stat-quiz-4.md](../questions/probability-questions/quizes/stat-quiz-4.md). Existing worked answers are study solutions, not a claim of an official marking key.
 
 #### Q4.1
+
+<!-- Question: Q4.1 | Reliability as a sum of exponentials: determine system MTTF -->
 
 *1 point*
 
@@ -2307,6 +2455,8 @@ $$
 
 #### Q4.2
 
+<!-- Question: Q4.2 | Failure-time histogram: choose a plausible lifetime distribution -->
+
 *1 point*
 
 A statistical life test is carried out on a particular type of component.
@@ -2338,6 +2488,8 @@ $$
 
 #### Q4.3
 
+<!-- Question: Q4.3 | Mean ranks: estimate CDF at the ninth failure among eleven components -->
+
 *1 point*
 
 We observe $11$ independent components, starting from time $t=0$.
@@ -2352,13 +2504,13 @@ to two decimal places.
 The mean-rank estimate at the $i$th ordered failure among $n$ components is
 
 $$
-\widehat F(t_i)=\frac{i}{n+1}.
+\hat F(t_i)=\frac{i}{n+1}.
 $$
 
 Here, $i=9$ and $n=11$, so
 
 $$
-\widehat F(13.48)
+\hat F(13.48)
 =\frac{9}{11+1}
 =\frac{9}{12}
 =0.75.
@@ -2367,10 +2519,12 @@ $$
 Therefore,
 
 $$
-\boxed{\widehat F(13.48)=0.75}.
+\boxed{\hat F(13.48)=0.75}.
 $$
 
 #### Q4.4
+
+<!-- Question: Q4.4 | Ten complete lifetimes: maximum-likelihood estimate of exponential rate -->
 
 *1 point*
 
@@ -2393,7 +2547,7 @@ three decimal places.
 For complete exponential lifetime data, the MLE of the hazard rate is
 
 $$
-\widehat\lambda
+\hat\lambda
 =\frac{n}{\sum_{i=1}^n t_i}
 =\frac{1}{\bar t}.
 $$
@@ -2417,10 +2571,12 @@ round(lambda_hat, 3)
 Therefore,
 
 $$
-\boxed{\widehat\lambda=0.186}.
+\boxed{\hat\lambda=0.186}.
 $$
 
 #### Q4.5
+
+<!-- Question: Q4.5 | Ten failures and five censored components: estimate exponential rate -->
 
 *1 point*
 
@@ -2445,7 +2601,7 @@ three decimal places.
 For $r$ failures and right-censored exponential data, the MLE is
 
 $$
-\widehat\lambda
+\hat\lambda
 =\frac{r}{\text{total time on test}}.
 $$
 
@@ -2467,7 +2623,7 @@ Therefore,
 
 $$
 \begin{aligned}
-\widehat\lambda
+\hat\lambda
 &=\frac{10}{317.8} \\
 &=0.031466\ldots
 \end{aligned}
@@ -2476,10 +2632,12 @@ $$
 and hence
 
 $$
-\boxed{\widehat\lambda=0.031}.
+\boxed{\hat\lambda=0.031}.
 $$
 
 #### Q4.6
+
+<!-- Question: Q4.6 | Repairable-system failure timestamps: determine MTBF -->
 
 *1 point*
 
@@ -2502,14 +2660,14 @@ decimal places.
 For a repairable component,
 
 $$
-\widehat{\operatorname{MTBF}}
+\hat{\operatorname{MTBF}}
 =\frac{\text{total operating time}}{\text{number of failures}}.
 $$
 
 There are five failures in $17.5$ units of operating time. Therefore,
 
 $$
-\widehat{\operatorname{MTBF}}
+\hat{\operatorname{MTBF}}
 =\frac{17.5}{5}
 =3.5.
 $$
@@ -2517,10 +2675,12 @@ $$
 Thus,
 
 $$
-\boxed{\widehat{\operatorname{MTBF}}=3.500}.
+\boxed{\hat{\operatorname{MTBF}}=3.500}.
 $$
 
 #### Q4.7
+
+<!-- Question: Q4.7 | Repairable-system failure timestamps: determine inter-failure SD -->
 
 *1 point*
 
@@ -2560,7 +2720,7 @@ Using the empirical standard deviation with divisor $5$,
 
 $$
 \begin{aligned}
-\widehat\sigma
+\hat\sigma
 &=\sqrt{\frac{(2-2)^2+(1-2)^2+(3-2)^2+(3-2)^2+(1-2)^2}{5}} \\
 &=\sqrt{0.8} \\
 &=0.894427\ldots
@@ -2570,12 +2730,14 @@ $$
 Therefore,
 
 $$
-\boxed{\widehat\sigma=0.894}.
+\boxed{\hat\sigma=0.894}.
 $$
 
 **Ambiguity note for Q4.7.** The saved answer uses divisor $n=5$ on completed intervals only. R's usual sample SD uses $n-1$ and would give 1.000. Neither descriptive calculation corrects for right censoring. Because the prompt does not specify a divisor or lifetime model, preserve 0.894 as the existing study answer rather than claiming a unique official answer.
 
 #### Q4.8
+
+<!-- Question: Q4.8 | Lifetimes with suspensions: Kaplan-Meier reliability at 18 hours -->
 
 *1 point*
 
@@ -2584,11 +2746,11 @@ data give the lifetimes, in operating hours, of $23$ identical components.
 Measurements marked with an asterisk are suspensions:
 
 $$
-\begin{gathered}
+\begin{aligned}
 8.0,\ 21.3,\ 25.5,\ 8.1,\ 4.5,\ 4.2,\ 13.2,\ 9.9,\ 11.9^*,\\
 27.0,\ 25.7,\ 25.8,\ 28.6,\ 14.5,\ 8.0,\ 21.9,\ 10.0^*,\\
 10.6,\ 16.5^*,\ 34.9,\ 17.5,\ 5.4,\ 20.2.
-\end{gathered}
+\end{aligned}
 $$
 
 Calculate the Kaplan--Meier estimate of $R(18)$, giving your answer to three
@@ -2623,16 +2785,18 @@ summary(fit_q8, times = 18)
 R gives
 
 $$
-\widehat R(18)=0.4944482\ldots
+\hat R(18)=0.4944482\ldots
 $$
 
 Therefore,
 
 $$
-\boxed{\widehat R(18)=0.494}.
+\boxed{\hat R(18)=0.494}.
 $$
 
 #### Q4.9
+
+<!-- Question: Q4.9 | Lifetimes with suspensions: Kaplan-Meier failure probability by 14 hours -->
 
 *1 point*
 
@@ -2640,11 +2804,11 @@ The following data give the lifetimes, in operating hours, of $23$ identical
 components. Measurements marked with an asterisk are suspensions:
 
 $$
-\begin{gathered}
+\begin{aligned}
 8.0,\ 21.3,\ 25.5,\ 8.1,\ 4.5,\ 4.2,\ 13.2,\ 9.9,\ 11.9^*,\\
 27.0,\ 25.7,\ 25.8,\ 28.6,\ 15.5,\ 9.0,\ 22.9,\ 11.0^*,\\
 11.6,\ 17.5^*,\ 35.9,\ 18.5,\ 6.4,\ 21.2.
-\end{gathered}
+\end{aligned}
 $$
 
 Use the Kaplan--Meier approach to estimate $F(14)$, giving your answer to three
@@ -2679,15 +2843,15 @@ f14
 The Kaplan--Meier estimate is
 
 $$
-\widehat R(14)=0.5993311\ldots
+\hat R(14)=0.5993311\ldots
 $$
 
 Since $F(t)=1-R(t)$,
 
 $$
 \begin{aligned}
-\widehat F(14)
-&=1-\widehat R(14) \\
+\hat F(14)
+&=1-\hat R(14) \\
 &=1-0.5993311\ldots \\
 &=0.4006689\ldots
 \end{aligned}
@@ -2696,10 +2860,12 @@ $$
 Therefore,
 
 $$
-\boxed{\widehat F(14)=0.401}.
+\boxed{\hat F(14)=0.401}.
 $$
 
 #### Q4.10
+
+<!-- Question: Q4.10 | Weibull shape MLE: omit censored records as instructed -->
 
 *1 point*
 
@@ -2707,11 +2873,11 @@ The following data give the lifetimes, in operating hours, of $23$ identical
 components. Measurements marked with an asterisk are suspensions:
 
 $$
-\begin{gathered}
+\begin{aligned}
 8.0,\ 21.3,\ 25.5,\ 8.1,\ 4.5,\ 4.2,\ 13.2,\ 9.9,\ 11.9^*,\\
 27.0,\ 25.7,\ 25.8,\ 28.6,\ 13.5,\ 7.0,\ 20.9,\ 9.0^*,\\
 9.6,\ 15.5^*,\ 33.9,\ 16.5,\ 4.4,\ 19.2.
-\end{gathered}
+\end{aligned}
 $$
 
 Evaluate the MLE of $\beta$ for a two-parameter Weibull model with threshold
@@ -2763,13 +2929,13 @@ beta_hat
 This gives
 
 $$
-\widehat\beta=1.888809\ldots
+\hat\beta=1.888809\ldots
 $$
 
 Therefore,
 
 $$
-\boxed{\widehat\beta=1.889}.
+\boxed{\hat\beta=1.889}.
 $$
 
 
@@ -2781,6 +2947,8 @@ $$
 The source references a Python verification script that is absent from this workspace; no verification claim is carried over from that reference. In the Normal notation below, the second parameter is the variance.
 
 #### Q5.1
+
+<!-- Question: Q5.1 | Normal population: identify the distribution of the sample mean -->
 
 *1 point*
 
@@ -2821,6 +2989,8 @@ $$
 $$
 
 #### Q5.2
+
+<!-- Question: Q5.2 | Normal sample mean: probability above a specified threshold -->
 
 Let $X_1,\ldots,X_{14}$ be a simple random sample from a normal population with
 mean $14$ and variance $25$. Find
@@ -2864,6 +3034,8 @@ $$
 
 #### Q5.3
 
+<!-- Question: Q5.3 | Normal sample mean: two-sided deviation probability with known SD -->
+
 *1 point*
 
 Let $X_1,\ldots,X_{49}$ be a simple random sample from a normal population
@@ -2904,6 +3076,8 @@ $$
 $$
 
 #### Q5.4
+
+<!-- Question: Q5.4 | Normal sample mean: minimum sample size for a specified accuracy -->
 
 *1 point*
 
@@ -2954,6 +3128,8 @@ $0.98921$ and $0.99063$, respectively, confirming that $27$ is the minimum.
 
 #### Q5.5
 
+<!-- Question: Q5.5 | Student's t: positive critical value from a two-sided tail probability -->
+
 *1 point*
 
 Suppose that $T$ follows a $t$ distribution with $5$ degrees of freedom. Find
@@ -2993,6 +3169,8 @@ $$
 
 #### Q5.6
 
+<!-- Question: Q5.6 | Student's t: lower-tail probability with eleven degrees of freedom -->
+
 *1 point*
 
 Suppose that $T$ follows a $t$ distribution with $11$ degrees of freedom.
@@ -3020,6 +3198,8 @@ $$
 
 #### Q5.7
 
+<!-- Question: Q5.7 | Student's t: upper-tail probability with twenty-three degrees of freedom -->
+
 *1 point*
 
 Suppose that $T$ follows a $t$ distribution with $23$ degrees of freedom.
@@ -3046,6 +3226,8 @@ $$
 $$
 
 #### Q5.8
+
+<!-- Question: Q5.8 | IID population with given moments: approximate sample-mean distribution -->
 
 *1 point*
 
@@ -3089,6 +3271,8 @@ The value $0.1059$ in Option C is the standard error, not the variance.
 
 #### Q5.9
 
+<!-- Question: Q5.9 | Normal population: is the sample-mean distribution only approximate? -->
+
 *1 point*
 
 The random variables $Y_1,Y_2,\ldots,Y_{64}$ are independent and identically
@@ -3125,6 +3309,8 @@ $$
 $$
 
 #### Q5.10
+
+<!-- Question: Q5.10 | IID lifetimes with given moments: approximate sample-mean upper tail -->
 
 *1 point*
 
@@ -3184,6 +3370,8 @@ Sources: [original paper](../questions/midsem/Mid%20Sem%202025%20Sem-1.pdf) · [
 
 ### M2025.3 — original Question 3
 
+<!-- Question: M2025.3 | Censored telemetry-system lifetimes: failure rate per million hours -->
+
 In the week 4 case study, we discussed the potential reliability of a meteorology telemetry system being designed by the New Products section of Electrosystems. Let’s assume that they won the contract and installed 7 systems. After 4 years of operation, they conduct a review of the performance of these systems.
 
 They found that the first system failed at 3 months, the 2nd at 13 months, the 3rd at 25 months and the 4th at 40 months. The remaining systems survived the 4 years of operation. Systems that failed were not replaced. Calculate the failure rate of the system in failure rate per million hours. Give your answer to 2 d.p. and use the conversion 365.25 days = 1 year.
@@ -3216,9 +3404,11 @@ failures per million hours.
 
 ### M2025.4 — original Question 4
 
+<!-- Question: M2025.4 | Reliability block diagram: combine parallel and series components -->
+
 The reliability block diagram of a system is shown in the following figure with component reliability noted in each block, where $a=0.62$, $b=0.91$ and $c=0.70$. What is the reliability of the system? Give your answer to 2 d.p.
 
-![Reliability block diagram for Question 4](../questions/midsem/images/question-04-reliability-block-diagram.jpg)
+![Reliability block diagram for Question 4](assets/question-04-reliability-block-diagram.jpg)
 
 *Figure 2: Figure for Q4*
 
@@ -3239,6 +3429,8 @@ $$
 
 
 ### M2025.8 — original Question 8
+
+<!-- Question: M2025.8 | Weibull foundations: failure probability over a 39-year design life -->
 
 A geotechnical engineering team is assessing the long-term reliability of offshore wind turbine foundations subjected to cyclic loading. They use Weibull analysis to model the time to failure based on historical data and laboratory test results. The team gathers failure data from past projects and laboratory tests on monopile foundations under cyclic loading. The dataset includes time to failure (in years) for different foundations. They plot the data using Weibull analysis and obtain a shape function = 1.2 and scale factor = 14.
 
@@ -3261,6 +3453,8 @@ $$
 
 ### M2025.10 — original Question 10
 
+<!-- Question: M2025.10 | Foundation tests: total exposure with survivors and invalid tests -->
+
 A geotechnical engineering team is assessing the long-term reliability of offshore wind turbine foundations subjected to cyclic loading. The team gathers failure data from past projects and laboratory tests on monopile foundations under cyclic loading. The dataset includes time to failure (in years) for different foundations. The team finds information for 113 foundation field tests. Five tests were unsuccessful because the equipment broke during testing. Five foundations failed under cyclic loading after 3, 5, 6, 8, 12 months, respectively. The remaining tests were carried out for 24 months and the foundations did not fail.
 
 What is the total time on test for the foundations? Give your answer in months.
@@ -3280,6 +3474,8 @@ $$
 
 
 ### M2025.13 — original Question 13
+
+<!-- Question: M2025.13 | Disjoint and independent events: conditional probability of a union -->
 
 Events $A$, $B$ and $C$ have respective probabilities $P(A)=0.2$, $P(B)=0.1$, and $P(C)=0.4$. Given that $A$ and $B$ are disjoint, that $B$ and $C$ are independent, and that $P(A\cap C)=0.1$, which ONE of the following is the correct value for $P(A\cup B\mid C)$? (2dp)
 
@@ -3302,6 +3498,8 @@ $$
 
 ### M2025.14 — original Question 14
 
+<!-- Question: M2025.14 | Event probabilities: identify an impossible assignment -->
+
 If $A$ and $B$ are two events, which ONE of the following assignments of probabilities is valid?
 
 - A. $P(A)=0.5$, $P(B)=0.7$, $P(A\cap B)=0.1$
@@ -3322,6 +3520,8 @@ which is valid. The other assignments violate the bounds on intersections or uni
 
 ### M2025.15 — original Question 15
 
+<!-- Question: M2025.15 | Poisson repair requests: probability of three requests in four weeks -->
+
 The arrival of requests for repair of excavators from a mining site can be approximated as a Poisson process with rate of 1 request per week. What is the probability that there will be 3 requests for repair in a 4 weeks period? (3dp)
 
 - A. 0.016
@@ -3340,6 +3540,8 @@ $$
 
 ### M2025.16 — original Question 16
 
+<!-- Question: M2025.16 | Lognormal pump repair time: probability a repair exceeds four hours -->
+
 A maintenance planner looks back on time taken to repair a centrifugal pump. The past data indicates that the repair time $T$ is distributed as $T=\exp(X)$, where $X\sim N(1.2,4.3)$. There is a shutdown coming up and the operations supervisor wants to know the probability that a repair will take more than 4 hours. Which of the following is the correct value for this probability? (3dp)
 
 - A. 0.159
@@ -3353,7 +3555,7 @@ A maintenance planner looks back on time taken to repair a centrifugal pump. The
 $$
 \begin{aligned}
 P(T>4)
-&=P\bigl(\exp(X)>4\bigr)\\
+&=P(\exp(X)>4)\\
 &=P(X>\ln 4)\\
 &=1-\Phi\left(\frac{\ln4-1.2}{\sqrt{4.3}}\right)\\
 &=0.464207\approx0.464.
@@ -3363,6 +3565,8 @@ $$
 
 
 ### M2025.17 — original Question 17
+
+<!-- Question: M2025.17 | Normal bucket loads: probability the mean of twelve is underloaded -->
 
 An excavator bucket has a bucket capacity of $11.5\,\mathrm{m}^3$ with a standard deviation of $1.4\,\mathrm{m}^3$. Assume that the volume of material in a loaded bucket is Normally distributed. A bucket is considered “underloaded” if its material volume is less than $10.88\,\mathrm{m}^3$. Let $\overline{X}$ denote the average material volume of 12 randomly chosen loaded buckets. What is the probability that $\overline{X}$ is less than $10.88\,\mathrm{m}^3$? (3dp)
 
@@ -3384,6 +3588,8 @@ $$
 
 ### M2025.18 — original Question 18
 
+<!-- Question: M2025.18 | Normal pump lifetimes, estimated SD: distribution of standardised mean -->
+
 A hydraulic pump used in an excavator has MTTF of $\mu$ hours and standard deviation $\sigma$ hours. Assume that the lifetime of a hydraulic pump is Normally distributed. Let $\overline{X}$ and $S$ denote the average lifetime and standard deviation of 20 randomly chosen hydraulic pumps.
 
 What is the distribution of
@@ -3404,6 +3610,8 @@ $$
 
 ### M2025.19 — original Question 19
 
+<!-- Question: M2025.19 | Weibull lifetime: assess conditional survival and CDF/reliability identities -->
+
 Suppose the life time, $X$, of a component is modelled as $\operatorname{Weibull}(\beta,\eta)$, with $\beta\ne1$. Let $F(t)$, $R(t)$ and $h(t)$ be its CDF, reliability function and hazard rate function, respectively. Which ONE of the following is true?
 
 - A. $P(X>t+s\mid X>s)=P(X>t)$, for $s,t>0$.
@@ -3417,6 +3625,8 @@ Suppose the life time, $X$, of a component is modelled as $\operatorname{Weibull
 
 
 ### M2025.20 — original Question 20
+
+<!-- Question: M2025.20 | Constant-hazard component: find hazard from mean lifetime -->
 
 An electronic component is assumed to have a constant hazard rate. The mean life time of the component is 0.125 years. What is the hazard rate of the component?
 
@@ -3442,6 +3652,8 @@ Source: [saved Week 4 quiz](../questions/week4-quiz.md). The source saves three 
 
 #### E4.1 — reliability of five sensors
 
+<!-- Question: E4.1 | Five series sensors: reliability over ten years from component failure rates -->
+
 We know from Q1 that the failure rate of an instrument module is 1.91 failures per million hours and that an instrument module is considered failed if a single sensor on the module has failed. For the purposes of this question assume that the failure rate of a single sensor is therefore 1.91 failures per million hours.
 
 The customer's requirement is that there are five critical sensors and if one fails then the unit is considered failed. What is the reliability of the instrument module over ten years?
@@ -3455,6 +3667,8 @@ The customer's requirement is that there are five critical sensors and if one fa
 
 #### E4.2 — whole-system failure rate
 
+<!-- Question: E4.2 | Series system: combine sensor and board failure rates -->
+
 What is the failure rate of the proposed meteorological system? Assume the system includes the instrument module, signal-processing board, transmission module (comms board), power supply and battery. Give the result in failures per million hours.
 
 - A. 15.44
@@ -3465,6 +3679,8 @@ What is the failure rate of the proposed meteorological system? Assume the syste
 **Recorded answer: A.** Add the independent series failure rates. The workshop uses five sensor rates of 1.95 and a combined other-board rate of 5.69, giving $5(1.95)+5.69=15.44$. Literal use of 1.91 instead gives 15.24; this is the same source-rate mismatch as E4.1. The prompt alone omits the board-rate table, so its numerical answer depends on the accompanying workshop context.
 
 #### E4.3 — meeting the MTBF requirement
+
+<!-- Question: E4.3 | Constant-rate system: check whether MTBF meets a ten-year requirement -->
 
 The design meets the customer's requirement of “A 10 year MTBF is required for the loss of any one parameter?” True or False?
 
@@ -3478,6 +3694,8 @@ The design meets the customer's requirement of “A 10 year MTBF is required for
 Source: [saved Week 5 quiz](../questions/week5-quiz.md). Original Q3–Q6 appear below; qualitative Q1–Q2 and Q7–Q8 belong in [engineering notes](engineering-content.md). The bathtub-curve concept in Q2 is also explained in the cheat sheet.
 
 #### E5.3 — original Question 3
+
+<!-- Question: E5.3 | Exponential tooth lifetime: infer rate from survival, then failure by replacement -->
 
 
 In a study to improve the life of ground-engaging tools on an excavator, a
@@ -3499,7 +3717,7 @@ Use the given survival probability to calculate the failure rate:
 
 $$
 0.46=e^{-1000\lambda}
-\quad\Longrightarrow\quad
+\quad\Rightarrow\quad
 \lambda=-\frac{\ln(0.46)}{1000}
 =0.000776529\ \text{h}^{-1}.
 $$
@@ -3533,6 +3751,8 @@ sprintf("%.3f", probability_of_failure)  # "0.230"
 
 
 #### E5.4 — original Question 4
+
+<!-- Question: E5.4 | Series excavator subsystem: mission reliability from component MTBFs -->
 
 
 Before the excavators were purchased, a reliability engineer modelled the
@@ -3588,6 +3808,8 @@ $$
 
 #### E5.5 — original Question 5
 
+<!-- Question: E5.5 | Shifted Weibull cable: choose replacement interval to minimise annual cost -->
+
 
 A cable has a three-parameter Weibull failure distribution with
 $\beta=1.8$, $\eta=500\ \text{h}$ and $\gamma=50\ \text{h}$.
@@ -3632,7 +3854,7 @@ The annualized cost is therefore
 
 $$
 C_{\text{annual}}(m)
-=H\frac{C_fF(m)+C_sR(m)}{\displaystyle\int_0^mR(t)\,dt}.
+=H\frac{C_fF(m)+C_sR(m)}{\int_0^mR(t)\,dt}.
 $$
 
 The expected cycle length must be used in the denominator because a corrective
@@ -3661,11 +3883,13 @@ $$
 
 #### E5.6 — original Question 6
 
+<!-- Question: E5.6 | Mixed Weibull plot: interpret early- and later-life fitted slopes -->
+
 
 Examine the plot for EXB8 shown in Figure 5 of an analysis of ground-engaging
 tools on an excavator. Which statement is true?
 
-![Mixed Weibull plot for excavator EXB8](../questions/w5q6.PNG)
+![Mixed Weibull plot for excavator EXB8](assets/w5q6.PNG)
 
 - **Option A:** The Weibull shape parameter for early life is higher than for
   later life.
@@ -3696,35 +3920,67 @@ These are distinct prompts/examples in the supplied slide decks. Repeated worked
 
 Source: [extra probability slides](../probability-content/slides-pdf/02-GENG5507-STATS-extra-slides.pdf).
 
-**S1.1 — complements and unions.** For $S=\{1,2,5,10\}$ and $A=\{2,5\}$ identify the complement. For $S=\{t:t>10\}$ and $A=\{t:10<t\le100\}$ identify the complement. For $A=(100,1000)$ and $B=(0,200)$ find intersection and union. For integer sets $A=\{0,\ldots,100\}$, $B=\{50,\ldots,150\}$ and $C=\{101,\ldots,200\}$ find $A\cap B$, $A\cup B$, $A\cap C$, $B\cap C$, $A\cap B\cap C$, $A\cup B\cup C$ and $A\cup C$.
+#### S1.1 — complements and unions
+
+<!-- Question: S1.1 | Sets and intervals: complements, unions and intersections -->
+
+For $S=\{1,2,5,10\}$ and $A=\{2,5\}$ identify the complement. For $S=\{t:t>10\}$ and $A=\{t:10<t\le100\}$ identify the complement. For $A=(100,1000)$ and $B=(0,200)$ find intersection and union. For integer sets $A=\{0,\ldots,100\}$, $B=\{50,\ldots,150\}$ and $C=\{101,\ldots,200\}$ find $A\cap B$, $A\cup B$, $A\cap C$, $B\cap C$, $A\cap B\cap C$, $A\cup B\cup C$ and $A\cup C$.
 
 **Answer.** Complements $\{1,10\}$ and $\{t:t>100\}$; interval intersection $(100,200)$ and union $(0,1000)$. Integer answers: $\{50,\ldots,100\}$; $\{0,\ldots,150\}$; $\varnothing$; $\{101,\ldots,150\}$; $\varnothing$; $\{0,\ldots,200\}$; $\{0,\ldots,200\}$.
 
-**S1.2 — probability definitions.** A fair die has six outcomes, three odd. A pump fails to start on 20 of 2000 starts. Calculate the classical odd-outcome probability and the empirical failed-start probability. Show that $P(E^c)=1-P(E)$.
+#### S1.2 — probability definitions
+
+<!-- Question: S1.2 | Classical and empirical probability; prove the complement rule -->
+
+A fair die has six outcomes, three odd. A pump fails to start on 20 of 2000 starts. Calculate the classical odd-outcome probability and the empirical failed-start probability. Show that $P(E^c)=1-P(E)$.
 
 **Answer.** $3/6=0.5$; $20/2000=0.01$; $E,E^c$ partition the sample space, so their probabilities sum to one. The frequency estimate assumes sufficiently comparable trials.
 
-**S1.3 — defective bolts.** One bolt from each of two independent suppliers is selected; defect probabilities are 0.05 and 0.07. Find the probabilities that both are defective and that at least one is defective.
+#### S1.3 — defective bolts
+
+<!-- Question: S1.3 | Independent suppliers: probability both or at least one bolt is defective -->
+
+One bolt from each of two independent suppliers is selected; defect probabilities are 0.05 and 0.07. Find the probabilities that both are defective and that at least one is defective.
 
 **Answer.** $0.05(0.07)=0.0035$; $0.05+0.07-0.0035=0.1165$.
 
-**S1.4 — sample combinations.** How many samples of four can be selected without replacement from 20 bulbs? If exactly two of the 20 are defective, what is the probability of exactly one defective in the sample?
+#### S1.4 — sample combinations
+
+<!-- Question: S1.4 | Sampling bulbs without replacement: combinations and exactly one defect -->
+
+How many samples of four can be selected without replacement from 20 bulbs? If exactly two of the 20 are defective, what is the probability of exactly one defective in the sample?
 
 **Answer.** $\binom{20}{4}=4845$; $\binom21\binom{18}{3}/\binom{20}{4}=1632/4845\approx0.33684$. This is sampling without replacement (hypergeometric), not independent binomial sampling.
 
-**S1.5 — tractors and assembly lines.** Red, White and Blue lines have failure-to-start probabilities 6%, 11% and 8%. Red makes 48% and Blue 31% of tractors. Find the overall proportion that fails to start; find the tree's joint probabilities $P(R\cap D)$, $P(W\cap D)$ and $P(B\cap D)$. The slide also displays the Bayes expression for $P(R\mid D)$.
+#### S1.5 — tractors and assembly lines
+
+<!-- Question: S1.5 | Assembly lines: overall failure proportion, joint probabilities and source -->
+
+Red, White and Blue lines have failure-to-start probabilities 6%, 11% and 8%. Red makes 48% and Blue 31% of tractors. Find the overall proportion that fails to start; find the tree's joint probabilities $P(R\cap D)$, $P(W\cap D)$ and $P(B\cap D)$. The slide also displays the Bayes expression for $P(R\mid D)$.
 
 **Answer.** White makes 21%. The joints are $0.0288$, $0.0231$, $0.0248$, giving $P(D)=0.0767\approx0.077$; $P(R\mid D)=0.0288/0.0767\approx0.37549$.
 
-**S1.6 — defective transistor origin.** Systems $S_1,S_2,S_3$ make 20%, 30%, 50% of transistors, with defect rates 0.01, 0.02, 0.05. A selected transistor is defective: find the probability it came from $S_1$ (and the analogous probabilities for $S_2,S_3$).
+#### S1.6 — defective transistor origin
+
+<!-- Question: S1.6 | Defective transistor: probability it came from each production system -->
+
+Systems $S_1,S_2,S_3$ make 20%, 30%, 50% of transistors, with defect rates 0.01, 0.02, 0.05. A selected transistor is defective: find the probability it came from $S_1$ (and the analogous probabilities for $S_2,S_3$).
 
 **Answer.** $P(D)=0.033$; posterior probabilities $0.002/0.033=0.06061$, $0.006/0.033=0.18182$, $0.025/0.033=0.75758$.
 
-**S1.7 — two equally credible experts.** Experts propose reliability values 0.98 and 0.60. Update their equal prior credibility after one successful reliability test, then after two successful tests.
+#### S1.7 — two equally credible experts
+
+<!-- Question: S1.7 | Competing expert predictions: update credibility after successful tests -->
+
+Experts propose reliability values 0.98 and 0.60. Update their equal prior credibility after one successful reliability test, then after two successful tests.
 
 **Answer and wording correction.** Treat the experts' predictions as alternative models with priors 0.5 each and assume tests conditionally independent given a model. The posterior for the first model is $0.98/(0.98+0.60)=0.62025$, then $0.98^2/(0.98^2+0.60^2)=0.72736$. The slide's words incorrectly conflate model prior credibility with the conditional success probabilities 0.98 and 0.60.
 
-**S1.8 — coin sequence.** A fair coin gives three heads in three tosses. What is the probability of heads next? Repeat for a coin whose known head probability is 0.6.
+#### S1.8 — coin sequence
+
+<!-- Question: S1.8 | Independent coin tosses: next-head probability after three heads -->
+
+A fair coin gives three heads in three tosses. What is the probability of heads next? Repeat for a coin whose known head probability is 0.6.
 
 **Answer.** 0.5 and 0.6, assuming independent tosses and a known fixed head probability; the previous sequence does not change it.
 
@@ -3732,19 +3988,39 @@ Source: [extra probability slides](../probability-content/slides-pdf/02-GENG5507
 
 Source: [probability-model slides](../probability-content/slides-pdf/03-GENG5507-STATS-ProbabilityModels.pdf).
 
-**S2.1 — graphical model illustrations (Examples 2.1 and 2.2).** Slides 5–9 show rework-cost survey distributions (% of project contract value). Slides 10–13 compare histogram bins for loader-engine times to first failure. These are graphical examples, with no additional explicit numerical question or complete raw dataset in their text. The loader dataset is supplied in S4.3 below, where its 35 observations and histogram task are retained.
+#### S2.1 — graphical model illustrations (Examples 2.1 and 2.2)
 
-**S2.2 — fair die (Example 2.3).** A fair die has values $1,\ldots,6$. Its discrete-uniform PMF is $1/6$ on these values, with mean 3.5 and variance $35/12$. This is a worked distribution illustration, not a separately worded assessment problem.
+<!-- Question: S2.1 | Graphical examples: rework-cost distributions and failure-time histogram bins -->
 
-**S2.3 — surviving bulbs (Example 2.4).** Each bulb survives a 500-hour mission with probability 0.9. For four independent bulbs calculate the probabilities of 0, 1, 2, 3 and 4 survivors.
+Slides 5–9 show rework-cost survey distributions (% of project contract value). Slides 10–13 compare histogram bins for loader-engine times to first failure. These are graphical examples, with no additional explicit numerical question or complete raw dataset in their text. The loader dataset is supplied in S4.3 below, where its 35 observations and histogram task are retained.
+
+#### S2.2 — fair die (Example 2.3)
+
+<!-- Question: S2.2 | Fair-die distribution illustration: PMF, mean and variance -->
+
+A fair die has values $1,\ldots,6$. Its discrete-uniform PMF is $1/6$ on these values, with mean 3.5 and variance $35/12$. This is a worked distribution illustration, not a separately worded assessment problem.
+
+#### S2.3 — surviving bulbs (Example 2.4)
+
+<!-- Question: S2.3 | Independent bulbs: probabilities of zero through four mission survivors -->
+
+Each bulb survives a 500-hour mission with probability 0.9. For four independent bulbs calculate the probabilities of 0, 1, 2, 3 and 4 survivors.
 
 **Answer.** $X\sim\operatorname{Bin}(4,0.9)$; probabilities are $0.0001$, $0.0036$, $0.0486$, $0.2916$, $0.6561$.
 
-**S2.4 — machine-component failures (Example 2.5).** Components fail according to a Poisson process with rate 1/week. What is the probability of one failure in four weeks?
+#### S2.4 — machine-component failures (Example 2.5)
+
+<!-- Question: S2.4 | Poisson component failures: probability of one failure in four weeks -->
+
+Components fail according to a Poisson process with rate 1/week. What is the probability of one failure in four weeks?
 
 **Answer.** $N\sim\operatorname{Pois}(4)$ and $P(N=1)=4e^{-4}=0.073263$.
 
-**S2.5 — bottle filling (Example 2.6).** A machine is intended to fill plastic bottles to 16.0 ounces. Quality engineers investigate the volume using this random sample:
+#### S2.5 — bottle filling (Example 2.6)
+
+<!-- Question: S2.5 | Bottle-fill sample: summarise measurements and investigate fill volume -->
+
+A machine is intended to fill plastic bottles to 16.0 ounces. Quality engineers investigate the volume using this random sample:
 
 $$
 \begin{aligned}
@@ -3755,9 +4031,17 @@ $$
 
 The slides display a histogram/Normal illustration; they do not specify a hypothesis-test question. **Study interpretation:** describe the distribution and compare its centre with 16.0; do not invent a required test or significance level.
 
-**S2.6 — Gamma function (Example 2.7).** Evaluate $\Gamma(4)$ using the positive-integer identity. **Answer:** $(4-1)!=6$.
+#### S2.6 — Gamma function (Example 2.7)
 
-**S2.7 — Weibull calculations (Example 2.8).** A lifetime has Weibull shape 2 and scale 1000 hours. Find (a) mean; (b) SD; (c) median; (d) $P(800\le T\le1200)$; (e) the time the lifetime exceeds with probability 0.9.
+<!-- Question: S2.6 | Gamma function: evaluate at a positive integer -->
+
+Evaluate $\Gamma(4)$ using the positive-integer identity. **Answer:** $(4-1)!=6$.
+
+#### S2.7 — Weibull calculations (Example 2.8)
+
+<!-- Question: S2.7 | Weibull: mean, SD, median, interval probability and a survival quantile -->
+
+A lifetime has Weibull shape 2 and scale 1000 hours. Find (a) mean; (b) SD; (c) median; (d) $P(800\le T\le1200)$; (e) the time the lifetime exceeds with probability 0.9.
 
 **Answer.** $1000\Gamma(1.5)=886.227$ h; $1000\sqrt{1-\Gamma(1.5)^2}=463.251$ h; $1000\sqrt{\ln2}=832.555$ h; $e^{-0.8^2}-e^{-1.2^2}=0.290365$; $1000\sqrt{-\ln0.9}=324.593$ h. Part (e) is the lower 10th percentile, not the lower 90th percentile.
 
@@ -3767,37 +4051,73 @@ The final exponential slide invites exploration of the Poisson/exponential conne
 
 Source: [hazard-rate slides](../probability-content/slides-pdf/04-GENG5507-STATS-HazardRate.pdf).
 
-**S3.1 — conditional failure and density.** Given survival up to $t$, what is the chance of failure in the next short interval $\Delta t$? **Answer:** $[F(t+\Delta t)-F(t)]/R(t)\approx h(t)\Delta t$.
+#### S3.1 — conditional failure and density
 
-**S3.2 — exponential interval.** A component has exponential life with rate 0.002/hour. What is the probability of failure between 510 and 515 hours? **Answer:** $e^{-0.002(510)}-e^{-0.002(515)}\approx0.003588$.
+<!-- Question: S3.1 | Survival to current age: failure probability in the next short interval -->
 
-**S3.3 — derive lifetime functions from constant hazard.** Assuming $h(t)=\lambda$, find $f(t)$, $F(t)$ and $R(t)$. Which are probabilities? Can any exceed 1?
+Given survival up to $t$, what is the chance of failure in the next short interval $\Delta t$? **Answer:** $[F(t+\Delta t)-F(t)]/R(t)\approx h(t)\Delta t$.
+
+#### S3.2 — exponential interval
+
+<!-- Question: S3.2 | Exponential: probability of failure between 510 and 515 hours -->
+
+A component has exponential life with rate 0.002/hour. What is the probability of failure between 510 and 515 hours? **Answer:** $e^{-0.002(510)}-e^{-0.002(515)}\approx0.003588$.
+
+#### S3.3 — derive lifetime functions from constant hazard
+
+<!-- Question: S3.3 | Constant hazard: derive PDF, CDF and reliability; distinguish rates/probabilities -->
+
+Assuming $h(t)=\lambda$, find $f(t)$, $F(t)$ and $R(t)$. Which are probabilities? Can any exceed 1?
 
 **Answer.** $R(t)=e^{-\lambda t}$; $F(t)=1-e^{-\lambda t}$; $f(t)=\lambda e^{-\lambda t}$. CDF and reliability are probabilities in $[0,1]$. Density and hazard are rates per unit time and may exceed 1.
 
-**S3.4 — exponential location and spread (Example 1).** For $f(t)=0.002e^{-0.002t}$, find MTTF, median, mode and SD.
+#### S3.4 — exponential location and spread (Example 1)
+
+<!-- Question: S3.4 | Exponential lifetime: MTTF, median, mode and standard deviation -->
+
+For $f(t)=0.002e^{-0.002t}$, find MTTF, median, mode and SD.
 
 **Answer.** 500 h; $\ln2/0.002=346.574$ h; boundary mode 0; 500 h. **Source correction:** the median calculation accidentally prints 0.02 instead of 0.002; the quoted median uses 0.002.
 
-**S3.5 — equal means, different reliability (Examples 2 and 2b).** Compare $R_1(t)=e^{-0.002t}$ and $R_2(t)=(1000-t)/1000$ for $0\le t\le1000$ (with $R_2=0$ thereafter). Find each MTTF, $R(400)$ and SD. Why might smaller SD be preferred?
+#### S3.5 — equal means, different reliability (Examples 2 and 2b)
+
+<!-- Question: S3.5 | Compare lifetime models with equal means: mission reliability and spread -->
+
+Compare $R_1(t)=e^{-0.002t}$ and $R_2(t)=(1000-t)/1000$ for $0\le t\le1000$ (with $R_2=0$ thereafter). Find each MTTF, $R(400)$ and SD. Why might smaller SD be preferred?
 
 **Answer.** Both means are 500 h. Reliabilities at 400 h are $e^{-0.8}=0.449329$ and $0.6$. SDs are 500 h and $1000/\sqrt{12}=288.675$ h. Smaller spread can make lifetime more predictable, but mission reliability depends on the whole distribution and the mission time; a smaller SD alone does not dominate at all times.
 
-**S3.6 — Weibull linearisation.** The final slide asks what the Weibull straight-line identity is useful for. **Answer:** a probability plot can check approximate Weibull fit and estimate shape from slope and scale from intercept; see P3.4.
+#### S3.6 — Weibull linearisation
+
+<!-- Question: S3.6 | Weibull straight-line identity: explain its use in model fitting -->
+
+The final slide asks what the Weibull straight-line identity is useful for. **Answer:** a probability plot can check approximate Weibull fit and estimate shape from slope and scale from intercept; see P3.4.
 
 ### S4 — model-estimation examples
 
 Source: [model-estimation slides](../probability-content/slides-pdf/05-GENG5507-STATS-ModelEstimation.pdf).
 
-**S4.1 — 20-unit censored test.** Twenty units are tested for 50 h. Earlier failure/censoring times are $10.8,12.6^+,15.7,28.1,30.5,36.0^+,42.1,48.2$ hours; the other 12 units survive to 50 h. Find exposure $T$ and estimated MTTF assuming exponential lifetimes. Repeat if 12.6 and 36.0 are failures instead of suspensions.
+#### S4.1 — 20-unit censored test
 
-**Answer.** The listed durations sum to 224 h; total exposure $224+12(50)=824$ h. With six failures, $\widehat{\mathrm{MTTF}}=824/6=137.333$ h. Changing the two outcomes to failures leaves exposure unchanged but gives eight failures: MTTF 103 h. A plus sign means right-censored.
+<!-- Question: S4.1 | Twenty-unit censored test: exposure and exponential MTTF; reclassify suspensions -->
 
-**S4.2 — repairable-system event times.** Failures occur at 452, 752, 967, 1256, 1432, 1999 and 2383 h; observation ends at 3000 h. Find MTBF and SD. First derive inter-failure durations.
+Twenty units are tested for 50 h. Earlier failure/censoring times are $10.8,12.6^+,15.7,28.1,30.5,36.0^+,42.1,48.2$ hours; the other 12 units survive to 50 h. Find exposure $T$ and estimated MTTF assuming exponential lifetimes. Repeat if 12.6 and 36.0 are failures instead of suspensions.
+
+**Answer.** The listed durations sum to 224 h; total exposure $224+12(50)=824$ h. With six failures, $\hat{\mathrm{MTTF}}=824/6=137.333$ h. Changing the two outcomes to failures leaves exposure unchanged but gives eight failures: MTTF 103 h. A plus sign means right-censored.
+
+#### S4.2 — repairable-system event times
+
+<!-- Question: S4.2 | Repairable-system event times: inter-failure durations, MTBF and SD -->
+
+Failures occur at 452, 752, 967, 1256, 1432, 1999 and 2383 h; observation ends at 3000 h. Find MTBF and SD. First derive inter-failure durations.
 
 **Answer with censoring caveat.** Durations are $452,300,215,289,176,567,384,617^+$. The exponential/constant-rate MTBF estimate is $3000/7=428.571$ h. The slide computes the ordinary SD of all eight recorded durations around their arithmetic mean 375: $\sqrt{179660/7}=160.205$ h. **That is a descriptive SD of observed durations, not an unbiased lifetime SD**, because the final interval is censored. Under the exponential model, fitted lifetime SD equals fitted MTBF, 428.571 h.
 
-**S4.3 — 35 field failure times.** Plot these failure times in operating hours, collected over six months, and consider the underlying distribution:
+#### S4.3 — 35 field failure times
+
+<!-- Question: S4.3 | Thirty-five field failure times: histogram and possible lifetime model -->
+
+Plot these failure times in operating hours, collected over six months, and consider the underlying distribution:
 
 $$
 \begin{aligned}
@@ -3806,17 +4126,29 @@ $$
 \end{aligned}
 $$
 
-**Source worked approach.** Compare histogram class choices; a right-skewed shape suggests considering an exponential distribution, followed by a proper model check. If fitting an uncensored exponential, use $\widehat\lambda=35/\sum t_i$.
+**Source worked approach.** Compare histogram class choices; a right-skewed shape suggests considering an exponential distribution, followed by a proper model check. If fitting an uncensored exponential, use $\hat\lambda=35/\sum t_i$.
 
-**S4.4 — mean-rank plotting positions.** For ordered times $12.2,13.1,14.0,14.1,14.6,14.7,14.7,15.1,15.7,15.8,16.3,16.9$, compare cumulative percentages and estimated CDF positions.
+#### S4.4 — mean-rank plotting positions
+
+<!-- Question: S4.4 | Ordered lifetimes: compare empirical cumulative percentages and mean ranks -->
+
+For ordered times $12.2,13.1,14.0,14.1,14.6,14.7,14.7,15.1,15.7,15.8,16.3,16.9$, compare cumulative percentages and estimated CDF positions.
 
 **Answer.** Empirical cumulative ranks are $i/12$; mean-rank positions are $i/13$, $i=1,\ldots,12$; Bernard/Benard approximate median ranks are $(i-0.3)/12.4$. The two 14.7 observations share a time but have separate ordered plotting positions; a proper ECDF has one combined jump at that time.
 
-**S4.5 — Kaplan–Meier, refinery pumps.** A refinery has 100 independent identical pumps. At each monthly inspection failures are recorded, then two surviving pumps are randomly removed for external testing and not replaced. Monthly failures for months 1–5 are 5, 6, 4, 8, 3. Estimate reliability using Kaplan–Meier.
+#### S4.5 — Kaplan–Meier, refinery pumps
+
+<!-- Question: S4.5 | Refinery pumps: Kaplan-Meier survival with monthly failures and removals -->
+
+A refinery has 100 independent identical pumps. At each monthly inspection failures are recorded, then two surviving pumps are randomly removed for external testing and not replaced. Monthly failures for months 1–5 are 5, 6, 4, 8, 3. Estimate reliability using Kaplan–Meier.
 
 **Answer.** Risk-set sizes before failures are $100,93,85,79,69$; multiply conditional survival factors $95/100$, $87/93$, $81/85$, $71/79$, $66/69$. Removals affect later denominators, not the survival curve at the censoring time.
 
-**S4.6 — Kaplan–Meier, IPP pumps.** Irving Pulp and Paper monitored 36 pumps: 12 bearing failures, 20 suspensions and four corrupted records excluded from analysis. The slide example shows observation timelines and a KM curve. Use 32 valid records, retaining both failures and suspensions. **Data limit:** exact event times are shown graphically rather than supplied as a numerical table; use [slides 43–45](../probability-content/slides-pdf/05-GENG5507-STATS-ModelEstimation.pdf#page=43) for the original plot. No new numerical target is stated, and exact values should not be invented from the graphic.
+#### S4.6 — Kaplan–Meier, IPP pumps
+
+<!-- Question: S4.6 | IPP pump graphical example: failures, suspensions and excluded records -->
+
+Irving Pulp and Paper monitored 36 pumps: 12 bearing failures, 20 suspensions and four corrupted records excluded from analysis. The slide example shows observation timelines and a KM curve. Use 32 valid records, retaining both failures and suspensions. **Data limit:** exact event times are shown graphically rather than supplied as a numerical table; use [slides 43–45](../probability-content/slides-pdf/05-GENG5507-STATS-ModelEstimation.pdf#page=43) for the original plot. No new numerical target is stated, and exact values should not be invented from the graphic.
 
 The final R example uses the same `exa1.csv` analysis as P4.3 and is deduplicated there.
 
@@ -3824,37 +4156,69 @@ The final R example uses the same `exa1.csv` analysis as P4.3 and is deduplicate
 
 Source: [random-sampling and CLT slides](../probability-content/slides-pdf/06-GENG5507-STATS-lecture-week5-CLT.pdf).
 
-**S5.0 — why sample?** How can we obtain MTTF of mining equipment, the proportion failing before warranty expiry, mean repair time, defective-production proportion, ore/oil quantity, quality compliance and the total number of tuna in Australian waters? Could we measure every item? What issues arise?
+#### S5.0 — why sample?
+
+<!-- Question: S5.0 | Sampling design: why sample rather than measure the entire population? -->
+
+How can we obtain MTTF of mining equipment, the proportion failing before warranty expiry, mean repair time, defective-production proportion, ore/oil quantity, quality compliance and the total number of tuna in Australian waters? Could we measure every item? What issues arise?
 
 **Slide answer.** A census can be costly, slow, impractical or destructive. Use a suitable representative sampling design and account for sampling uncertainty and bias.
 
-**S5.1 — cereal sample mean.** Box weights are Normal with mean 500 g and SD 5 g. What is the probability that a random sample of 25 boxes has mean weight below 495 g?
+#### S5.1 — cereal sample mean
+
+<!-- Question: S5.1 | Normal cereal weights: probability the mean of 25 boxes is below 495 g -->
+
+Box weights are Normal with mean 500 g and SD 5 g. What is the probability that a random sample of 25 boxes has mean weight below 495 g?
 
 **Answer.** $\bar X\sim N(500,1)$ exactly, so $P(\bar X<495)=\Phi(-5)\approx2.8665\times10^{-7}$.
 
-**S5.2 — linear combinations.** For random variables $X,Y$ and $U=aX+bY$, can you determine the distribution, mean and variance of $U$?
+#### S5.2 — linear combinations
+
+<!-- Question: S5.2 | Linear combination of random variables: distribution, mean and variance -->
+
+For random variables $X,Y$ and $U=aX+bY$, can you determine the distribution, mean and variance of $U$?
 
 **Answer and assumption correction.** $E(U)=aE(X)+bE(Y)$; $\operatorname{Var}(U)=a^2\operatorname{Var}(X)+b^2\operatorname{Var}(Y)+2ab\operatorname{Cov}(X,Y)$. The slide's shorter formula assumes independence (or zero covariance). A full distribution needs further information: independent Normal variables give a Normal linear combination.
 
-**S5.3 — bank service times.** A teller's service time is Normal with mean 150 s and variance 900 s$^2$. Find the chance that mean service time exceeds 160 s for samples of (a) 25 customers; (b) 100 customers.
+#### S5.3 — bank service times
+
+<!-- Question: S5.3 | Normal service times: sample-mean upper tail for two sample sizes -->
+
+A teller's service time is Normal with mean 150 s and variance 900 s${}^2$. Find the chance that mean service time exceeds 160 s for samples of (a) 25 customers; (b) 100 customers.
 
 **Answer.** $1-\Phi((160-150)/(30/5))\approx0.04779$; $1-\Phi((160-150)/(30/10))\approx0.0004291$.
 
-**S5.4 — long-life bulbs (image-only example, slide 25).** A long-life bulb has mean life 1500 h and SD 300 h. What is the probability that a random sample of 200 bulbs has mean life less than 1450 h?
+#### S5.4 — long-life bulbs (image-only example, slide 25)
+
+<!-- Question: S5.4 | Bulb lifetimes: approximate probability the mean of 200 is below 1450 h -->
+
+A long-life bulb has mean life 1500 h and SD 300 h. What is the probability that a random sample of 200 bulbs has mean life less than 1450 h?
 
 **Answer.** By CLT, $\Phi((1450-1500)/(300/\sqrt{200}))\approx0.00921$. This is approximate when the population is not stated to be Normal.
 
-**S5.5 — simulation demonstration.** Try the slides' R code simulating 1000 means of exponential samples of size 20 with rate 2, then histograms with 50 classes and density overlays. The subsequent demonstration does the same for Weibull samples of size 100. Compare the original skewed population shape with the approximately Normal sampling distribution of means. See [R guide](R.md) for repaired reproducible code; this is an exploration prompt, not an extra numerical assessment question.
+#### S5.5 — simulation demonstration
+
+<!-- Question: S5.5 | R simulation: compare skewed lifetimes with distributions of sample means -->
+
+Try the slides' R code simulating 1000 means of exponential samples of size 20 with rate 2, then histograms with 50 classes and density overlays. The subsequent demonstration does the same for Weibull samples of size 100. Compare the original skewed population shape with the approximately Normal sampling distribution of means. See [R guide](R.md) for repaired reproducible code; this is an exploration prompt, not an extra numerical assessment question.
 
 ### S6 — additional Weibull-analysis deck
 
 Source: [Weibull analysis](../probability-content/slides-pdf/Weibull-analysis.pdf).
 
-**S6.1 — ignoring suspensions changes a cost forecast.** A hydraulic-cylinder replacement costs AUD 5000. Ignoring suspensions gives MTBF 72 days and about 25 replacements in five years; retaining suspensions gives about 13 replacements. Compare costs.
+#### S6.1 — ignoring suspensions changes a cost forecast
+
+<!-- Question: S6.1 | Hydraulic cylinders: compare replacement-cost forecasts with/without suspensions -->
+
+A hydraulic-cylinder replacement costs AUD 5000. Ignoring suspensions gives MTBF 72 days and about 25 replacements in five years; retaining suspensions gives about 13 replacements. Compare costs.
 
 **Answer.** The displayed rounded-count calculation gives AUD 125,000 versus AUD 65,000. This is the slide's illustrative cost comparison; the broader maintenance decision belongs in [engineering notes](engineering-content.md).
 
-**S6.2 — O'Connor Example 3.2, 50-item censored Weibull exercise (slides 31–32, repeated on 38).** List failure order numbers, ordered failure lifetimes and numbers of preceding observations; calculate adjusted ranks, median ranks and a Weibull plot. `F` denotes failed and `S` suspended. The complete table shown on slide 31 is transcribed below (hours):
+#### S6.2 — O'Connor Example 3.2, 50-item censored Weibull exercise (slides 31–32, repeated on 38)
+
+<!-- Question: S6.2 | Fifty-item censored Weibull data: adjusted ranks, median ranks and probability plot -->
+
+List failure order numbers, ordered failure lifetimes and numbers of preceding observations; calculate adjusted ranks, median ranks and a Weibull plot. `F` denotes failed and `S` suspended. The complete table shown on slide 31 is transcribed below (hours):
 
 | Item | Time | Item | Time | Item | Time |
 |---|---:|---|---:|---|---:|

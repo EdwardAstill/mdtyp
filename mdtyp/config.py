@@ -37,6 +37,13 @@ class CodeConfig:
 @dataclass
 class PageConfig:
     paper: str = ""
+    margin: str = ""
+    numbering: str = ""
+
+
+@dataclass
+class TextConfig:
+    size: str = ""
 
 
 @dataclass
@@ -47,6 +54,7 @@ class Config:
     image: ImageConfig = field(default_factory=ImageConfig)
     code: CodeConfig = field(default_factory=CodeConfig)
     page: PageConfig = field(default_factory=PageConfig)
+    text: TextConfig = field(default_factory=TextConfig)
 
 
 def default_config_path() -> Path:

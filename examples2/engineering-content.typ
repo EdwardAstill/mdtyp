@@ -1,9 +1,12 @@
-#set page(paper: "a4", margin: 16mm, numbering: "1")
-#set text(size: 10.5pt)
-#show raw: set text(size: 8pt)
-#show table: set text(size: 9pt)
+#set page(paper: "a4")
+
+#set page(margin: 15mm)
+#set page(numbering: "1")
+#set text(size: 12pt)
 
 = GENG5507 — Engineering midsemester notes
+
+#outline(title: [Table of contents])
 
 *Scope:* the engineering slides and workshops supplied for Weeks 1–5, the engineering quizzes, and engineering applications in the 2025 paper. This is a course revision document; references to standards/regulation describe the supplied teaching material. The detailed statistics formulas are in #link("cheatsheet.md")[the cheat sheet], complete statistical questions in #link("questions.md")[questions], R commands in #link("R.md")[the R guide], and selected worked problems in #link("examples.md")[examples].
 
@@ -271,6 +274,8 @@ The result should be recorded, communicated and validated at an appropriate orga
 
 ==== 4.5 Risk treatment
 
+*Residual risk* is the risk remaining after treatment. *Inherent risk*, when used in a question, generally means risk before controls. State which controls are included when comparing ratings.
+
 Treatment is iterative:
 
 + formulate and select options;
@@ -290,6 +295,8 @@ In this hierarchy:
 - *engineering controls* physically isolate people or other receptors from the hazard;
 - *administrative controls* change work through procedures, training, warnings or scheduling; and
 - *personal protective equipment (PPE)* reduces exposure at the individual level.
+
+*Scenario cue:* a sealed chemical container is an engineering control; a written instruction to check its seal is administrative. Controls may reduce likelihood, consequence or both; adding a control does not automatically justify lowering both matrix axes.
 
 Controls higher in the hierarchy are generally preferred because they rely less on continual correct human action. Multiple controls may still be needed, and their effectiveness must be verified in the actual operating context.
 
@@ -516,7 +523,7 @@ The lecture example uses 155 road deaths in a Western Australian population of 2
 
 $ frac(155, 2.67 times 10^6)=5.81 times 10^(-5)" per person-year" $
 
-This is about 5.8 deaths per 100,000 people per year.
+This is about 5.8 deaths per 100,000 people per year. It is a population average, not a measure of each individual’s exposure; risks can differ substantially between people.
 
 
 === 2. F-N curves
@@ -601,7 +608,7 @@ An event tree starts with an initiating event and moves forward through pivotal 
 
 If conditional branch events are represented correctly, an end-state probability is the product of probabilities along its path:
 
-$ P("path")=product_j P(B_j ∣ B_1,dots,B_(j-1)) $
+$ P("path")=product_j P(B_j | B_1,dots,B_(j-1)) $
 
 Mutually exclusive end-state probabilities can then be summed for a consequence category.
 
@@ -613,7 +620,7 @@ A fault tree works backward from an undesired top event to combinations of lower
 - *AND gates:* every input event is required; and
 - *OR gates:* any input event is sufficient.
 
-A *minimal cut set* is a smallest combination of bottom events sufficient to produce the top event. Single-event cut sets deserve early attention because one failure alone can cause the top event.
+A *minimal cut set* is a combination of bottom events sufficient to produce the top event, where removing any member makes that combination insufficient. Minimal does not mean it must have the fewest members of all cut sets. Single-event cut sets deserve early attention because one failure alone can cause the top event.
 
 Do not multiply probabilities blindly: dependence and common-cause failure must be modelled explicitly.
 
@@ -651,6 +658,8 @@ Every QRA uses approximations and assumptions. Good practice is to make them exp
 - clear statements of exclusions, dependencies and data quality.
 
 The lecture's modelling examples show that changing a parameter can alter both the predicted trajectory and the width of uncertainty bounds.
+
+*Diagram cue:* on the supplied probability–consequence diagram, horizontal spread means uncertainty in consequence and vertical spread means uncertainty in expected frequency. Spread in both directions means both are uncertain. A point further right or higher up represents greater severity or frequency, not necessarily greater uncertainty. Read the width of the plausible range separately from its position.
 
 Risk communication also matters. Stakeholders may perceive the same numerical risk differently because of trust, control, familiarity, fairness or dread. Engineering decisions need understandable explanation of what is known, uncertain and value-dependent.
 
@@ -813,6 +822,8 @@ Each function needs a measurable performance standard. Failure can then be defin
 - *Failure effect:* the consequence of the failure mode for operation, function or item status.
 - *Failure mechanism:* the physical or other process leading to failure.
 - *Common-mode failure:* different items fail in the same manner.
+- *Common-cause failure:* one shared cause affects several items; identical failure symptoms alone do not establish a shared cause.
+- *Latent fault:* a fault exists but has not become apparent.
 - *Error:* a discrepancy between a computed, observed or measured state and the correct or specified state; it can arise from hardware, software or human action.
 
 Failure criteria should be unambiguous and linked to a measurable parameter or clear indication.
@@ -942,7 +953,7 @@ so about 63.2% of the population has failed.
 
 For exponential lifetimes:
 
-$ P(T>s+t ∣ T>s)=P(T>t) $
+$ P(T>s+t | T>s)=P(T>t) $
 
 Age does not change the conditional probability of surviving the next interval. Among continuous lifetime distributions, this is the memoryless property of the exponential model. The discrete geometric model is also memoryless.
 
@@ -954,7 +965,7 @@ The inverse $op("MTTF")=1/lambda$ is valid for a constant-hazard exponential mod
 
 === 11. Reliability block diagrams
 
-RBDs model which combinations of item success allow the system function to succeed. They are functional success models, not necessarily physical wiring diagrams.
+RBDs model which combinations of item success allow the system function to succeed. They are functional success models, not necessarily physical wiring diagrams. Five sensors measuring five different required parameters are not redundant merely because there are five sensors: if every measurement is required, they form series success logic.
 
 
 ==== Series system
@@ -1179,7 +1190,7 @@ where:
 - MTBF = mean operating time between failures; and
 - MTTR = mean time to repair.
 
-Availability depends on both *reliability* (how often failure occurs) and *maintainability* (how quickly service can be restored). Improving either MTBF or MTTR can improve availability.
+Availability depends on both *reliability* (how often failure occurs) and *maintainability* (how quickly service can be restored). Improving either MTBF or MTTR can improve availability. Frequent failures repaired quickly can produce high availability despite poor reliability; being available now is different from completing a mission without failure.
 
 
 === 4. Maintenance strategy hierarchy
@@ -1313,7 +1324,9 @@ A fixed-interval task is suitable when:
 - most items survive to that age; and
 - the age can be estimated with useful confidence.
 
-This logic fits a genuine wear-out pattern. It is weak for random failures because age does not provide a useful trigger.
+This logic fits a genuine wear-out pattern. It is weak for random failures because age does not provide a useful trigger. Under constant hazard, replacing a surviving item does not lower its age-related risk. Replacement can also reintroduce early-life manufacturing or installation failures.
+
+*Restoration versus replacement:* scheduled restoration/overhaul restores the existing item; scheduled replacement/discard installs another item. Both use age or usage as the trigger rather than measured deterioration.
 
 
 ==== Run to failure
@@ -1341,6 +1354,8 @@ A condition-monitoring task is suitable when:
 - inspection can be frequent enough to leave time for effective action before functional failure.
 
 The P-F interval is the time between detecting a potential failure ($P$) and the point of functional failure ($F$). Task frequency must be selected from the P-F interval, not from convenience alone.
+
+*Scheduled inspection is not automatically age-based replacement.* Monthly vibration measurements still support condition-based maintenance if observed deterioration triggers intervention. Failure-finding instead tests whether a hidden loss of function has already occurred.
 
 
 ==== Redesign
@@ -1553,7 +1568,7 @@ Source: #link("../content/02-risk-management/PW02%20-%20Risk%20Management.pdf#pa
 )
 Health/safety consequences progress from *1: first aid/minor reversible effects*, *2: medical treatment/reversible effects of concern*, *3: lost-time injury/severe reversible effects*, *4: one fatality/permanent disability/irreversible effects*, to *5: multiple fatalities/multiple disabling illnesses leading to early mortality*. Environment, assets/business disruption and reputation are alternative consequence dimensions. Keep the scenario and relevant consequence dimension explicit.
 
-*Past-paper Q9:* the given port-explosion history establishes “heard of in industry” and multiple fatalities: *B5*, option E. Its matrix colour is *M* in this supplied matrix. Do not change the label to H simply because the consequences sound severe; equally, the M label does not remove the need to evaluate controls and major-accident consequences.
+*Past-paper Q9:* the given port-explosion history establishes “heard of in industry” and multiple fatalities: *B5*, option E. Its matrix colour is *M* in this supplied matrix. The incident history supports the supplied qualitative descriptor; it does not establish a numerical annual probability for this plant without comparable exposure and operating-context data. Do not change the label to H simply because the consequences sound severe; equally, the M label does not remove the need to evaluate controls and major-accident consequences.
 
 
 === C. Driverless-car trial: risk-management application and FMEA
@@ -1654,7 +1669,7 @@ The workshop's field data give 150 original modules, 3 excluded for gross mistre
 
 $ R_("five sensors")(10" y")=e^(-5(1.95 times 10^{-6})(87600))approx 0.426. $
 
-The *0.843* result is for *one sensor* under that convention. Literal use of 1.91 gives approximately 0.433 for five sensors; the difference is a source mismatch, not a different parallel/series rule. In practice a module-level rate cannot automatically be assigned to every sensor without disaggregating field data; this is a stated exercise assumption.
+The *0.843* result is for *one sensor* under that convention. Literal use of 1.91 gives approximately 0.433 for five sensors and a complete-system rate of *15.24 failures per million hours*; the difference is a source mismatch, not a different parallel/series rule. In practice a module-level rate cannot automatically be assigned to every sensor without disaggregating field data; this is a stated exercise assumption.
 
 The system rate includes five critical sensors plus processing, communication, power supply and battery: *15.44 failures per million hours*, MTTF about *7.39 years*. It *does not meet* the stated 10-year mean-time requirement. Even a mean of 10 years would give only 36.8% ten-year survival for a constant-hazard model; a mean-time requirement is not a guarantee of ten years without failure.
 

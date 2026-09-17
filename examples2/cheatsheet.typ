@@ -1,637 +1,631 @@
-#set page(paper: "a4", margin: 16mm, numbering: "1")
-#set text(size: 10.5pt)
-#show raw: set text(size: 8pt)
-#show table: set text(size: 9pt)
+#set page(paper: "a4")
 
-= GENG5507 midsemester statistics cheat sheet
+#set page(margin: 15mm)
+#set page(numbering: "1")
+#set text(size: 12pt)
 
-*Order of use:* translate the event → choose the model → calculate the probability or lifetime → estimate unknown parameters → handle sample means. This sheet covers the supplied statistics lectures through Week 5, Weibull analysis and their reliability applications. See #link("examples.md")[worked examples], #link("R.md")[R guide], #link("questions.md")[question collection] and #link("engineering-content.md")[engineering notes].
+= GENG5507 Probability and Statistics Cheatsheet
+
+#outline(title: [Table of contents])
+
+Use this after learning the concepts in the #link("./README.md")[study map]. The #link("../probability-examples/worked-examples.md")[worked examples] show how the formulas are applied.
 
 
-== 1. Decode the question
+== 1. Translate the wording
 
 #table(
   columns: 2,
   align: (auto, auto,),
   table.header(
-    [*Wording*],
-    [*Mathematical event or tool*],
+    [*Words*],
+    [*Symbol*],
   ),
-  [Not $A$],
-  [$A^c=A'$],
-  [$A$ and $B$],
-  [Intersection $A ∩ B$],
+  [not $A$],
+  [$A^c$],
   [$A$ or $B$, including both],
-  [Union $A union B$],
-  [$B$ given that $A$ happened],
-  [$P(B ∣ A)$; restrict the population to $A$],
-  [At least one],
-  [$1-P("none")$],
-  [Failure by time $t$],
+  [$A union B$],
+  [$A$ and $B$],
+  [$A inter B$],
+  [$A$, given $B$],
+  [$P(A | B)$],
+  [fails by $t$],
   [$F(t)=P(T <= t)$],
-  [Survives beyond $t$],
-  [$R(t)=P(T>t)=1-F(t)$],
-  [Probability from a boundary],
-  [CDF, R prefix `p`],
-  [Boundary from a probability],
-  [Quantile, R prefix `q`],
-  [One observation],
-  [Use its SD $sigma$],
-  [Mean of $n$ independent observations],
-  [Use standard error $sigma/sqrt(n)$],
+  [survives beyond $t$],
+  [$R(t)=P(T>t)$],
+  [between $a$ and $b$],
+  [$F(b)-F(a)$],
+  [at least one],
+  [$1-P("none")$],
+  [probability from a boundary],
+  [CDF: R prefix /* <code> */p/* </code> */],
+  [boundary from a probability],
+  [quantile: R prefix /* <code> */q/* </code> */],
 )
 
-== 2. Probability rules: build, split, then reverse
+== 2. Event rules
 
-For equally likely outcomes only, $P(A)=\#(A)/\#(Omega)$.
+$ P(A^c)=1-P(A) $
 
-$ P(A^c)=1-P(A),wide
-P(A union B)=P(A)+P(B)-P(A ∩ B). $
+$ P(A union B)=P(A)+P(B)-P(A inter B) $
+
+$ P(A | B)=frac(P(A inter B), P(B)) $
+
+$ P(A inter B)=P(A | B)P(B) $
+
+For independent events,
+
+$ P(A inter B)=P(A)P(B). $
+
+For independent $A_1,dots,A_n$,
+
+$ P("at least one")
+=
+1-product_(i=1)^n P(A_i^c). $
+
+If each has probability $p$,
+
+$ P("at least one")=1-(1-p)^n. $
+
+*Law of total probability:* split $B$ into the cases where $A$ happens and where it does not. For $0<P(A)<1$,
+
+$ P(B)=P(B | A)P(A)+P(B | A^c)P(A^c). $
+
+Weight each conditional probability by the probability of its case; $P(B | A)+P(B | A^c)$ alone is not the rule. Equivalently, $P(B)=P(B inter A)+P(B inter A^c)$.
+
+More generally, if $B_1,dots,B_k$ form a partition (mutually exclusive, exhaustive cases with positive probabilities),
+
+$ P(A)=sum_(i=1)^k P(A | B_i)P(B_i). $
+
+Bayes:
+
+$ P(B_j | A)
+=
+frac(P(A | B_j)P(B_j), sum_i P(A | B_i)P(B_i)). $
+
+*Do not confuse:*
+
+- disjoint: $P(A inter B)=0$;
+- independent: $P(A inter B)=P(A)P(B)$.
+
+Positive-probability disjoint events are not independent.
 
 
-=== Conditional probability and intersection
-
-$ P(B ∣ A)=frac(P(A ∩ B), P(A)),wide P(A)>0. $
-
-*Correct version of the requested identity:*
-
-$ P(B ∣ A)P(A)=P(A ∩ B)=P(A ∣ B)P(B). $
-
-The final factor is *$P(B)$*, because the preceding conditional is given $B$. Multiply the probability along one branch of a probability tree to get an intersection.
-
-
-=== Law of total probability: add all the routes to the event
-
-$A$ and $A^c$ split the population into two non-overlapping groups containing everybody. Event $B$ can occur in either group:
-
-$ P(B)=P(B ∣ A)P(A)+P(B ∣ A^c)P(A^c). $
-
-This is a *weighted average of the within-group probabilities*, weighted by the group sizes. More generally, if $A_1,dots,A_k$ are mutually exclusive and exhaustive,
-
-$ P(B)=sum_(i=1)^(k)P(B ∣ A_i)P(A_i). $
-
-Example: supplier $A$ supplies $60 %$ of parts with defect probability $0.02$; the other supplier has defect probability $0.05$. Then $P(D)=0.02(0.60)+0.05(0.40)=0.032$.
-
-
-=== Bayes: reverse the conditioning
-
-$ P(A_j ∣ B)=frac(P(B ∣ A_j)P(A_j), P(B))
-=frac(P(B ∣ A_j)P(A_j), sum_i P(B ∣ A_i)P(A_i)). $
-
-In the supplier example, $P(A ∣ D)=0.012/0.032=0.375$. A defective part is not automatically most likely to come from the largest supplier.
-
-
-=== Independence is different from mutual exclusion
+== 3. Random-variable functions
 
 #table(
   columns: 3,
   align: (auto, auto, auto,),
   table.header(
-    [*Property*],
-    [*Test*],
-    [*Consequence*],
+    [*Object*],
+    [*Discrete*],
+    [*Continuous*],
   ),
-  [Independent],
-  [$P(A ∩ B)=P(A)P(B)$],
-  [Knowing one occurred does not change the probability of the other.],
-  [Mutually exclusive/disjoint],
-  [$P(A ∩ B)=0$],
-  [Both cannot occur together. Positive-probability disjoint events are dependent.],
-)
-For independent events, $P("none")=product_i[1-P(A_i)]$. For $n$ independent equal-probability opportunities, $P("at least one")=1-(1-p)^n$.
-
-
-== 3. PMF, PDF, CDF, mean and standard deviation
-
-#table(
-  columns: 3,
-  align: (auto, auto, auto,),
-  table.header(
-    [*Quantity*],
-    [*Discrete random variable*],
-    [*Continuous random variable*],
-  ),
-  [Main model formula],
+  [Probability model],
   [PMF $p(x)=P(X=x)$],
-  [PDF $f(x)$ is density, not point probability],
-  [Normalisation],
+  [PDF $f(x)$, a density],
+  [Total probability],
   [$sum_x p(x)=1$],
-  [$integral_(-infinity)^(infinity)f(x)thin "dx"=1$],
+  [$integral f(x)thin "dx"=1$],
+  [Interval probability],
+  [Sum relevant masses],
+  [$integral_a^b f(x)thin "dx"$],
   [CDF],
-  [$F(x)=sum_(u <= x)p(u)$],
-  [$F(x)=integral_(-infinity)^(x)f(u)thin "du"$],
+  [$F(x)=P(X <= x)$],
+  [$F(x)=integral_(-infinity)^x f(u)thin "du"$],
   [Mean],
-  [$mu=sum_x x p(x)$],
-  [$mu=integral_(-infinity)^(infinity)x f(x)thin "dx"$],
-  [Second moment],
-  [$E[X^2]=sum_x x^2 p(x)$],
-  [$E[X^2]=integral_(-infinity)^(infinity)x^2 f(x)thin "dx"$],
+  [$sum_x x p(x)$],
+  [$integral x f(x)thin "dx"$],
 )
-$ op("Var")(X)=E[X^2]-mu^2,wide sigma=sqrt(op("Var")(X)). $
+$ op("Var")(X)=E[X^2]-E[X]^2,
+wide
+op("SD")(X)=sqrt(op("Var")(X)). $
 
-For continuous $X$, $P(X=x)=0$ and $P(a<X<b)=F(b)-F(a)$; inclusion of the endpoints does not matter. For integer-valued $X$,
+For a continuous variable,
 
-$ P(a <= X <= b)=F(b)-F(a-1),wide P(X >= k)=1-F(k-1). $
+$ P(a<X<b)=F(b)-F(a),
+wide
+P(X=x)=0. $
 
-A PDF can exceed $1$; its *area* must sum to $1$. A PMF value is itself a probability.
 
+== 4. Reliability and hazard
 
-== 4. Reliability, hazard and MTTF
+Let $T >= 0$ be the time to failure. The *failure function* (CDF) is
 
-Let $T >= 0$ be a continuous time to failure.
+$ F(t)=P(T <= t), $
+
+the probability that the item *has failed by time $t$*. The *reliability function* (survival function) is
+
+$ R(t)=P(T>t), $
+
+the probability that the item *has not failed by time $t$* and survives beyond it. These are complementary events, so
+
+$ F(t)+R(t)=1,
+wide
+R(t)=1-F(t). $
+
+For a continuous lifetime, the other functions are:
 
 #table(
   columns: 3,
   align: (auto, auto, auto,),
   table.header(
     [*Function*],
-    [*Formula*],
-    [*Interpretation*],
+    [*What it is*],
+    [*Meaning*],
   ),
-  [Failure CDF],
-  [$F(t)=P(T <= t)$],
-  [Fraction failed by $t$],
-  [Reliability/survival],
-  [$R(t)=1-F(t)$],
-  [Fraction surviving beyond $t$],
-  [Failure PDF],
   [$f(t)=F'(t)=-R'(t)$],
-  [Density of failure times],
-  [Hazard],
-  [$h(t)=f(t)/R(t)=-frac(d, "dt")ln R(t)$],
-  [Instantaneous failure rate among current survivors],
+  [Failure-time density (PDF)],
+  [Describes how concentrated failures are near $t$. For small $Delta t$, $f(t)Delta t approx P(t<T <= t+Delta t)$.],
+  [$h(t)=f(t)/R(t)$],
+  [Hazard rate],
+  [Instantaneous failure rate at age $t$ *among items that have survived to $t$*.],
+  [$H(t)=integral_0^t h(u)thin "du"$],
   [Cumulative hazard],
-  [$H(t)=integral_0^t h(u)thin "du"=-ln R(t)$],
-  [Accumulated hazard; hence $R(t)=e^(-H(t))$],
+  [Total hazard accumulated from time $0$ to $t$.],
 )
-The slides also write the hazard as $r(t)$ or $Z(t)$. Hazard has units of inverse time and is *not a probability*. For small $Delta t$,
+Thus, for small $Delta t$,
 
-$ P(t<T <= t+Delta t ∣ T>t)approx h(t)Delta t. $
+$ P(t<T <= t+Delta t | T>t)
+approx h(t)Delta t. $
 
-*Yes: mean time to failure is the mean of the lifetime distribution.*
+The functions describe the same lifetime distribution and can be converted using
 
-$ op("MTTF")=E[T]=integral_0^infinity t f(t)thin "dt"=integral_0^infinity R(t)thin "dt". $
-
-A count or a strength has a mean, but that mean is not a time to failure. MTTF is not generally the median, Weibull scale $eta$, or $1/h(t)$; the reciprocal-hazard result applies to constant-hazard exponential lifetimes. Mean repair duration is *MTTR*, not MTTF.
-
-
-=== Conditional remaining life
-
-For $s,u >= 0$,
-
-$ P(T>s+u ∣ T>s)=frac(R(s+u), R(s)),
+$ R(t)=e^(-H(t)),
 wide
-P(s<T <= s+u ∣ T>s)=1-frac(R(s+u), R(s)). $
+f(t)=h(t)R(t). $
 
-Without the condition, $P(s<T <= s+u)=F(s+u)-F(s)$. Only the exponential model makes the conditional remaining-life distribution identical to the original lifetime distribution.
+The mean time to failure is the expected lifetime, or equivalently the area under the reliability curve:
 
+$ op("MTTF")
+=E[T]
+=integral_0^infinity t f(t)thin "dt"
+=integral_0^infinity R(t)thin "dt". $
 
-== 5. Distribution formula tables
-
-All PMFs/PDFs below are zero outside their stated support. $Phi$ and $phi.alt$ are the standard normal CDF and PDF. $Gamma(a)=integral_0^infinity u^(a-1)e^(-u)thin "du"$, with $Gamma(a+1)=a Gamma(a)$ and $Gamma(m)=(m-1)!$ for positive integers $m$.
-
-
-=== Counts and equally likely outcomes
-
-#table(
-  columns: 5,
-  align: (auto, auto, auto, auto, auto,),
-  table.header(
-    [*Model and support*],
-    [*PMF/PDF — main formula*],
-    [*Mean*],
-    [*SD*],
-    [*Special property*],
-  ),
-  [Discrete uniform on integers $a,dots,b$; $k=b-a+1$],
-  [$p(x)=1/k$],
-  [$(a+b)/2$],
-  [$sqrt((k^2-1)/12)$],
-  [All $k$ outcomes equally likely. For arbitrary values $x_i$, mean is $sum x_i/k$.],
-  [Binomial $X tilde.op upright("Bin")(n,p)$; $x=0,dots,n$],
-  [$p(x)=binom(n, x) p^x(1-p)^(n-x)$],
-  [$"np"$],
-  [$sqrt(n p(1-p))$],
-  [Fixed $n$, independent trials, two outcomes, constant $p$. Bernoulli is $n=1$.],
-  [Poisson $X tilde.op upright("Pois")(m)$; $x=0,1,dots$],
-  [$p(x)=e^(-m)m^x/x!$],
-  [$m$],
-  [$sqrt(m)$],
-  [Mean = variance. For event rate $lambda$ over duration $t$, $m=lambda t$.],
-  [Continuous uniform $U(a,b)$; $a <= x <= b$],
-  [$f(x)=1/(b-a)$],
-  [$(a+b)/2$],
-  [$(b-a)/sqrt(12)$],
-  [Equal-length subintervals have equal probability; median = mean.],
-)
-Counts have no lifetime hazard or MTTF in their usual interpretation. Their upper tail is still $1-F(x)$. For a uniform *lifetime* with $0 <= a<b$, MTTF is $(a+b)/2$; $R(t)=1$ for $t<a$, $(b-t)/(b-a)$ for $a <= t<b$, and $0$ for $t >= b$. Its hazard is $0$ before $a$ and $1/(b-t)$ for $a <= t<b$; hazard is undefined once no survivors remain.
+Both $f(t)$ and $h(t)$ are densities or rates, not probabilities. If time is measured in hours, their units are $1/"hour"$.
 
 
-=== Continuous measurements and lifetimes: PDF and moments
+=== Multicomponent systems
 
-For gamma use *shape $k>0$, rate $lambda>0$*, equivalently scale $theta=1/lambda$. This sheet reserves $beta$ for Weibull shape; the slides sometimes use $beta$ for gamma shape too.
-
-#table(
-  columns: 4,
-  align: (auto, auto, auto, auto,),
-  table.header(
-    [*Model and support*],
-    [*PDF — main formula*],
-    [*Mean / MTTF when a lifetime*],
-    [*Standard deviation*],
-  ),
-  [Normal $N(mu,sigma^2)$; $x in RR$, $sigma>0$],
-  [$f(x)=frac(1, sigma sqrt(2 pi))exp[-frac((x-mu)^2, 2 sigma^2)]$],
-  [$mu$; lifetime approximation only],
-  [$sigma$],
-  [Lognormal; $ln T tilde.op N(mu,sigma^2)$; $t>0$],
-  [$f(t)=frac(1, t sigma sqrt(2 pi))exp[-frac((ln t-mu)^2, 2 sigma^2)]$],
-  [$m_T=e^(mu+sigma^2/2)$],
-  [$m_T sqrt(e^(sigma^2)-1)$],
-  [Exponential, rate $lambda>0$; $t >= 0$],
-  [$f(t)=lambda e^(-lambda t)$],
-  [$1/lambda$],
-  [$1/lambda$],
-  [Weibull, shape $beta>0$, scale $eta>0$; $t>0$],
-  [$f(t)=frac(beta, eta)(t/eta)^(beta-1)e^(-(t/eta)^beta)$],
-  [$eta Gamma(1+1/beta)$],
-  [$eta sqrt(Gamma(1+2/beta)-[Gamma(1+1/beta)]^2)$],
-  [Gamma, shape $k$, rate $lambda$; $t>0$],
-  [$f(t)=frac(lambda^k, Gamma(k))t^(k-1)e^(-lambda t)$],
-  [$k/lambda=k theta$],
-  [$sqrt(k)/lambda=sqrt(k)theta$],
-  [Student's $t_nu$, degrees of freedom $nu>0$; $x in RR$],
-  [$f(x)=frac(Gamma((nu+1)/2), sqrt(nu pi)Gamma(nu/2))(1+x^2/nu)^(-(nu+1)/2)$],
-  [$0$ for $nu>1$; otherwise undefined. Not a lifetime model.],
-  [$sqrt(nu/(nu-2))$ for $nu>2$; otherwise no finite SD.],
-)
-The normal model allows negative values. It can approximate a lifetime if $P(T<0)=Phi(-mu/sigma)$ is negligible. An actual normal distribution has mean $mu$, but the nonnegative-lifetime identity $integral_0^infinity R(t)"dt"=mu$ is not exact for it. A truncated normal is a different model.
-
-
-=== The same lifetime models: reliability, hazard and useful properties
-
-For gamma, define $Q(k,x)=Gamma(k)^(-1)integral_x^infinity u^(k-1)e^(-u)thin "du"$; this is its upper-tail integral.
-
-#table(
-  columns: 4,
-  align: (auto, auto, auto, auto,),
-  table.header(
-    [*Model*],
-    [*Reliability $R(t)=1-F(t)$*],
-    [*Hazard $h(t)$*],
-    [*Special properties*],
-  ),
-  [Normal, $z=(t-mu)/sigma$],
-  [$1-Phi(z)$],
-  [$phi.alt(z)/{ sigma[1-Phi(z)]}$],
-  [Symmetric; mean = median = mode; standardise with $z$.],
-  [Lognormal, $z=(ln t-mu)/sigma$],
-  [$1-Phi(z)$],
-  [$phi.alt(z)/{ t sigma[1-Phi(z)]}$],
-  [Positive, right-skewed; median $e^mu$; parameters refer to *log times*. Hazard rises then falls.],
-  [Exponential],
-  [$e^(-lambda t)$],
-  [$lambda$],
-  [*Memoryless*; mean = SD; median $(ln 2)/lambda$; no ageing.],
-  [Weibull],
-  [$e^(-(t/eta)^beta)$],
-  [$frac(beta, eta)(t/eta)^(beta-1)$],
-  [$beta<1$: decreasing hazard; $beta=1$: exponential; $beta>1$: increasing hazard. $F(eta)=0.6321$.],
-  [Gamma],
-  [$Q(k,lambda t)$],
-  [$f(t)/Q(k,lambda t)$],
-  [$k=1$: exponential. Integer $k$: sum of $k$ iid exponential waiting times.],
-)
-*Beta is named but not developed in the probability-model lecture.* For completeness, $X tilde.op upright("Beta")(a,b)$ has support $0<x<1$, PDF $x^(a-1)(1-x)^(b-1)/B(a,b)$, mean $a/(a+b)$ and SD $sqrt("ab"/[(a+b)^2(a+b+1)])$, where $B(a,b)=Gamma(a)Gamma(b)/Gamma(a+b)$. It models proportions, not unscaled lifetimes; $a=b=1$ is $U(0,1)$.
-
-
-=== What the distributions describe: quick examples
-
-#table(
-  columns: 2,
-  align: (auto, auto,),
-  table.header(
-    [*Model*],
-    [*Description and engineering use*],
-  ),
-  [Discrete uniform],
-  [Random choice among equally likely values: fair die or randomly selected component label.],
-  [Binomial],
-  [Count within a fixed number of trials: survivors among four independent bulbs, each surviving with probability $0.9$.],
-  [Poisson],
-  [Count over an interval under constant rate and independent increments: breakdowns in a month or defects along a cable.],
-  [Continuous uniform],
-  [Bounded uncertainty with constant density: an arrival time equally likely anywhere in a fixed interval. Bounds alone do not prove uniformity.],
-  [Normal],
-  [Symmetric variation about a target: material strength or dimension; also sample means under the CLT.],
-  [Lognormal],
-  [Multiplicative positive variation: right-skewed repair duration or fatigue life when log times are approximately normal.],
-  [Exponential],
-  [Time to the next event in a homogeneous Poisson process: random failures with constant hazard.],
-  [Weibull],
-  [Lifetime with monotone age-dependent hazard: weak items failing early, random failures, or wear-out. A single two-parameter Weibull does not model the whole bathtub curve.],
-  [Gamma],
-  [Accumulated positive waiting time: time until the $k$th Poisson-process event when $k$ is an integer.],
-  [Beta],
-  [A proportion constrained to $[0,1]$: uncertainty about a defect probability or fraction.],
-  [Student's $t$],
-  [Symmetric, heavier-tailed reference model for a standardised sample mean when the population SD is estimated; use $nu=n-1$ for a normal sample. Approaches standard normal as $nu$ increases.],
-)
-
-=== Quantiles: solve for the time
-
-Let $t_p$ satisfy $F(t_p)=p$, where $0<p<1$.
-
-#table(
-  columns: 2,
-  align: (auto, auto,),
-  table.header(
-    [*Model*],
-    [*Failure percentile $t_p$*],
-  ),
-  [Normal],
-  [$mu+sigma Phi^(-1)(p)$],
-  [Lognormal],
-  [$exp[mu+sigma Phi^(-1)(p)]$],
-  [Exponential],
-  [$-ln(1-p)/lambda$],
-  [Weibull],
-  [$eta[-ln(1-p)]^(1/beta)$],
-)
-If the target is reliability $r$, substitute $p=1-r$: for Weibull, $t=eta(-ln r)^(1/beta)$. A $B_(10)$ life means *10% failed*, so use $p=0.10$, not reliability $0.10$.
-
-
-== 6. System reliability: connect components correctly
-
-Assume independent component states at the same time $t$ unless dependence is explicitly modelled.
+At time $t$, let component $i$ have reliability $R_i(t)$. If component failures are independent:
 
 #table(
   columns: 3,
   align: (auto, auto, auto,),
   table.header(
     [*System*],
-    [*It operates when…*],
-    [*Reliability*],
+    [*It works when*],
+    [*System reliability*],
   ),
   [Series],
-  [Every component operates],
-  [$R_(upright("sys"))(t)=product_(i=1)^n R_i(t)$],
-  [Active parallel],
-  [At least one operates],
-  [$R_(upright("sys"))(t)=1-product_(i=1)^n[1-R_i(t)]$],
-  [$k$-out-of-$n$, identical reliability $R$],
-  [At least $k$ components operate],
-  [$R_(upright("sys"))=sum_(j=k)^n binom(n, j) R^j(1-R)^(n-j)$],
+  [Every component works],
+  [$R_(upright("series"))(t)=product_(i=1)^m R_i(t)$],
+  [Parallel],
+  [At least one component works],
+  [$R_(upright("parallel"))(t)=1-product_(i=1)^m[1-R_i(t)]$],
 )
-For equal component reliability $R$, series gives $R^n$ and parallel gives $1-(1-R)^n$. For a complex network, condition on a key component $C$:
+For $m$ independent components with identical reliability $R(t)$,
 
-$ R_(upright("sys"))=P(S ∣ C)R_C+P(S ∣ C^c)(1-R_C). $
+$ R_(upright("series"))(t)=R(t)^m,
+wide
+R_(upright("parallel"))(t)=1-[1-R(t)]^m. $
 
-This is the law of total probability. Reduce each conditional network separately; do not count a shared component twice as if its states were independent.
+For either system, $F_(upright("sys"))(t)=1-R_(upright("sys"))(t)$. The product formulas do not apply directly when component failures are dependent.
 
-For an independent series system, $h_(upright("sys"))(t)=sum_i h_i(t)$. Consequently:
+For an independent series system, cumulative hazards and hazard rates add:
 
-- Exponential components: $lambda_(upright("sys"))=sum_i lambda_i$ and $upright("MTTF")_(upright("sys"))=1/sum_i lambda_i$.
-- Weibull components with common shape $beta$: $eta_(upright("sys"))=(sum_i eta_i^(-beta))^(-1/beta)$ and $upright("MTTF")_(upright("sys"))=eta_(upright("sys"))Gamma(1+1/beta)$.
+$ H_(upright("series"))(t)=sum_(i=1)^m H_i(t),
+wide
+h_(upright("series"))(t)=sum_(i=1)^m h_i(t). $
 
-Perfect cold standby with $n$ identical exponential units, one active at a time, no standby failures and perfect switching has $R_(upright("sys"))(t)=e^(-lambda t)sum_(j=0)^(n-1)(lambda t)^j/j!$ and MTTF $n/lambda$. This differs from active parallel operation. Availability and maintenance decisions are in the engineering notes.
+If component $i$ has a constant exponential failure rate $lambda_i$, then
+
+$ lambda_(upright("series"))=sum_(i=1)^m lambda_i,
+wide
+R_(upright("series"))(t)
+=exp (-t sum_(i=1)^m lambda_i ). $
 
 
-== 7. Estimate unknown parameters from data
+== 5. Choose a distribution
+
+#table(
+  columns: 4,
+  align: (auto, auto, right, right,),
+  table.header(
+    [*Model*],
+    [*Use when*],
+    [*Mean*],
+    [*Standard deviation*],
+  ),
+  [Binomial $(n,p)$],
+  [Success count in fixed $n$ independent trials],
+  [$"np"$],
+  [$sqrt(n p(1-p))$],
+  [Poisson $(mu=lambda t)$],
+  [Event count in an interval],
+  [$mu$],
+  [$sqrt(mu)$],
+  [Uniform $[a,b]$],
+  [All positions in a bounded interval equally likely],
+  [$(a+b)/2$],
+  [$(b-a)/sqrt(12)$],
+  [Normal $(mu,sigma^2)$],
+  [Symmetric measurements],
+  [$mu$],
+  [$sigma$],
+  [Lognormal $(mu,sigma^2)$],
+  [$ln T tilde.op N(mu,sigma^2)$],
+  [$e^(mu+sigma^2/2)$],
+  [$e^(mu+sigma^2/2)sqrt(e^(sigma^2)-1)$],
+  [Exponential $(lambda)$],
+  [Constant-hazard lifetime],
+  [$1/lambda$],
+  [$1/lambda$],
+  [Weibull $(beta,eta)$],
+  [Flexible monotone-hazard lifetime],
+  [$eta Gamma(1+1/beta)$],
+  [$eta sqrt(Gamma(1+2/beta)-Gamma(1+1/beta)^2)$],
+  [Gamma, shape $k$, rate $lambda$],
+  [Positive staged waiting time],
+  [$k/lambda$],
+  [$sqrt(k)/lambda$],
+)
+
+=== CDF, reliability, hazard and MTTF at a glance
+
+For continuous lifetimes, $R(t)=1-F(t)$ and $h(t)=f(t)/R(t)$ wherever $R(t)>0$. All scale, shape and rate parameters below are positive. Write $phi.alt(z)=e^(-z^2/2)/sqrt(2 pi)$ and $Phi(z)=P(Z <= z)$ for the standard normal PDF and CDF.
+
+#table(
+  columns: 5,
+  align: (auto, auto, auto, auto, auto,),
+  table.header(
+    [*Distribution*],
+    [*CDF $F(t)$*],
+    [*Reliability $R(t)$*],
+    [*Hazard $h(t)$*],
+    [*MTTF $E[T]$*],
+  ),
+  [Uniform $[a,b]$, $0 <= a<b$; $a <= t<b$],
+  [$(t-a)/(b-a)$],
+  [$(b-t)/(b-a)$],
+  [$1/(b-t)$],
+  [$(a+b)/2$],
+  [Normal $(mu,sigma^2)$; $z=(t-mu)/sigma$],
+  [$Phi(z)$],
+  [$1-Phi(z)$],
+  [$phi.alt(z)/[sigma(1-Phi(z))]$],
+  [$mu$ (mean; lifetime approximation only)],
+  [Lognormal $(mu,sigma^2)$; $z=(ln t-mu)/sigma$, $t>0$],
+  [$Phi(z)$],
+  [$1-Phi(z)$],
+  [$phi.alt(z)/[t sigma(1-Phi(z))]$],
+  [$e^(mu+sigma^2/2)$],
+  [Exponential $(lambda)$; $t >= 0$],
+  [$1-e^(-lambda t)$],
+  [$e^(-lambda t)$],
+  [$lambda$],
+  [$1/lambda$],
+  [Weibull $(beta,eta)$; $t>0$],
+  [$1-e^(-(t/eta)^beta)$],
+  [$e^(-(t/eta)^beta)$],
+  [$(beta/eta)(t/eta)^(beta-1)$],
+  [$eta Gamma(1+1/beta)$],
+  [Gamma, shape $k$, rate $lambda$; $t>0$],
+  [$G_k(lambda t)$],
+  [$1-G_k(lambda t)$],
+  [$lambda^k t^(k-1)e^(-lambda t)/[Gamma(k)(1-G_k(lambda t))]$],
+  [$k/lambda$],
+)
+Here the gamma CDF uses
+
+$ G_k(y)=frac(1, Gamma(k))integral_0^y u^(k-1)e^(-u)thin "du". $
+
+For integer $k >= 1$, gamma reliability also has the finite-sum form
+
+$ R(t)=e^(-lambda t)sum_(j=0)^(k-1)frac((lambda t)^j, j!). $
+
+For uniform lifetimes, $F=0$, $R=1$, $h=0$ when $t<a$; $F=1$, $R=0$ when $t >= b$, where hazard is undefined. For lognormal, exponential, Weibull and gamma lifetimes, $F(t)=0$ and $R(t)=1$ for $t <= 0$; hazard at $0$ is interpreted by its right-hand limit. The untruncated normal allows negative values, so its mean $mu$ is only an approximate MTTF when the negative tail is negligible. The nonnegative-lifetime identity $E[T]=integral_0^infinity R(t)thin "dt"$ does not hold for that untruncated model.
+
+*Count distributions:* binomial and Poisson CDFs are sums of masses. For $x >= 0$,
+
+$ F_(upright("bin"))(x)=sum_(j=0)^(min(n,floor.l x floor.r))
+binom(n, j)p^j(1-p)^(n-j),
+wide
+F_(upright("Pois"))(x)=sum_(j=0)^(floor.l x floor.r)frac(mu^j e^(-mu), j!). $
+
+Both CDFs are $0$ for $x<0$, and $P(X>x)=1-F(x)$. Their means $"np"$ and $mu$ are counts, not MTTFs. If an integer-valued variable instead represents lifetime in discrete time steps, use the *discrete hazard* $P(T=j | T >= j)=p(j)/[1-F(j-1)]$, not the continuous hazard formula, and $E[T]=sum_(j=0)^infinity P(T>j)$ for $T >= 0$.
 
 
-=== Complete observations
+=== Binomial
 
-$ macron(x)=frac(1, n)sum_i x_i,wide
-s^2=frac(sum_i(x_i-macron(x))^2, n-1),wide s=sqrt(s^2). $
+$ P(X=x)=binom(n, x)p^x(1-p)^(n-x). $
+
+Check: fixed $n$, two outcomes, constant $p$, independent trials.
+
+
+=== Poisson
+
+$ P(X=x)=frac(mu^x e^(-mu), x!),
+wide
+mu=lambda t. $
+
+Check: count, constant rate, independent increments.
+
+
+=== Normal
+
+$ Z=frac(X-mu, sigma)tilde.op N(0,1). $
+
+R uses $sigma$, even when the model is written $N(mu,sigma^2)$.
+
+
+=== Lognormal
+
+$ P(T <= t)
+=
+Phi ( frac(ln t-mu, sigma)). $
+
+Parameters describe $ln T$, not $T$.
+
+
+=== Exponential
+
+$ f(t)=lambda e^(-lambda t),
+quad
+F(t)=1-e^(-lambda t),
+quad
+R(t)=e^(-lambda t),
+quad
+h(t)=lambda. $
+
+$ P(T>s+t | T>s)=P(T>t). $
+
+
+=== Weibull
+
+$ F(t)=1-e^(-(t/eta)^beta),
+wide
+R(t)=e^(-(t/eta)^beta), $
+
+$ h(t)=frac(beta, eta)(t/eta)^(beta-1). $
+
+#table(
+  columns: 2,
+  align: (right, auto,),
+  table.header(
+    [*Shape*],
+    [*Meaning*],
+  ),
+  [$beta<1$],
+  [Decreasing hazard; early defects.],
+  [$beta=1$],
+  [Constant hazard; exponential.],
+  [$beta>1$],
+  [Increasing hazard; fatigue or wear-out.],
+)
+$ F(eta)=1-e^(-1)approx 0.632,
+wide
+t_(upright(med))=eta(ln 2)^(1/beta). $
+
+
+== 6. R distribution functions
+
+#table(
+  columns: 3,
+  align: (auto, auto, auto,),
+  table.header(
+    [*Need*],
+    [*Prefix*],
+    [*Normal example*],
+  ),
+  [PMF/PDF height],
+  [/* <code> */d/* </code> */],
+  [/* <code> */dnorm(x, mean, sd)/* </code> */],
+  [Lower-tail probability],
+  [/* <code> */p/* </code> */],
+  [/* <code> */pnorm(x, mean, sd)/* </code> */],
+  [Quantile],
+  [/* <code> */q/* </code> */],
+  [/* <code> */qnorm(p, mean, sd)/* </code> */],
+  [Random sample],
+  [/* <code> */r/* </code> */],
+  [/* <code> */rnorm(n, mean, sd)/* </code> */],
+)
+Replace /* <code> */norm/* </code> */ with /* <code> */binom/* </code> */, /* <code> */pois/* </code> */, /* <code> */unif/* </code> */, /* <code> */lnorm/* </code> */, /* <code> */exp/* </code> */, /* <code> */weibull/* </code> */ or /* <code> */gamma/* </code> */.
+
+```r
+# P(X > x)
+pnorm(x, mean = mu, sd = sigma, lower.tail = FALSE)
+
+# P(a < X < b)
+pnorm(b, mean = mu, sd = sigma) -
+  pnorm(a, mean = mu, sd = sigma)
+
+# c such that P(X > c) = alpha
+qnorm(alpha, mean = mu, sd = sigma, lower.tail = FALSE)
+```
+
+Parameter reminders:
+
+- /* <code> */pbinom(x, size = n, prob = p)/* </code> */
+- /* <code> */ppois(x, lambda = rate \* time)/* </code> */
+- /* <code> */plnorm(t, meanlog = mu, sdlog = sigma)/* </code> */
+- /* <code> */pexp(t, rate = lambda)/* </code> */
+- /* <code> */pweibull(t, shape = beta, scale = eta)/* </code> */
+- /* <code> */pgamma(t, shape = k, rate = lambda)/* </code> */
+
+Use /* <code> */lower.tail = FALSE/* </code> */ for reliability $P(T>t)$.
+
+
+== 7. Estimation
+
+For complete data,
+
+$ macron(x)=frac(1, n)sum_i x_i,
+wide
+s=sqrt(frac(1, n-1)sum_i(x_i-macron(x))^2). $
 
 #table(
   columns: 2,
   align: (auto, auto,),
   table.header(
     [*Model*],
-    [*Maximum-likelihood estimates (complete independent observations)*],
+    [*MLE*],
   ),
   [Normal],
   [$hat(mu)=macron(x)$, $hat(sigma)=sqrt(sum_i(x_i-macron(x))^2/n)$],
   [Lognormal],
-  [Apply the normal MLE formulas to $y_i=ln x_i$; then fitted mean lifetime is $e^(hat(mu)+hat(sigma^2)/2)$.],
-  [Exponential],
-  [$hat(lambda)=n/sum_i x_i=1/macron(x)$; fitted MTTF $=macron(x)$.],
+  [$hat(mu)=frac(1, n)sum_(i=1)^n ln x_i$, $hat(sigma)=sqrt(frac(1, n)sum_(i=1)^n(ln x_i-hat(mu))^2)$],
+  [Exponential, complete],
+  [$hat(lambda)=1/macron(x)$],
 )
-*Sample SD uses $n-1$; normal MLE SD uses $n$.* R's `sd(x)` returns the sample SD. A sample coefficient of variation $s/macron(x)$ far from $1$ is evidence against an exponential fit, not a conclusive test by itself.
+For censored exponential data, with $r$ failures and total time on test $cal(T)=sum_i t_i$,
+
+$ hat(lambda)=frac(r, cal(T)),
+wide
+hat(op("MTTF"))=frac(cal(T), r). $
+
+Likelihood with status $delta_i$:
+
+$ L(theta)
+=
+product_i
+f(t_i;theta)^(delta_i)
+R(t_i;theta)^(1-delta_i). $
+
+Complete-data plotting positions:
+
+$ hat(F)(t_((i)))=frac(i, n+1)
+quad"or"quad
+frac(i-0.3, n+0.4). $
+
+Weibull plot:
+
+$ ln[-ln(1-hat(F)(t))]
+=
+beta ln t-beta ln eta. $
+
+Slope $=beta$; intercept $a=-beta ln eta$; therefore
+
+$ eta=e^(-a/beta). $
+
+Kaplan–Meier:
+
+$ hat(R)(t)
+=
+product_(t_j <= t)
+frac(n_j-d_j, n_j). $
+
+Censoring causes no downward step, but it reduces the later risk set.
 
 
-=== Censoring and total exposure
+== 8. Sampling distribution and CLT
 
-Right-censored at $c$ means *known to survive beyond $c$*, not failed at $c$. Left-censored means failed before observation; interval-censored means failure occurred between inspections. The course mainly uses right censoring/suspensions.
-
-Let $n$ be the original item count, $r$ the observed failures and $cal(T)$ total accumulated time on test.
+$ macron(X)=frac(1, n)sum_i X_i,
+wide
+E[macron(X)]=mu,
+wide
+op("SE")(macron(X))=frac(sigma, sqrt(n)). $
 
 #table(
   columns: 2,
   align: (auto, auto,),
   table.header(
-    [*Data collection*],
-    [*Total time on test*],
+    [*Situation*],
+    [*Standardisation*],
   ),
-  [Complete observations],
-  [$cal(T)=sum_(i=1)^n t_i$],
-  [Type I: stop at fixed time $t_*$],
-  [$cal(T)=sum_(i=1)^r t_i+(n-r)t_*$],
-  [Type II: stop at the $r$th failure, time $t_r$],
-  [$cal(T)=sum_(i=1)^r t_i+(n-r)t_r$],
-  [Different independent censoring times],
-  [Sum every item's actual observed exposure, including survivors.],
+  [Normal population, $sigma$ known],
+  [$frac(macron(X)-mu, sigma/sqrt(n))tilde.op N(0,1)$, exact],
+  [Normal population, $sigma$ unknown],
+  [$frac(macron(X)-mu, S/sqrt(n))tilde.op t_(n-1)$, exact],
+  [Non-normal population, large $n$],
+  [$macron(X)dot(tilde.op) N(mu,sigma^2/n)$, CLT],
 )
-*Under the exponential lifetime model*, with $r>0$,
-
-$ hat(lambda)=frac(r, cal(T)),wide
-hat(upright("MTTF"))=frac(cal(T), r),wide
-hat(upright("SD"))(T)=frac(cal(T), r). $
-
-Do not generalise the last identity to Weibull or other lifetimes. With no failures, $cal(T)/r$ does not give a finite MTTF estimate. Deleting survivors or applying `mean`/`sd` to censored times as though they were failures misrepresents the data.
+Course rule of thumb: $n >= 30$ is large, but strong skewness or far tails may need more.
 
 
-=== Likelihood: retain the information in censored observations
+=== Sample-size symbols
 
-For independent observations with non-informative right censoring and $delta_i=1$ for failure, $0$ for suspension,
-
-$ L(theta)=product_i f(t_i;theta)^(delta_i)R(t_i;theta)^(1-delta_i),
-wide ell(theta)=ln L(theta). $
-
-Maximise $L$ or $ell$ to estimate $theta$. Failures contribute $f$; suspensions contribute $R$. Complete-data Weibull log-likelihood is
-
-$ ell(beta,eta)=n ln beta-n beta ln eta
- +(beta-1)sum_i ln t_i-sum_i(t_i/eta)^beta. $
-
-Both Weibull parameters usually require numerical fitting. For fixed $beta$, $hat(eta)=(sum_i t_i^beta/n)^(1/beta)$.
-
-
-== 8. Empirical reliability and Weibull plots
-
-
-=== Complete-data ranking
-
-Sort failure times as $t_((1))<= dots.c <= t_((n))$.
+These formulas assume independent observations with population standard deviation $sigma$ known. They are exact for a normal population and approximate when using the CLT.
 
 #table(
   columns: 2,
   align: (auto, auto,),
   table.header(
-    [*Rank choice*],
-    [*Estimated failure probability at $t_((i))$*],
+    [*Symbol*],
+    [*Meaning*],
   ),
-  [Empirical CDF],
-  [$i/n$ for distinct failures],
-  [Mean rank],
-  [$i/(n+1)$],
-  [Approximate median rank (Benard)],
-  [$(i-0.3)/(n+0.4)$],
+  [$n$],
+  [Required number of observations.],
+  [$macron(X)$, $mu$],
+  [Sample mean and true population mean.],
+  [$sigma$],
+  [Population standard deviation, not variance $sigma^2$.],
+  [$alpha$],
+  [Allowed probability of falling outside the desired bound; e.g. $0.05$.],
+  [$1-alpha$],
+  [Desired probability of meeting the bound; e.g. $0.95$.],
+  [$d$],
+  [Allowed upward deviation of the sample mean from $mu$ (one-sided).],
+  [$E$],
+  [Allowed error in either direction from $mu$ (two-sided).],
+  [$z_p$],
+  [Standard normal quantile: the value with probability $p$ to its left, so $P(Z <= z_p)=p$ for $Z tilde.op N(0,1)$. In R: /* <code> */qnorm(p)/* </code> */.],
 )
-Use the rank method specified in the question. Mean/median ranks avoid $F=1$, which cannot be double-log transformed.
+*Read the subscripts as a whole:* $z_(1-alpha)$ means the normal quantile at probability $1-alpha$, not $z_1-alpha$. Similarly, $z_(1-alpha/2)$ uses probability $1-(alpha/2)$. The $sigma$ after either quantile is a separate multiplication factor.
 
+One-sided sample size: keep the probability of overshooting $mu$ by at least $d$ below or equal to $alpha$.
 
-=== Weibull straight-line transformation
+$ P(macron(X)>=mu+d)<= alpha
+quad =>quad
+n >=
+( frac(z_(1-alpha)times sigma, d))^2. $
 
-$ x_i=ln t_((i)),wide
- y_i=ln[-ln(1-hat(F)(t_((i))))],
-wide y=a+"bx". $
+Two-sided sample size: keep the sample mean within $E$ of $mu$ with probability at least $1-alpha$. Split the allowed error probability equally between the two tails: $alpha/2$ in each.
 
-$ hat(beta)=b,wide hat(eta)=e^(-a/b). $
-
-An approximately straight plot supports a Weibull fit. Slope measures ageing; scale is the $63.2 %$ failure time, *not generally the mean*. Median $=eta(ln 2)^(1/beta)$.
-
-For the shifted three-parameter Weibull with failure-free period $gamma >= 0$, replace $t$ by $t-gamma$ for $t>gamma$. Reliability is $1$ before $gamma$, mean is $gamma+eta Gamma(1+1/beta)$, SD is unchanged, and characteristic failure time is $gamma+eta$. Use the location shift only if specified or justified.
-
-
-=== Median ranks with suspensions
-
-Sort *all* observations, retaining failure/suspension labels. Let $j_(upright("prev"))=0$ initially and $m$ be the number of all observations preceding the current failure. Update only at a failure:
-
-$ upright("INC")=frac(n+1-j_(upright("prev")), 1+n-m),wide
-j=j_(upright("prev"))+upright("INC"),wide
-hat(F)(t)=frac(j-0.3, n+0.4). $
-
-Then set $j_(upright("prev"))=j$ for the next failure. Suspensions affect ordering and risk but receive no failure plotting point. With no suspensions this reduces to ordinary integer ranks. This method and Kaplan–Meier below produce different estimates; use the requested method.
-
-
-=== Kaplan–Meier survival estimate
-
-At each distinct failure time $t_j$, $n_j$ is the number at risk *immediately before* the failure time and $d_j$ is the number failing then:
-
-$ hat(R)(t)=product_(t_j <= t)( 1-frac(d_j, n_j)),
-wide hat(F)(t)=1-hat(R)(t). $
-
-Failures step the survival curve down. Censoring makes no downward step, but removes subjects from later risk sets. If failures and censoring share a recorded time, conventionally count those censored as at risk for the failures at that time. The curve is constant between failures.
-
-
-== 9. Sampling distributions and the CLT
-
-A *parameter* describes the population; a *statistic* is calculated from the sample. A sampling distribution describes how a statistic changes across repeated samples. A good random sample avoids selection bias; increasing $n$ does not fix biased selection.
-
-For constants $a,b$, $E["aX"+"bY"]="aE"[X]+"bE"[Y]$. If $X,Y$ are independent, $op("Var")("aX"+"bY")=a^2 op("Var")(X)+b^2 op("Var")(Y)$; otherwise include $2"ab" op("Cov")(X,Y)$.
-
-For iid observations with finite mean $mu$ and variance $sigma^2$:
+$ P(|macron(X)-mu|<E)>= 1-alpha
+quad =>quad
+n >=
+( frac(z_(1-alpha/2)times sigma, E))^2. $
 
 #table(
   columns: 4,
   align: (auto, auto, auto, auto,),
   table.header(
-    [*Statistic*],
-    [*Mean*],
-    [*Variance*],
-    [*SD*],
+    [*Desired probability $1-alpha$*],
+    [*$alpha$*],
+    [*One-sided $z_(1-alpha)$*],
+    [*Two-sided $z_(1-alpha/2)$*],
   ),
-  [One $X$],
-  [$mu$],
-  [$sigma^2$],
-  [$sigma$],
-  [Sum $S_n=sum_i X_i$],
-  [$n mu$],
-  [$n sigma^2$],
-  [$sqrt(n)sigma$],
-  [Mean $macron(X)=S_n/n$],
-  [$mu$],
-  [$sigma^2/n$],
-  [$sigma/sqrt(n)$ (standard error)],
+  [$0.90$],
+  [$0.10$],
+  [$z_(0.90)approx 1.282$],
+  [$z_(0.95)approx 1.645$],
+  [$0.95$],
+  [$0.05$],
+  [$z_(0.95)approx 1.645$],
+  [$z_(0.975)approx 1.960$],
+  [$0.99$],
+  [$0.01$],
+  [$z_(0.99)approx 2.326$],
+  [$z_(0.995)approx 2.576$],
 )
-#table(
-  columns: 3,
-  align: (auto, auto, auto,),
-  table.header(
-    [*Situation*],
-    [*Standardisation and distribution*],
-    [*Validity*],
-  ),
-  [Normal population; known $sigma$],
-  [$Z=(macron(X)-mu)/(sigma/sqrt(n))tilde.op N(0,1)$],
-  [Exact for any $n$],
-  [Normal population; unknown $sigma$],
-  [$T=(macron(X)-mu)/(S/sqrt(n))tilde.op t_(n-1)$],
-  [Exact for any $n$],
-  [Non-normal population; large $n$],
-  [$macron(X)approx N(mu,sigma^2/n)$],
-  [CLT approximation; iid and finite variance],
-)
-The course's $n >= 30$ rule is a guide, not a guarantee for strong skew or extreme tails. The *mean's distribution* approaches normal; the original population does not become normal. Student's $t$ has heavier tails than normal and approaches normal as its degrees of freedom increase. With a small non-normal sample, the usual $t$ result is not exact.
+For example, with $sigma=10$ hours and allowed error $2$ hours at $1-alpha=0.95$:
 
-For iid exponential lifetimes with rate $lambda$, the exact sum is $S_n tilde.op upright(Gamma)(n,"rate"=lambda)$ and the exact mean is $macron(X)tilde.op upright(Gamma)(n,"rate"=n lambda)$. For a Weibull population, first calculate $mu,sigma$ from its moment formulas, then use the CLT for the mean; do not apply the individual Weibull CDF to $macron(T)$.
+- One-sided: $n >=(1.645 times 10/2)^2 approx 67.65$, so use $n=68$.
+- Two-sided: $n >=(1.960 times 10/2)^2 approx 96.04$, so use $n=97$.
+
+Square the entire fraction, then round $n$ up to a whole number.
 
 
-=== Sample size for a probability/accuracy target
+== 9. Final checks
 
-Here $z_p=Phi^(-1)(p)$ is a *lower-tail quantile*. Some supplied tables label critical values by upper-tail probability instead; translate the tail before reading them.
-
-#table(
-  columns: 2,
-  align: (auto, auto,),
-  table.header(
-    [*Requirement under a normal/CLT model*],
-    [*Required sample size*],
-  ),
-  [$P(macron(X)>=mu+d)<= alpha$, $d>0$, $alpha<0.5$],
-  [$n >=(z_(1-alpha)sigma/d)^2$],
-  [$P(|macron(X)-mu|<E)>= 1-alpha$],
-  [$n >=(z_(1-alpha/2)sigma/E)^2$],
-)
-Round *up* and recheck the probability at the resulting integer. Two-sided accuracy splits $alpha$ equally between the tails. A fourfold sample size halves the standard error.
-
-
-== 10. R reminders and final checks
-
-#table(
-  columns: 2,
-  align: (auto, auto,),
-  table.header(
-    [*Need*],
-    [*R convention*],
-  ),
-  [PMF/PDF],
-  [`d...` (a continuous density is not a probability)],
-  [$P(X <= x)$],
-  [`p...(x, ...)`],
-  [$P(X>x)$ / reliability],
-  [`p...(x, ..., lower.tail = FALSE)`],
-  [Boundary for lower-tail probability $p$],
-  [`q...(p, ...)`],
-  [Generate $n$ observations],
-  [`r...(n, ...)`],
-)
-Suffixes: `binom`, `pois`, `unif`, `norm`, `lnorm`, `exp`, `weibull`, `gamma`, `beta`, `t`. Normal uses `sd`, lognormal uses `meanlog`/`sdlog`, exponential uses `rate`, Weibull uses `shape`/`scale`, gamma uses `shape` with *either* `rate` *or* `scale`. Poisson's `lambda` argument is the expected count over the requested interval, not automatically the rate per hour.
-
-Before submitting: define the variable and units; check independence and support; distinguish PDF from probability, SD from variance, and individual from sample mean; choose the correct tail and discrete endpoint; retain censored exposure; report probabilities between $0$ and $1$ with sensible time/rate units.
-
-
-== Source map
-
-Source links refer to the supplied files. Page numbers below are *PDF page positions*, which may differ from printed slide numbers. The essential summary also contains later confidence-interval and hypothesis-testing material; those later topics are not developed here because this sheet follows the supplied statistics lectures through Week 5.
-
-- #link("../probability-content/slides-pdf/01-GENG5507-STATS-Basics.pdf")[Probability basics] and #link("../probability-content/slides-pdf/02-GENG5507-STATS-extra-slides.pdf")[additional probability slides]: events, conditional probability and reliability language.
-- #link("../probability-content/slides-pdf/03-GENG5507-STATS-ProbabilityModels.pdf")[Probability models]: model definitions and moments; gamma and the beta/uniform reading pointers on PDF p. 43. Continuous uniform and beta formulas are compact reference supplements for those named models.
-- #link("../probability-content/slides-pdf/04-GENG5507-STATS-HazardRate.pdf")[Hazard rate]: reliability, hazard, MTTF and system applications.
-- #link("../probability-content/slides-pdf/05-GENG5507-STATS-ModelEstimation.pdf")[Model estimation]: complete/censored data, likelihood and Weibull fitting; Kaplan–Meier on PDF pp. 34–35.
-- #link("../probability-content/slides-pdf/Weibull-analysis.pdf")[Weibull analysis]: shifted model, probability paper and adjusted median ranks.
-- #link("../probability-content/slides-pdf/06-GENG5507-STATS-lecture-week5-CLT.pdf")[Random sampling and CLT]: sampling distributions, $z$, $t$ and sample size.
-- #link("../GENG5507-%20ESSENTIAL%20SUMMARY%20AND%20TABLES.pdf")[Essential summary and tables]: printed formula pp. 1–9; probability, distributions, system reliability and data ranking. Formula conditions and parameter conventions are made explicit here.
-- #link("../questions/probability-questions/lecture/")[Lecture questions] and #link("../questions/probability-questions/prac/")[practical questions]: question patterns addressed by this sheet.
+- Did I define the random variable and its units?
+- Is it a count or a continuous measurement?
+- Does the distribution's support match the variable?
+- Did I use variance or standard deviation correctly?
+- Did I choose the requested lower, upper or two-sided tail?
+- For a sample mean, did I use $sigma/sqrt(n)$?
+- If $sigma$ is unknown, is t exact or only approximate here?
+- Did I account for censored observations?
+- Does the fitted hazard shape match the physical failure mechanism?
+- Is the final number a probability, rate, time, variance or standard deviation, and are its units correct?

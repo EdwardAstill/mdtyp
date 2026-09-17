@@ -1,9 +1,31 @@
-#set page(paper: "a4", margin: 16mm, numbering: "1")
-#set text(size: 10.5pt)
-#show raw: set text(size: 8pt)
-#show table: set text(size: 9pt)
+#set page(paper: "a4")
+
+#set page(margin: 15mm)
+#set page(numbering: "1")
+#set text(size: 12pt)
 
 = GENG5507 midsemester statistics question bank
+
+#heading(level: 2, outlined: false)[Question index]
+Find a similar question by its topic, then turn to the page shown.
+
+#context table(
+  columns: (auto, 1fr, auto),
+  align: (left, left, right),
+  stroke: none,
+  inset: (x: 5pt, y: 3pt),
+  table.header([*Question*], [*What it asks*], [*Page*]),
+  ..query(metadata).filter(q => type(q.value) == dictionary and q.value.at("kind", default: none) == "mdtyp-question").map(q => {
+    let fmt = q.location().page-numbering()
+    (
+      link(q.location(), q.value.id),
+      link(q.location(), q.value.summary),
+      link(q.location(), numbering(if fmt == none { "1" } else { fmt },
+        ..counter(page).at(q.location()))),
+    )
+  }).flatten(),
+)
+#pagebreak()
 
 This bank compiles the actual questions saved in this workspace and the distinct worked examples/prompts in the supplied statistics slides. Questions come first within each item, followed by clearly labelled worked answers. Original numbers, data and available answer choices are retained; some practical wording is tightened without removing subparts. Source ambiguities and corrections are flagged. Course convention: $N(mu,sigma^2)$ uses *variance* as its second parameter.
 
@@ -68,7 +90,7 @@ This mechanism matters when choosing a lifetime model: fatigue normally suggests
 
 The repair times, in minutes, are
 
-$ 10,thin 17,thin 24,thin 30,thin 14,thin 18,thin 15,thin 13,thin 21. $
+$ 10,\ 17,\ 24,\ 30,\ 14,\ 18,\ 15,\ 13,\ 21. $
 
 These data are used in the Week 4 problems.
 
@@ -103,7 +125,7 @@ Because $beta$ is close to $1$, this fitted model has an almost constant hazard 
 Source: #link("../questions/probability-questions/lecture/Lecture1.pdf")[Lecture1.pdf]
 
 
-==== L1.1 — Causes of an LNG tank explosion
+==== L1.1 — Causes of an LNG tank explosion #metadata((kind: "mdtyp-question", id: "L1.1", summary: "Total probability and Bayes: LNG explosion and its possible causes"))
 
 
 ===== Problem
@@ -114,8 +136,8 @@ $ P(A)=0.30,quad P(B)=0.40,quad P(C)=0.15,quad P(D)=0.15. $
 
 The conditional probabilities of an explosion $E$ given each cause are
 
-$ P(E ∣ A)=0.25,quad P(E ∣ B)=0.20,quad
-P(E ∣ C)=0.40,quad P(E ∣ D)=0.75. $
+$ P(E | A)=0.25,quad P(E | B)=0.20,quad
+P(E | C)=0.40,quad P(E | D)=0.75. $
 
 + Find the probability of an explosion.
 + Given that an explosion occurred, find the probability that static electricity caused it.
@@ -126,8 +148,8 @@ P(E ∣ C)=0.40,quad P(E ∣ D)=0.75. $
 Assuming the four causes are mutually exclusive and exhaustive, the law of total probability gives
 
 $ P(E)
-=P(E ∣ A)P(A)+P(E ∣ B)P(B) \
-quad+P(E ∣ C)P(C)+P(E ∣ D)P(D) \
+=P(E | A)P(A)+P(E | B)P(B) \
+quad+P(E | C)P(C)+P(E | D)P(D) \
 =(0.25)(0.30)+(0.20)(0.40) \
 quad +(0.40)(0.15)+(0.75)(0.15) \
 =0.3275. $
@@ -138,21 +160,21 @@ $ P(E)=0.3275. $
 
 For the second part, Bayes' theorem gives
 
-$ P(A ∣ E)
-=frac(P(E ∣ A)P(A), P(E)) \
+$ P(A | E)
+=frac(P(E | A)P(A), P(E)) \
 =frac((0.25)(0.30), 0.3275) \
 =0.2290. $
 
 Thus,
 
-$ P(A ∣ E)approx 0.229. $
+$ P(A | E)approx 0.229. $
 
-The value $0.075$ is $P(A ∩ E)$; dividing it by $P(E)$ produces the required conditional probability.
+The value $0.075$ is $P(A inter E)$; dividing it by $P(E)$ produces the required conditional probability.
 
 #line(length: 100%)
 
 
-==== L1.2 — LNG tank repair time
+==== L1.2 — LNG tank repair time #metadata((kind: "mdtyp-question", id: "L1.2", summary: "Piecewise repair-time PDF: derive CDF, interval probability and mean"))
 
 
 ===== Problem
@@ -160,9 +182,13 @@ The value $0.075$ is $P(A ∩ E)$; dividing it by $P(E)$ produces the required c
 The repair time $X$, in hours, has probability density function
 
 $ f_X(x)=
-cases(frac(x, 1600) quad 0<x <= 40, [6"pt"]
-frac(80-x, 1600) quad 40<x<80, [6"pt"]
-0 quad "otherwise".) $
+cases(
+ frac(x, 1600), & 0<x <= 40,,
+ [6"pt"]
+frac(80-x, 1600), & 40<x<80,,
+ [6"pt"]
+0, & "otherwise".
+) $
 
 + Plot the PDF and CDF.
 + Find $P(60 <= X <= 70)$.
@@ -174,10 +200,15 @@ frac(80-x, 1600) quad 40<x<80, [6"pt"]
 Integrating the PDF gives the CDF
 
 $ F_X(x)=
-cases(0 quad x <= 0, [4"pt"]
-frac(x^2, 3200) quad 0<x <= 40, [8"pt"]
-1-frac((80-x)^2, 3200) quad 40<x<80, [8"pt"]
-1 quad x >= 80.) $
+cases(
+ 0, & x <= 0,,
+ [4"pt"]
+frac(x^2, 3200), & 0<x <= 40,,
+ [8"pt"]
+1-frac((80-x)^2, 3200), & 40<x<80,,
+ [8"pt"]
+1, & x >= 80.
+) $
 
 The PDF is triangular: it increases linearly from $0$ to its peak at $x=40$, then decreases linearly to $0$ at $x=80$. The CDF increases from $0$ to $1$ and is continuous at $x=40$.
 
@@ -230,14 +261,14 @@ This also follows from the symmetry of the triangular density about $x=40$.
 #line(length: 100%)
 
 
-==== L1.3 — Car-battery lifetimes
+==== L1.3 — Car-battery lifetimes #metadata((kind: "mdtyp-question", id: "L1.3", summary: "Battery lifetime data: histogram, sample mean and standard deviation"))
 
 
 ===== Problem
 
 The lifetimes, in years, of ten car batteries are
 
-$ 4.8,thin 3.9,thin 2.2,thin 5.1,thin 4.6,thin 5.3,thin 6.3,thin 4.3,thin 6.8,thin 4.7. $
+$ 4.8,\ 3.9,\ 2.2,\ 5.1,\ 4.6,\ 5.3,\ 6.3,\ 4.3,\ 6.8,\ 4.7. $
 
 + Draw a histogram of the data in RStudio.
 + Estimate the mean and standard deviation of battery lifetime.
@@ -281,7 +312,7 @@ Source: #link("../questions/probability-questions/lecture/Lecture2.pdf")[Lecture
 Let $Phi$ denote the standard normal CDF and $Phi^(-1)$ its quantile function.
 
 
-==== L2.1 — Normal lifetime model
+==== L2.1 — Normal lifetime model #metadata((kind: "mdtyp-question", id: "L2.1", summary: "Normal hose lifetime: lower/upper tails and a survival quantile"))
 
 
 ===== Problem
@@ -337,7 +368,7 @@ Under the model, $99 %$ of hoses last longer than about $92.43$ hours.
 #line(length: 100%)
 
 
-==== L2.2 — Uniform lifetime model
+==== L2.2 — Uniform lifetime model #metadata((kind: "mdtyp-question", id: "L2.2", summary: "Uniform hose lifetime: failure probability and a survival quantile"))
 
 
 ===== Problem
@@ -383,7 +414,7 @@ Under the model, $99 %$ of hoses last longer than $85.8$ hours.
 #line(length: 100%)
 
 
-==== L2.3 — Lognormal lifetime model
+==== L2.3 — Lognormal lifetime model #metadata((kind: "mdtyp-question", id: "L2.3", summary: "Lognormal hose lifetime: failure probability and a survival quantile"))
 
 
 ===== Problem
@@ -437,7 +468,7 @@ Under the lognormal model, $99 %$ of hoses last longer than about $115.61$ hours
 Source: #link("../questions/probability-questions/lecture/Lecture3.pdf")[Lecture3.pdf]
 
 
-==== L3.1 — Exponential lifetime model
+==== L3.1 — Exponential lifetime model #metadata((kind: "mdtyp-question", id: "L3.1", summary: "Exponential lifetime: PDF, reliability, hazard, median, MTTF and variance"))
 
 
 ===== Problem
@@ -459,7 +490,10 @@ $ lambda=0.008" per hour". $
 The exponential PDF is
 
 $ f_X(x)=
-cases(lambda e^(-lambda x)=0.008e^(-0.008x) quad x >= 0, 0 quad x<0.) $
+cases(
+ lambda e^(-lambda x)=0.008e^(-0.008x), & x >= 0,,
+ 0, & x<0.
+) $
 
 For $t >= 0$, the survival function is
 
@@ -524,7 +558,7 @@ The exponential model assumes a constant hazard and has the memoryless property.
 #line(length: 100%)
 
 
-==== L3.2 — Weibull lifetime model
+==== L3.2 — Weibull lifetime model #metadata((kind: "mdtyp-question", id: "L3.2", summary: "Weibull lifetime: PDF, reliability, hazard, median and MTTF"))
 
 
 ===== Problem
@@ -544,10 +578,13 @@ Suppose the flexible-hose lifetime $X$, in hours, follows a Weibull distribution
 Using the shape-scale parameterisation, the Weibull PDF is
 
 $ f_X(x)=
-cases(frac(beta, eta)
+cases(
+ frac(beta, eta)
 ( frac(x, eta))^(beta-1)
-exp [-( frac(x, eta))^beta ] quad x>0, [10"pt"]
-0 quad x <= 0.) $
+exp [-( frac(x, eta))^beta ], & x>0,,
+ [10"pt"]
+0, & x <= 0.
+) $
 
 With $beta=0.5$ and $eta=125$,
 
@@ -618,12 +655,12 @@ Source: #link("../questions/probability-questions/lecture/Lecture4.pdf")[Lecture
 
 The rigid-hose repair times, in minutes, are
 
-$ 10,thin 17,thin 24,thin 30,thin 14,thin 18,thin 15,thin 13,thin 21. $
+$ 10,\ 17,\ 24,\ 30,\ 14,\ 18,\ 15,\ 13,\ 21. $
 
 The solutions below use maximum-likelihood estimates (MLEs). Because R's `sd()` uses the denominator $n-1$, the corresponding sample standard deviations are also reported where relevant.
 
 
-==== L4.1 — Normal model
+==== L4.1 — Normal model #metadata((kind: "mdtyp-question", id: "L4.1", summary: "Fit Normal mean and standard deviation to repair-time data"))
 
 
 ===== Problem
@@ -661,7 +698,7 @@ $ s=sqrt(frac(1, 8)sum_(i=1)^9(x_i-18)^2)=6.1644" minutes". $
 #line(length: 100%)
 
 
-==== L4.2 — Lognormal model
+==== L4.2 — Lognormal model #metadata((kind: "mdtyp-question", id: "L4.2", summary: "Fit lognormal parameters to repair-time data"))
 
 
 ===== Problem
@@ -697,7 +734,7 @@ $ s_(ln X)=0.33464. $
 #line(length: 100%)
 
 
-==== L4.3 — Exponential model
+==== L4.3 — Exponential model #metadata((kind: "mdtyp-question", id: "L4.3", summary: "Fit an exponential rate to repair times and assess suitability"))
 
 
 ===== Problem
@@ -750,7 +787,7 @@ Source: #link("../questions/probability-questions/lecture/Lecture5.pdf")[Lecture
 Let $T$ denote the time between rigid-hose failures, with $E[T]=mu$ and $op("Var")(T)=sigma^2$.
 
 
-==== L5.1 — One normally distributed lifetime
+==== L5.1 — One normally distributed lifetime #metadata((kind: "mdtyp-question", id: "L5.1", summary: "One Normal lifetime: survival probability and an upper-tail quantile"))
 
 
 ===== Problem
@@ -790,7 +827,7 @@ $ t approx 329.40" hours". $
 #line(length: 100%)
 
 
-==== L5.2 — Mean lifetime with known standard deviation
+==== L5.2 — Mean lifetime with known standard deviation #metadata((kind: "mdtyp-question", id: "L5.2", summary: "Normal sample mean with known SD: tail probability and minimum sample size"))
 
 
 ===== Problem
@@ -848,7 +885,7 @@ For $n=15$, the upper-tail probability is approximately $0.004912$, which is bel
 #line(length: 100%)
 
 
-==== L5.3 — Mean lifetime with unknown standard deviation
+==== L5.3 — Mean lifetime with unknown standard deviation #metadata((kind: "mdtyp-question", id: "L5.3", summary: "Unknown population SD: standardised sample mean, t tails and sample size"))
 
 
 ===== Problem
@@ -899,7 +936,7 @@ $ n=16. $
 #line(length: 100%)
 
 
-==== L5.4 — Unknown lifetime distribution
+==== L5.4 — Unknown lifetime distribution #metadata((kind: "mdtyp-question", id: "L5.4", summary: "Unknown lifetime distribution: approximate sample-mean probability"))
 
 
 ===== Problem
@@ -914,7 +951,7 @@ Suppose individual lifetimes have mean $300$ hours and standard deviation $15$ h
 
 The exact distribution of $macron(T)$ cannot be determined without the population distribution. By the central limit theorem, however,
 
-$ macron(T)thin dot(tilde.op)thin N ( 300,frac(15^2, 40)), $
+$ macron(T)\ dot(tilde.op)\ N ( 300,frac(15^2, 40)), $
 
 where $dot(tilde.op)$ denotes an approximate distribution. Its standard deviation is $15/sqrt(40)=2.3717$ hours.
 
@@ -942,25 +979,25 @@ The original PDFs contain background revision and R demonstrations as well as qu
 Sources: #link("../questions/probability-questions/prac/prac-sheet-1.pdf")[question sheet] · #link("../questions/probability-questions/prac/prac-sheet-1-solution.pdf")[supplied solutions].
 
 
-==== P1.1 — corrosion test (Textbook Problem 3.79, adapted)
+==== P1.1 — corrosion test (Textbook Problem 3.79, adapted) #metadata((kind: "mdtyp-question", id: "P1.1", summary: "Corrosion screening: infer prevalence and reverse conditional probabilities"))
 
-Engineers maintaining nuclear submarines must check cooling-system pipes for internal corrosion. A non-destructive test is not infallible. Let $A$ mean actual corrosion and $B$ mean the test indicates corrosion. The test detects corrosion with $P(B ∣ A)=0.7$ and falsely indicates corrosion with $P(B ∣ A^c)=0.2$. One in every four tests indicates corrosion: $P(B)=0.25$.
+Engineers maintaining nuclear submarines must check cooling-system pipes for internal corrosion. A non-destructive test is not infallible. Let $A$ mean actual corrosion and $B$ mean the test indicates corrosion. The test detects corrosion with $P(B | A)=0.7$ and falsely indicates corrosion with $P(B | A^c)=0.2$. One in every four tests indicates corrosion: $P(B)=0.25$.
 
 (a) Find $P(A)$, using a tree diagram and/or total probability. (b) Find the probability of corrosion given a positive test. (c) Find the probability of corrosion given a negative test.
 
-*Answer notes.* $0.25=0.7p+0.2(1-p)$ gives $p=0.1$; $P(A ∣ B)=0.07/0.25=0.28$; $P(A ∣ B^c)=0.03/0.75=0.04$. Complement bars lost in PDF extraction have been restored.
+*Answer notes.* $0.25=0.7p+0.2(1-p)$ gives $p=0.1$; $P(A | B)=0.07/0.25=0.28$; $P(A | B^c)=0.03/0.75=0.04$. Complement bars lost in PDF extraction have been restored.
 
 
-==== P1.2 — printed circuit boards (Textbook Problem 3.80)
+==== P1.2 — printed circuit boards (Textbook Problem 3.80) #metadata((kind: "mdtyp-question", id: "P1.2", summary: "Circuit-board screening: infer defect rate and probability given a test result"))
 
 Let $A$ mean a board is defective and $B$ mean it passes an automated verification test. Of 900 completed boards, 890 passed. In a separate study, 5 of 30 deliberately defective boards passed. Interpret long-run relative frequencies as probabilities.
 
-(a) Estimate $P(B ∣ A)$. (b) Assuming $P(B ∣ A^c)=1$ (a good board cannot fail), estimate $P(A)$ using total probability. (c) Estimate the probability that a board is defective given that it passed.
+(a) Estimate $P(B | A)$. (b) Assuming $P(B | A^c)=1$ (a good board cannot fail), estimate $P(A)$ using total probability. (c) Estimate the probability that a board is defective given that it passed.
 
-*Answer notes.* $P(B ∣ A)approx 1/6$; $890/900=p/6+(1-p)$ gives $p=1/75$; $P(A ∣ B)approx(1/450)/(89/90)=1/445 approx 0.002247$.
+*Answer notes.* $P(B | A)approx 1/6$; $890/900=p/6+(1-p)$ gives $p=1/75$; $P(A | B)approx(1/450)/(89/90)=1/445 approx 0.002247$.
 
 
-==== P1.3 — mercury discharge and financial risk
+==== P1.3 — mercury discharge and financial risk #metadata((kind: "mdtyp-question", id: "P1.3", summary: "Mercury-discharge PDF: moments, exceedance probabilities and expected fines"))
 
 Mercury concentration $X$ (units/litre) in weekly tests of a water-treatment plant varies day to day without a long-term trend. Model it as Gamma with shape $alpha=2$ and scale $beta=1$.
 
@@ -968,7 +1005,10 @@ Mercury concentration $X$ (units/litre) in weekly tests of a water-treatment pla
 
 (b) Show that
 
-$ F_X(x)=cases(1-(1+x)e^(-x) quad x>0, 0 quad x <= 0.) $
+$ F_X(x)=cases(
+ 1-(1+x)e^(-x), & x>0,,
+ 0, & x <= 0.
+) $
 
 Hint: integration by parts gives $integral_0^x "ue"^(-u)thin "du"=[-"ue"^(-u)]_0^x+integral_0^x e^(-u)thin "du"$.
 
@@ -985,14 +1025,14 @@ A fine is imposed whenever the measured concentration exceeds $T$ units/litre.
 *Answer notes.* $E(X)=2$, $op("Var")(X)=2$; $P(X>T)=(1+T)e^(-T)$ for $T >= 0$. At 4 this is $0.09158$, and at 3 it is $0.19915$. Expected fortnightly fines are $2C(5e^(-4))=0.18316C$ versus $C(4e^(-3))=0.19915C$, so weekly testing is cheaper under this model. A fixed limit penalises occasional exceedances even if average discharge is low; the exceedance probability, not just the mean, determines expected fines. Greater variability does not universally increase every tail probability at every threshold.
 
 
-==== P1.R — explicit R demonstration prompts
+==== P1.R — explicit R demonstration prompts #metadata((kind: "mdtyp-question", id: "P1.R", summary: "R exploration: Normal functions, standardisation and reproducible samples"))
 
 Run and compare `pnorm(0.3)`, `pnorm(2, lower.tail=FALSE)`, and `pnorm(9, mean=6, sd=10)`. Explain why the first and third agree, and why `pnorm(9)` differs from the third. Run `qnorm(0.025)`, `qnorm(0.05, lower.tail=FALSE)` and `qnorm(0.1, mean=6, sd=10)`; sketch the Normal symmetry behind the opposite-tail quantiles. Run `rnorm(4)` twice, then `mean(rnorm(4))`; explain why these are different samples. Store `x <- rnorm(4)` and reuse `x`. Repeat `set.seed(5507); x <- rnorm(6, mean=10, sd=5)` to check reproducibility. For `y <- c(4,3,3,7,5,2,1,0,1,2,4,3,2)`, try `mean(y)`, `median(y)`, `sd(y)` and `summary(y)`.
 
 *Answer notes.* Standardisation gives $(9-6)/10=0.3$; the default Normal has mean 0 and SD 1. Re-running a generator advances its random-number state; storing a sample or resetting the seed preserves reproducibility. See #link("R.md")[R guide] for executable examples.
 
 
-==== P1.4 — Normal calculations and simulation
+==== P1.4 — Normal calculations and simulation #metadata((kind: "mdtyp-question", id: "P1.4", summary: "Normal probabilities and quantiles; simulate and summarise a sample in R"))
 
 (a) For $Z tilde.op N(0,1)$ find using R: (i) $P(Z>2)$; (ii) $P(0.2<Z<0.57)$; (iii) $z$ such that $P(Z<z)=0.975$.
 
@@ -1014,14 +1054,14 @@ text(x=26, y=0.08, "N(20, 5^2) pdf", col="red")
 Sources: #link("../questions/probability-questions/prac/prac-sheet-2.pdf")[question sheet] · #link("../questions/probability-questions/prac/prac-sheet-2-solution.pdf")[supplied solutions].
 
 
-==== P2.1 — defective resistors (Textbook Problem 2.10)
+==== P2.1 — defective resistors (Textbook Problem 2.10) #metadata((kind: "mdtyp-question", id: "P2.1", summary: "Defective resistors: probability of more than one defect in ten"))
 
 A random sample of 10 resistors is tested; each has probability 0.08 of being defective. Let $X$ count defective resistors. (a) Recommend a distribution. (b) Find the probability of more than one defective resistor.
 
 *Answer notes.* Assuming independent outcomes and a common defect probability, $X tilde.op op("Bin")(10,0.08)$ and $P(X>1)=1-0.92^(10)-10(0.08)0.92^9 approx 0.18788$.
 
 
-==== P2.2 — elevator and passenger arrivals (Textbook Problem 2.24, adapted)
+==== P2.2 — elevator and passenger arrivals (Textbook Problem 2.24, adapted) #metadata((kind: "mdtyp-question", id: "P2.2", summary: "Independent arrival streams: elevator and passenger counts in one minute"))
 
 A proposed 10-passenger elevator arrives in the lobby on average once per minute. Five passengers per minute are expected to use it; the company rejects the proposal.
 
@@ -1030,14 +1070,14 @@ A proposed 10-passenger elevator arrives in the lobby on average once per minute
 *Answer notes.* Model arrivals as independent Poisson processes with rates 1/min and 5/min. (a) $e^(-1)[1-P(op("Pois")(5)<= 9)]approx 0.01171$. (b) $5e^(-5)approx 0.03369$. The sheet's duplicated “not” is a typographical error; its solution uses no elevator arrival.
 
 
-==== P2.3 — Gamma plots, continuing P1.3
+==== P2.3 — Gamma plots, continuing P1.3 #metadata((kind: "mdtyp-question", id: "P2.3", summary: "Plot Gamma PDF and CDF in R; define and plot a function"))
 
 For $f_X(x)="xe"^(-x)$ on $x >= 0$ and $F_X(x)=1-(1+x)e^(-x)$ on $x>0$ (zero outside their lower support), (a) plot the PDF using R; (b) plot the CDF using R.
 
 *Answer notes.* Use `curve(dgamma(x, shape=2, scale=1), 0, 10)` and `curve(pgamma(x, shape=2, scale=1), 0, 10)`. The introductory exercise also asks you to define `fn <- function(x) x^2` and plot it from $-2$ to $2$, labelling the axis and title with `ylab` and `main=expression(f(x)==x^2)`.
 
 
-==== P2.4 — chain-link lengths (Textbook Problem 2.22)
+==== P2.4 — chain-link lengths (Textbook Problem 2.22) #metadata((kind: "mdtyp-question", id: "P2.4", summary: "Uniform chain-link lengths: PDF, CDF, mean and variance"))
 
 Individual chain-link lengths have the uniform PDF shown in the #link("../questions/probability-questions/prac/prac-sheet-2.pdf#page=2")[source figure, page 2]: a rectangle from $m-a/2$ to $m+a/2$.
 
@@ -1046,7 +1086,7 @@ Individual chain-link lengths have the uniform PDF shown in the #link("../questi
 *Answer notes.* Height $1/a$; CDF 0 below $m-a/2$, $(x-m+a/2)/a$ within the interval and 1 above $m+a/2$; mean $m$, variance $a^2/12$.
 
 
-==== P2.5 — standard Normal and underweight cereal
+==== P2.5 — standard Normal and underweight cereal #metadata((kind: "mdtyp-question", id: "P2.5", summary: "Normal tails and quantiles; choose SD to limit underweight cereal"))
 
 For standard Normal $Z$: (a) find $P(-0.34<Z<0.68)$; (b) find $k$ such that $P(Z>k)=0.025$.
 
@@ -1055,27 +1095,27 @@ A cereal-filling machine gives Normally distributed weights with mean 405 g and 
 *Answer notes.* (a) $Phi(0.68)-Phi(-0.34)approx 0.38482$; (b) $1.95996$; (c) $Phi(-0.7)=0.24196$; (d) $sigma=(398-405)/Phi^(-1)(0.01)approx 3.009$ g.
 
 
-==== P2.6 — lognormal
+==== P2.6 — lognormal #metadata((kind: "mdtyp-question", id: "P2.6", summary: "Lognormal lifetime: probability, mean and standard deviation"))
 
 $T$ is lognormal with log-scale parameters $mu=-1$, $sigma=2$. (a) Find $P(T<3)$. (b) Find the mean and SD of $T$.
 
 *Answer notes.* $Phi((ln 3+1)/2)approx 0.8530$; $E(T)=e^1 approx 2.7183$; $op("SD")(T)=sqrt((e^4-1)e^2)approx 19.901$.
 
 
-==== P2.7 — exponential cycles and a series system
+==== P2.7 — exponential cycles and a series system #metadata((kind: "mdtyp-question", id: "P2.7", summary: "Exponential lifetime: mean, survival given age and series-system reliability"))
 
 A device's cycles-to-failure $T$ is exponential with rate $lambda=0.003$ failures/cycle. (a) Determine mean cycles to failure. (b) Given survival through 300 cycles, find the probability that it fails after 1000 cycles. (c) Find the probability that a new device does not fail in its first 700 cycles.
 
 Independent $X_1 tilde.op op("Exp")(0.002)$, $X_2 tilde.op op("Exp")(0.003)$ and $X_3 tilde.op op("Exp")(0.005)$ are given. (d) For $Y=min(X_1,X_2,X_3)$, find $P(Y>300)$.
 
-*Answer notes.* (a) $333.333$ cycles; (b) $P(T>1000 ∣ T>300)=e^(-0.003(700))=0.122456$; (c) the same by memorylessness; (d) $e^(-(0.002+0.003+0.005)300)=e^(-3)=0.049787$.
+*Answer notes.* (a) $333.333$ cycles; (b) $P(T>1000 | T>300)=e^(-0.003(700))=0.122456$; (c) the same by memorylessness; (d) $e^(-(0.002+0.003+0.005)300)=e^(-3)=0.049787$.
 
 
-==== P2.8 — Weibull lifetime
+==== P2.8 — Weibull lifetime #metadata((kind: "mdtyp-question", id: "P2.8", summary: "Weibull lifetime: PDF, mean, variance and failure probability"))
 
 A component's lifetime $T$ in years has shape $beta=0.5$ and scale $eta=0.25$. (a) Write its PDF. (b) Graph the PDF in R. (c) Find its mean and variance, using $Gamma(n)=(n-1)!$. (d) Find the probability of failure within one year.
 
-*Answer notes.* For $t>0$, $f(t)=t^(-1/2)e^(-2sqrt(t))$, and zero for $t<0$; plot away from zero because the density diverges there. Mean $0.25 Gamma(3)=0.5$ yr; variance $0.25^2[Gamma(5)-Gamma(3)^2]=1.25$ yr${}^2$; $F(1)=1-e^(-2)=0.864665$.
+*Answer notes.* For $t>0$, $f(t)=t^(-1/2)e^(-2sqrt(t))$, and zero for $t<0$; plot away from zero because the density diverges there. Mean $0.25 Gamma(3)=0.5$ yr; variance $0.25^2[Gamma(5)-Gamma(3)^2]=1.25$ yr$""^2$; $F(1)=1-e^(-2)=0.864665$.
 
 
 === Practical 3 — hazard, MTTF and Weibull plots
@@ -1083,37 +1123,37 @@ A component's lifetime $T$ in years has shape $beta=0.5$ and scale $eta=0.25$. (
 Sources: #link("../questions/probability-questions/prac/prac-sheet-3.pdf")[question sheet] · #link("../questions/probability-questions/prac/prac-sheet-3-solution.pdf")[supplied solutions].
 
 
-==== P3.1 — derive hazard functions
+==== P3.1 — derive hazard functions #metadata((kind: "mdtyp-question", id: "P3.1", summary: "Derive exponential and Weibull hazard functions"))
 
 Use the expressions for PDF and CDF to derive hazard rates for (a) exponential lifetime with rate $1/eta$; (b) Weibull lifetime with shape $beta$ and characteristic life $eta$.
 
 *Answer notes.* $h(t)=f(t)/[1-F(t)]$ gives $1/eta$ and $(beta/eta)(t/eta)^(beta-1)$, respectively. *Source correction:* the background's alternative Weibull parameterisation mixes incompatible PDF/CDF expressions. If the CDF is $1-e^(-alpha t^beta)$, then $eta=alpha^(-1/beta)$; if it is $1-e^(-(t/alpha)^beta)$, then $alpha=eta$.
 
 
-==== P3.2 — exponential hazard interpretation
+==== P3.2 — exponential hazard interpretation #metadata((kind: "mdtyp-question", id: "P3.2", summary: "Interpret an exponential hazard rate; find MTTF and standard deviation"))
 
 A component lifetime in years has $f(t)=lambda e^(-lambda t)$, $t>0$, with $lambda=2$. This is Weibull with $beta=1$, $eta=1/lambda$. (a) Write the hazard and interpret it. (b) Calculate MTTF and SD.
 
 *Answer notes.* $h(t)=2$ per year: for small $Delta t$, conditional failure probability is approximately $2 Delta t$ given survival to $t$. It is a rate, not a probability of 2. MTTF and SD are both 0.5 years.
 
 
-==== P3.3 — solar-cell Weibull hazards
+==== P3.3 — solar-cell Weibull hazards #metadata((kind: "mdtyp-question", id: "P3.3", summary: "Solar-cell Weibull lifetime: hazard at different ages, MTTF and SD"))
 
 (a) Solar-cell lifetime in years is Weibull with $beta=2.5$, $eta=10$. (i) Write the hazard and evaluate it at 5, 10 and 20 years; interpret the trend. (ii) Find MTTF using $Gamma(1.4)=0.8873$. (iii) Find SD using $Gamma(1.8)=0.9314$.
 
 (b) Plot several Weibull hazards using Mathematica, MATLAB, R or another package. Explain changes caused by varying $beta$ at fixed $eta$, and varying $eta$ at fixed $beta$.
 
-*Answer notes.* $h(t)=0.25(t/10)^(1.5)$; the three rates are $0.08839$, $0.25$, $0.70711$ yr${}^(-1)$, increasing with age. MTTF $8.873$ yr; SD $10sqrt(0.9314-0.8873^2)approx 3.796$ yr. $beta<1,=1,>1$ gives decreasing, constant, increasing hazard. Increasing $eta$ lowers the hazard at any fixed positive $t$ and fixed $beta$; changing $beta$ changes the curve's shape, not simply its vertical height everywhere.
+*Answer notes.* $h(t)=0.25(t/10)^(1.5)$; the three rates are $0.08839$, $0.25$, $0.70711$ yr$""^(-1)$, increasing with age. MTTF $8.873$ yr; SD $10sqrt(0.9314-0.8873^2)approx 3.796$ yr. $beta<1,=1,>1$ gives decreasing, constant, increasing hazard. Increasing $eta$ lowers the hazard at any fixed positive $t$ and fixed $beta$; changing $beta$ changes the curve's shape, not simply its vertical height everywhere.
 
 
-==== P3.4 — reliability and Weibull probability plots
+==== P3.4 — reliability and Weibull probability plots #metadata((kind: "mdtyp-question", id: "P3.4", summary: "Derive PDF from reliability; linearise and interpret a Weibull probability plot"))
 
 (a) A component has $R(t)=exp[-(t/eta)^beta]$, $t>0$, for $beta,eta>0$. Show that its lifetime is Weibull. (b) Express $log[-log(1-F(t))]$ as a function of $log t$. (c) Plot $log t$ against $log[-log(1-F(t))]$ for $beta=2$, $eta=1$. (d) Explain how a Weibull plot checks model suitability. (e) Derive the corresponding relation for exponential lifetime of rate $1/eta$.
 
 *Answer notes.* Differentiating $F=1-R$ gives the Weibull PDF. Set $x=log t$, $y=log[-log(1-F(t))]$; then $y=beta x-beta log eta$. Thus $y=2x$ in (c), while the exponential case has $y=x-log eta$. Approximately straight empirical points support the model. *Axis clarification:* the usual Weibull plot puts $log t$ horizontally; literally reversing the source's “against” wording changes the slope to $1/beta$.
 
 
-==== P3.5 — lognormal light bulbs (Problem 2.37, adapted)
+==== P3.5 — lognormal light bulbs (Problem 2.37, adapted) #metadata((kind: "mdtyp-question", id: "P3.5", summary: "Lognormal bulbs: moments, survival and survival given current age"))
 
 A light-bulb lifetime $T$ is lognormal with $mu=10$, $sigma=0.2$ for $X=ln T$. (a) Find $E(T)$ and $E(X)$. (b) Find $op("Var")(T)$ and $op("Var")(X)$. (c) Find the probability a bulb lasts 30,000 hours. (d) Given that it has worked for 20,000 hours, find the probability it lasts 30,000 hours.
 
@@ -1125,14 +1165,14 @@ A light-bulb lifetime $T$ is lognormal with $mu=10$, $sigma=0.2$ for $X=ln T$. (
 Sources: #link("../questions/probability-questions/prac/prac-sheet-4.pdf")[question sheet] · #link("../questions/probability-questions/prac/prac-sheet-4-solution.pdf")[supplied solutions].
 
 
-==== P4.setup — explicit software exploration
+==== P4.setup — explicit software exploration #metadata((kind: "mdtyp-question", id: "P4.setup", summary: "R exploration: import data, inspect variables and create histograms"))
 
 Install/run RStudio; set the working directory to the downloaded data folder and inspect it using `getwd()`. Import text with `read.table(..., header=TRUE)` or CSV with `read.csv`; examine `sep` for text files. Review `write.csv` and `write.table`. Load `microwaves <- read.table("microwaves.txt", header=TRUE)`, then run `microwaves`, `head(microwaves)`, `head(microwaves,10)`, `microwaves$FailureTimes`, `class(microwaves)` and `class(microwaves$FailureTimes)`.
 
 *Source issue.* The sheet alternates between `microwave.txt` and `microwaves.txt`; use the actual filename. A dataframe and one numeric column are different object types.
 
 
-==== P4.1 — microwave-transmitter lifetime and street lamps
+==== P4.1 — microwave-transmitter lifetime and street lamps #metadata((kind: "mdtyp-question", id: "P4.1", summary: "Lifetime histograms and street-lamp failure/survival estimates"))
 
 (a) A life test on 200 microwave transmitters gives iid failure times in `microwave.txt`. (i) Construct a histogram in RStudio, trying `xlab`, `main` and `col="blue"`. (ii) Choose and justify a probability model from its shape.
 
@@ -1141,7 +1181,7 @@ Install/run RStudio; set the working directory to the downloaded data folder and
 *Answer notes.* The supplied solution describes the microwave histogram as right-skewed, suggesting an exponential model (shape alone does not prove constant hazard). For (b) the course's *mean-rank* estimates are $70/(99+1)=0.70$ and $0.30$. The empirical proportion/Kaplan–Meier estimate without earlier censoring would instead be $70/99$ and $29/99$; state which estimator you use.
 
 
-==== P4.2 — street-lamp exponential MLE
+==== P4.2 — street-lamp exponential MLE #metadata((kind: "mdtyp-question", id: "P4.2", summary: "Censored street-lamp data: exponential MLE and histogram/density scaling"))
 
 The bulbs in P4.1(b) have exponential lifetimes; right-censored data are in `streetlamps.xlsx`.
 
@@ -1151,10 +1191,10 @@ The bulbs in P4.1(b) have exponential lifetimes; right-censored data are in `str
 
 (c) Write $hat(f)(t)=hat(lambda) e^(-hat(lambda) t)$ and overlay it on the histogram. The source suggests $99hat(f)(t)$ if plotting counts.
 
-*Answer notes.* Survivors are recorded at the censoring time 18.34, causing the artificial spike; these are not failures. The supplied exposure is 1076.4 years, giving $hat(lambda)=70/1076.4 approx 0.065032$ yr${}^(-1)$. *Plotting corrections:* `nclass` is only a suggested number of bins; specify `breaks` to enforce width 1.5. For equal-width count bins of width $w$, the matching density overlay is $"nw" hat(f)(t)$, not merely $n hat(f)(t)$ unless $w=1$. A density histogram (`freq=FALSE`) avoids that scale issue.
+*Answer notes.* Survivors are recorded at the censoring time 18.34, causing the artificial spike; these are not failures. The supplied exposure is 1076.4 years, giving $hat(lambda)=70/1076.4 approx 0.065032$ yr$""^(-1)$. *Plotting corrections:* `nclass` is only a suggested number of bins; specify `breaks` to enforce width 1.5. For equal-width count bins of width $w$, the matching density overlay is $"nw" hat(f)(t)$, not merely $n hat(f)(t)$ unless $w=1$. A density histogram (`freq=FALSE`) avoids that scale issue.
 
 
-==== P4.3 — excavator ground-engaging tools (GET)
+==== P4.3 — excavator ground-engaging tools (GET) #metadata((kind: "mdtyp-question", id: "P4.3", summary: "Excavator tools: censoring, MTTF, Kaplan-Meier and model comparison"))
 
 The LMS file `exa1.csv` has 127 time-to-failure/censoring observations from one hard-rock excavator over eight years. Bucket teeth functionally fail when their ability to penetrate rock and required power become unacceptable. There are usually five to eight teeth per bucket; each recorded replacement may involve one or more teeth, but the records do not specify how many. Columns are `time` and `status`, where 0 means censored and 1 means failed.
 
@@ -1180,43 +1220,43 @@ Start RStudio; use `getwd()`, `list.files()` and, if needed, `setwd()`. Read `q3
 Sources: #link("../questions/probability-questions/prac/prac-sheet-5.pdf")[question sheet] · #link("../questions/probability-questions/prac/prac-sheet-5-solution.pdf")[supplied solutions].
 
 
-==== P5.1 — know your Z-tables
+==== P5.1 — know your Z-tables #metadata((kind: "mdtyp-question", id: "P5.1", summary: "Standard Normal tables: tail/interval probabilities and critical values"))
 
 For $Z tilde.op N(0,1)$ evaluate (a) $P(Z<1.282)$; (b) $P(Z>2.326)$; (c) $P(|Z|<0.1)$; (d) $z$ satisfying $P(|Z|<z)=0.95$.
 
 *Answer notes.* Approximately $0.900$, $0.010$, $0.07966$, $1.95996$.
 
 
-==== P5.2 — carbide drilling tips
+==== P5.2 — carbide drilling tips #metadata((kind: "mdtyp-question", id: "P5.2", summary: "Drilling-tip sample mean: accuracy probability and minimum sample size"))
 
 Drilling-depth lifetimes of 36 carbide tips are an iid Normal sample with unknown mean $mu$ and known SD $sigma=12$.
 
 (a) State the distribution of $macron(X)$ in terms of $mu$. (b) Find the probability that the sample mean lies within 4 units of the true mean. (c) Find the minimum sample size giving probability 0.99 of lying within 4 units.
 
-*Answer notes.* $macron(X)tilde.op N(mu,4)$, exactly; $P(|macron(X)-mu|<4)=P(|Z|<2)=0.95450$; $n="ceil".l(12 Phi^(-1)(0.995)/4)^2 "ceil".r=60$.
+*Answer notes.* $macron(X)tilde.op N(mu,4)$, exactly; $P(|macron(X)-mu|<4)=P(|Z|<2)=0.95450$; $n=ceil.l(12 Phi^(-1)(0.995)/4)^2 ceil.r=60$.
 
 
-==== P5.3 — know your t-tables
+==== P5.3 — know your t-tables #metadata((kind: "mdtyp-question", id: "P5.3", summary: "Student's t tables: probabilities, quantiles and degrees of freedom"))
 
 For $T tilde.op t_n$ evaluate (a) $P(T<2.160)$ with $n=13$; (b) $P(T>1.943)$ with $n=6$; (c) $P(|T|<2.750)$ with $n=30$; (d) $t$ such that $P(T<t)=0.01$ with $n=29$.
 
 *Answer notes.* Approximately $0.975$, $0.05$, $0.99$, $-2.462$. Here $n$ labels the degrees of freedom in the question, not a sample size that needs another subtraction of one.
 
 
-==== P5.4 — hole-punch machine
+==== P5.4 — hole-punch machine #metadata((kind: "mdtyp-question", id: "P5.4", summary: "Normal sample mean and estimated-SD statistic: exact or approximate laws?"))
 
 Hole diameters $X_1,dots,X_n$ are iid Normal with unknown mean $mu$ and unknown variance $sigma^2$. (a) State the distribution of $macron(X)=n^(-1)sum_i X_i$. (b) State the distribution of $(macron(X)-mu)/(S/sqrt(n))$. (c) Say whether each is exact or approximate and why.
 
 *Answer notes.* (a) $N(mu,sigma^2/n)$ exactly, even though parameters are unknown; (b) $t_(n-1)$ exactly, because the parent distribution is Normal and $S$ is its usual sample SD. Unknown parameters do not make the underlying Normal sampling law approximate.
 
 
-==== P5.5 — Weibull circuit-board CLT
+==== P5.5 — Weibull circuit-board CLT #metadata((kind: "mdtyp-question", id: "P5.5", summary: "Weibull circuit boards: individual survival, sample-mean CLT and sample size"))
 
 Fifty iid electronic circuit-board lifetimes $T_1,dots,T_(50)$ are Weibull with shape $beta=2$ and characteristic life $eta=5$.
 
 (a) Find $P(T_1>5)$. (b) State the distribution and numerical parameters of $macron(T)=50^(-1)sum_i T_i$, using $Gamma(1.5)=0.8862$. (c) Is the distribution exact or approximate? Explain. (d) Approximate $P(macron(T)>5)$. (e) Find the minimum sample size needed so that $P(|macron(T)-mu|<0.5)>0.95$, where $mu=E(T)$.
 
-*Answer notes.* (a) $e^(-1)=0.367879$. (b) $mu=4.431$, $sigma^2=25(1-0.8862^2)=5.366239$; $macron(T)thin dot(tilde.op)thin N(4.431,0.10732478)$. (c) CLT approximation because individual lifetimes are Weibull. (d) $1-Phi((5-4.431)/sqrt(0.10732478))approx 0.0412$. (e) $n>(Phi^(-1)(0.975)sigma/0.5)^2 approx 82.46$, hence 83 using the CLT. This is an approximate design calculation, not an exact probability guarantee for Weibull data.
+*Answer notes.* (a) $e^(-1)=0.367879$. (b) $mu=4.431$, $sigma^2=25(1-0.8862^2)=5.366239$; $macron(T)\ dot(tilde.op)\ N(4.431,0.10732478)$. (c) CLT approximation because individual lifetimes are Weibull. (d) $1-Phi((5-4.431)/sqrt(0.10732478))approx 0.0412$. (e) $n>(Phi^(-1)(0.975)sigma/0.5)^2 approx 82.46$, hence 83 using the CLT. This is an approximate design calculation, not an exact probability guarantee for Weibull data.
 
 
 == Statistics quizzes
@@ -1229,35 +1269,35 @@ Quiz numbers refer to the saved source Markdown, not newly generated practice.
 *Source transcription:* #link("../questions/probability-questions/quizes/stat-quiz-1.md")[stat-quiz-1.md]. Existing worked answers are study solutions, not a claim of an official marking key.
 
 
-==== Q1.1 — disjoint events
+==== Q1.1 — disjoint events #metadata((kind: "mdtyp-question", id: "Q1.1", summary: "Disjoint events: identify a valid set/probability statement"))
 
 *Original prompt:* “Which is true about disjoint sets?” The saved note includes $P(A union B^c)=1-P(B^c)$, but does not save the answer options.
 
-*Correction / answer status.* The saved expression is not generally true. For disjoint $A,B$, $A subset.eq B^c$, so $P(A union B^c)=P(B^c)=1-P(B)$. Also $P(A ∩ B)=0$ and $P(A union B)=P(A)+P(B)$. Without the missing choices an original option letter cannot be recovered.
+*Correction / answer status.* The saved expression is not generally true. For disjoint $A,B$, $A subset.eq B^c$, so $P(A union B^c)=P(B^c)=1-P(B)$. Also $P(A inter B)=0$ and $P(A union B)=P(A)+P(B)$. Without the missing choices an original option letter cannot be recovered.
 
 
-==== Q1.2 — union of independent events
+==== Q1.2 — union of independent events #metadata((kind: "mdtyp-question", id: "Q1.2", summary: "Independent events: probability of at least one among twenty"))
 
 $A_1,dots,A_(20)$ are independent events, each with probability $p$. Which expression for $P(A_1 union dots.c union A_(20))$ is correct?
 
 *Answer added.* $1-(1-p)^(20)$. Original choices were not saved.
 
 
-==== Q1.3 — independent intersection
+==== Q1.3 — independent intersection #metadata((kind: "mdtyp-question", id: "Q1.3", summary: "Independent events: find an intersection probability"))
 
 What is the intersection probability of two independent events?
 
-*Answer.* $P(A ∩ B)=P(A)P(B)$.
+*Answer.* $P(A inter B)=P(A)P(B)$.
 
 
-==== Q1.4 — reverse conditioning
+==== Q1.4 — reverse conditioning #metadata((kind: "mdtyp-question", id: "Q1.4", summary: "Reverse conditioning: recover an event probability from conditional data"))
 
-$P(A ∣ B)=0.3$, $P(B ∣ A)=0.1$ and $P(B)=0.1$. Find $P(A)$.
+$P(A | B)=0.3$, $P(B | A)=0.1$ and $P(B)=0.1$. Find $P(A)$.
 
-*Answer added.* $P(A ∩ B)=0.3(0.1)=0.03$, hence $P(A)=0.03/0.1=0.3$.
+*Answer added.* $P(A inter B)=0.3(0.1)=0.03$, hence $P(A)=0.03/0.1=0.3$.
 
 
-==== Q1.5 — seeded Normal sample median
+==== Q1.5 — seeded Normal sample median #metadata((kind: "mdtyp-question", id: "Q1.5", summary: "R: generate a seeded Normal sample and find its median"))
 
 Set the R random seed to 5507 and generate 20 observations from a Normal distribution with mean 10 and SD 5. Find the sample median to three decimal places.
 
@@ -1270,11 +1310,14 @@ round(median(sample_data), 3)
 ```
 
 
-==== Q1.6 — interval probability from a CDF
+==== Q1.6 — interval probability from a CDF #metadata((kind: "mdtyp-question", id: "Q1.6", summary: "Piecewise CDF: find an interval probability"))
 
 Given the CDF below, find $P(2.2<X<2.7)$:
 
-$ F(x)=cases(0 quad x <= 1, 1-frac(2, x(x+1)) quad x>1.) $
+$ F(x)=cases(
+ 0, & x <= 1,,
+ 1-frac(2, x(x+1)), & x>1.
+) $
 
 *Formatting repair.* The source omitted the closing cases environment and value at 1; continuity supplies $F(1)=0$.
 
@@ -1286,25 +1329,32 @@ F(2.7) - F(2.2)
 ```
 
 
-==== Q1.7 — PDF from a CDF
+==== Q1.7 — PDF from a CDF #metadata((kind: "mdtyp-question", id: "Q1.7", summary: "Piecewise CDF: derive the probability density"))
 
 Find the PDF for
 
-$ F(x)=cases(0 quad x <=-1, (x^2+2x+1)/9 quad -1<x <= 2, 1 quad x>2.) $
+$ F(x)=cases(
+ 0, & x <=-1,,
+ (x^2+2x+1)/9, & -1<x <= 2,,
+ 1, & x>2.
+) $
 
 *Answer.* Differentiate on each interval:
 
-$ f(x)=cases((2x+2)/9 quad -1<x<2, 0 quad "otherwise".) $
+$ f(x)=cases(
+ (2x+2)/9, & -1<x<2,,
+ 0, & "otherwise".
+) $
 
 
-==== Q1.8 — integrating a PDF
+==== Q1.8 — integrating a PDF #metadata((kind: "mdtyp-question", id: "Q1.8", summary: "Given a PDF: calculate probability over an interval"))
 
 A continuous random variable has $f(x)=x/32$ on $0<x<8$, zero elsewhere. Find $P(1.6<X<4.1)$ to two decimal places.
 
 *Answer completed.* Within the support, $F(x)=x^2/64$, so the probability is $(4.1^2-1.6^2)/64=0.22265625 approx 0.22$.
 
 
-==== Q1.9 — reliability tail
+==== Q1.9 — reliability tail #metadata((kind: "mdtyp-question", id: "Q1.9", summary: "Lifetime distribution: find a reliability tail probability"))
 
 Given $R(t)=e^(-2t)$, find the chance that the component lasts more than 2.5 time units.
 
@@ -1316,7 +1366,7 @@ Given $R(t)=e^(-2t)$, find the chance that the component lasts more than 2.5 tim
 *Source transcription:* #link("../questions/probability-questions/quizes/stat-quiz-2.md")[stat-quiz-2.md]. Existing worked answers are study solutions, not a claim of an official marking key.
 
 
-==== Q2.1
+==== Q2.1 #metadata((kind: "mdtyp-question", id: "Q2.1", summary: "Standard Normal: upper-tail probability beyond 0.21"))
 
 $Z tilde.op N(0,1)$. Find (to 2 decimal places): $P(Z>0.21)$
 
@@ -1338,7 +1388,7 @@ cat(sprintf("%.2f\n", p))
 ```
 
 
-==== Q2.2
+==== Q2.2 #metadata((kind: "mdtyp-question", id: "Q2.2", summary: "Standard Normal: find a positive cutoff from a two-sided tail probability"))
 
 $Z tilde.op N(0,1)$. Find (to 2 decimal places): Find the positive $z$ such that $P(|Z|>z)=0.85$.
 
@@ -1360,7 +1410,7 @@ cat(sprintf("%.2f\n", z))
 ```
 
 
-==== Q2.3
+==== Q2.3 #metadata((kind: "mdtyp-question", id: "Q2.3", summary: "Normal with given mean and variance: lower-tail probability"))
 
 $X tilde.op N(9,100)$.
 
@@ -1375,7 +1425,7 @@ $P(X<14.79)$
 import scipy.stats as stats
 
 mean = 9
-standard_deviation = 100*0.5
+standard_deviation = 100**0.5
 p = stats.norm.cdf(14.79, loc=mean, scale=standard_deviation)
 print(f"{p:.4f}")
 ```
@@ -1388,7 +1438,7 @@ cat(sprintf("%.4f\n", p))
 ```
 
 
-==== Q2.4
+==== Q2.4 #metadata((kind: "mdtyp-question", id: "Q2.4", summary: "Uniform on 0 to 13: probability between 3.2 and 8.9"))
 
 X has a Uniform distribution on the interval from 0 to 13. Find $P(3.2<X<8.9)$. (Give your answer to 3 decimal places.)
 
@@ -1417,7 +1467,7 @@ cat(sprintf("%.3f\n", p))
 ```
 
 
-==== Q2.5
+==== Q2.5 #metadata((kind: "mdtyp-question", id: "Q2.5", summary: "Gamma with shape and rate: upper-tail probability using R"))
 
 The Gamma distributions were seen in the Week 2 lecture. The cdf of these distributions cannot generally be expressed as an elementary function, so we need to use software to evaluate Gamma probabilities and quantiles (just as we have already seen for the Normal distribution, in Practical Sheet 1). We can perform the calculation of Gamma probabilities and quantiles using the functions pgamma() and qgamma(). Use the command help(pgamma), or Google, to see how these functions are used.
 
@@ -1443,7 +1493,7 @@ cat(sprintf("%.3f\n", p))
 ```
 
 
-==== Q2.6
+==== Q2.6 #metadata((kind: "mdtyp-question", id: "Q2.6", summary: "Gamma with shape and rate: find a quantile using R"))
 
 The Gamma distributions were seen in the Week 2 lecture. The cdf of these distributions cannot generally be expressed as an elementary function, so we need to use software to evaluate Gamma probabilities and quantiles (just as we have already seen for the Normal distribution, in Practical Sheet 1). We can perform the calculation of Gamma probabilities and quantiles using the functions pgamma() and qgamma(). Use the command help(pgamma), or Google, to see how these functions are used.
 
@@ -1469,7 +1519,7 @@ cat(sprintf("%.2f\n", c))
 ```
 
 
-==== Q2.7
+==== Q2.7 #metadata((kind: "mdtyp-question", id: "Q2.7", summary: "Lognormal T = exp(X): find the standard deviation"))
 
 Suppose that $X tilde.op N(5,1)$ and $T=e^X$.
 
@@ -1497,7 +1547,7 @@ from math import exp
 import scipy.stats as stats
 
 mean = 5
-standard_deviation = 1*0.5
+standard_deviation = 1**0.5
 sd_t = stats.lognorm.std(
     s=standard_deviation,
     scale=exp(mean),
@@ -1513,7 +1563,7 @@ cat(sprintf("%.2f\n", sd_t))
 ```
 
 
-==== Q2.8
+==== Q2.8 #metadata((kind: "mdtyp-question", id: "Q2.8", summary: "Lognormal T = exp(X): probability of exceeding 35"))
 
 Suppose that $X tilde.op N(6,16)$ and $T=e^X$.
 
@@ -1528,7 +1578,7 @@ from math import log
 import scipy.stats as stats
 
 mean = 6
-standard_deviation = 16*0.5
+standard_deviation = 16**0.5
 p = stats.norm.sf(
     log(35),
     loc=mean,
@@ -1550,7 +1600,7 @@ cat(sprintf("%.2f\n", p))
 ```
 
 
-==== Q2.9
+==== Q2.9 #metadata((kind: "mdtyp-question", id: "Q2.9", summary: "Weibull with shape and characteristic life: find standard deviation"))
 
 X observes a Weibull distribution with shape parameter
 
@@ -1587,7 +1637,7 @@ cat(sprintf("%.2f\n", sd_x))
 ```
 
 
-==== Q2.10
+==== Q2.10 #metadata((kind: "mdtyp-question", id: "Q2.10", summary: "Weibull with shape and characteristic life: survival beyond 4.7"))
 
 X observes a Weibull distribution with shape parameter
 
@@ -1630,7 +1680,7 @@ cat(sprintf("%.3f\n", p))
 ```
 
 
-==== Q2.11
+==== Q2.11 #metadata((kind: "mdtyp-question", id: "Q2.11", summary: "Exponential: infer the mean from a given failure probability"))
 
 X is an exponential random variable with $P(X<6.21)=0.632$. Find the mean of X (give answers correct to 2 decimal places).
 
@@ -1673,7 +1723,7 @@ Answers 0.42, 0.19, 0.7187, 0.438, 0.251, 2.52, 320.75, 0.73, 14.30, 0.188, 6.21
 *Source transcription:* #link("../questions/probability-questions/quizes/stat-quiz-3.md")[stat-quiz-3.md]. Existing worked answers are study solutions, not a claim of an official marking key.
 
 
-==== Q3.1
+==== Q3.1 #metadata((kind: "mdtyp-question", id: "Q3.1", summary: "Given a rational reliability function: find the PDF at a specified time"))
 
 _1 point_
 
@@ -1710,7 +1760,7 @@ Therefore,
 $ f(2.2) = 0.10. $
 
 
-==== Q3.2
+==== Q3.2 #metadata((kind: "mdtyp-question", id: "Q3.2", summary: "Given a rational reliability function: find hazard at a specified time"))
 
 _1 point_
 
@@ -1747,7 +1797,7 @@ Hence,
 $ h(2) = 0.58. $
 
 
-==== Q3.3
+==== Q3.3 #metadata((kind: "mdtyp-question", id: "Q3.3", summary: "Reliability and hazard: identify the correct interpretation"))
 
 _1 point_
 
@@ -1773,7 +1823,7 @@ $ "Option B". $
 A constant hazard rate means the failure tendency remains constant over time; it neither accelerates nor decelerates.
 
 
-==== Q3.4
+==== Q3.4 #metadata((kind: "mdtyp-question", id: "Q3.4", summary: "Exponential: find MTTF from a constant hazard rate"))
 
 _1 point_
 
@@ -1805,7 +1855,7 @@ Therefore,
 $ op("MTTF") = 1.96. $
 
 
-==== Q3.5
+==== Q3.5 #metadata((kind: "mdtyp-question", id: "Q3.5", summary: "Exponential: survival until 17 weeks given survival to 7.9 weeks"))
 
 _1 point_
 
@@ -1818,26 +1868,26 @@ Give your answer correct to two decimal places.
 
 The required conditional probability is
 
-$ P(T > 17 ∣ T > 7.9). $
+$ P(T > 17 | T > 7.9). $
 
 The exponential distribution has the memoryless property, so
 
-$ P(T > 17 ∣ T > 7.9)
+$ P(T > 17 | T > 7.9)
 = P(T > 17 - 7.9). $
 
 Using the exponential reliability function $R(t) = e^(-lambda t)$,
 
-$ P(T > 17 ∣ T > 7.9)
+$ P(T > 17 | T > 7.9)
 = e^(-0.13(17 - 7.9)) \
 = e^(-1.183) \
 = 0.306358 dots $
 
 Therefore,
 
-$ P(T > 17 ∣ T > 7.9) = 0.31. $
+$ P(T > 17 | T > 7.9) = 0.31. $
 
 
-==== Q3.6
+==== Q3.6 #metadata((kind: "mdtyp-question", id: "Q3.6", summary: "Exponential: evaluate the hazard function at a given age"))
 
 _1 point_
 
@@ -1857,7 +1907,7 @@ Since $lambda = 2.7$,
 $ h(0.8) = 2.7. $
 
 
-==== Q3.7
+==== Q3.7 #metadata((kind: "mdtyp-question", id: "Q3.7", summary: "Weibull with shape and scale: identify its hazard function"))
 
 _1 point_
 
@@ -1895,7 +1945,7 @@ Therefore, the correct expression is
 $ "Option D". $
 
 
-==== Q3.8
+==== Q3.8 #metadata((kind: "mdtyp-question", id: "Q3.8", summary: "Constant-hazard system: failure probability between times 1 and 2"))
 
 _1 point_
 
@@ -1926,7 +1976,7 @@ Therefore,
 $ P(1 < T < 2) = 0.248. $
 
 
-==== Q3.9
+==== Q3.9 #metadata((kind: "mdtyp-question", id: "Q3.9", summary: "Weibull: calculate MTTF using a supplied Gamma-function value"))
 
 _1 point_
 
@@ -1961,7 +2011,7 @@ Therefore,
 $ op("MTTF") = 0.91. $
 
 
-==== Q3.10
+==== Q3.10 #metadata((kind: "mdtyp-question", id: "Q3.10", summary: "Power-law reliability function: determine MTTF"))
 
 _1 point_
 
@@ -1998,7 +2048,7 @@ $ op("MTTF") = 0.17. $
 *Source transcription:* #link("../questions/probability-questions/quizes/stat-quiz-4.md")[stat-quiz-4.md]. Existing worked answers are study solutions, not a claim of an official marking key.
 
 
-==== Q4.1
+==== Q4.1 #metadata((kind: "mdtyp-question", id: "Q4.1", summary: "Reliability as a sum of exponentials: determine system MTTF"))
 
 _1 point_
 
@@ -2040,7 +2090,7 @@ $ op("MTTF")=3.967. $
 ]
 
 
-==== Q4.2
+==== Q4.2 #metadata((kind: "mdtyp-question", id: "Q4.2", summary: "Failure-time histogram: choose a plausible lifetime distribution"))
 
 _1 point_
 
@@ -2066,7 +2116,7 @@ Therefore, a reasonable first choice is
 $ "Option A: Weibull with "beta>1. $
 
 
-==== Q4.3
+==== Q4.3 #metadata((kind: "mdtyp-question", id: "Q4.3", summary: "Mean ranks: estimate CDF at the ninth failure among eleven components"))
 
 _1 point_
 
@@ -2093,13 +2143,13 @@ Therefore,
 $ hat(F)(13.48)=0.75. $
 
 
-==== Q4.4
+==== Q4.4 #metadata((kind: "mdtyp-question", id: "Q4.4", summary: "Ten complete lifetimes: maximum-likelihood estimate of exponential rate"))
 
 _1 point_
 
 A lifetime test is carried out on $10$ components, with failure times
 
-$ 9.7,thin 3.3,thin 5.4,thin 2.5,thin 8.7,thin 2.2,thin 5.5,thin 7.9,thin 0.4,thin 8.1. $
+$ 9.7,\ 3.3,\ 5.4,\ 2.5,\ 8.7,\ 2.2,\ 5.5,\ 7.9,\ 0.4,\ 8.1. $
 
 The failure times are assumed to be iid exponential random variables with hazard rate $lambda$.
 
@@ -2137,13 +2187,13 @@ Therefore,
 $ hat(lambda)=0.186. $
 
 
-==== Q4.5
+==== Q4.5 #metadata((kind: "mdtyp-question", id: "Q4.5", summary: "Ten failures and five censored components: estimate exponential rate"))
 
 _1 point_
 
 A total of $15$ components are observed from $t=0$ until $t=50$. Ten components fail during this interval, at the following times:
 
-$ 5.3,thin 5.1,thin 9.4,thin 6.9,thin 3.7,thin 5.0,thin 6.0,thin 8.8,thin 9.9,thin 7.7. $
+$ 5.3,\ 5.1,\ 9.4,\ 6.9,\ 3.7,\ 5.0,\ 6.0,\ 8.8,\ 9.9,\ 7.7. $
 
 The remaining five components are right-censored at $t=50$. The component lifetimes are assumed to be iid exponential random variables with hazard rate $lambda$.
 
@@ -2180,13 +2230,13 @@ and hence
 $ hat(lambda)=0.031. $
 
 
-==== Q4.6
+==== Q4.6 #metadata((kind: "mdtyp-question", id: "Q4.6", summary: "Repairable-system failure timestamps: determine MTBF"))
 
 _1 point_
 
 A repairable component fails at times
 
-$ t=1,thin 2,thin 3,thin 5,thin 8. $
+$ t=1,\ 2,\ 3,\ 5,\ 8. $
 
 No further failures are observed during the observation period, which ends at $t=17.5$.
 
@@ -2213,13 +2263,13 @@ Thus,
 $ hat(op("MTBF"))=3.500. $
 
 
-==== Q4.7
+==== Q4.7 #metadata((kind: "mdtyp-question", id: "Q4.7", summary: "Repairable-system failure timestamps: determine inter-failure SD"))
 
 _1 point_
 
 A repairable component fails at times
 
-$ t=2,thin 3,thin 6,thin 9,thin 10. $
+$ t=2,\ 3,\ 6,\ 9,\ 10. $
 
 No further failures are observed during the observation period, which ends at $t=11$.
 
@@ -2232,8 +2282,8 @@ _Integer, decimal, or E notation allowed._
 
 Starting from $t=0$, the five completed times between failures are
 
-$ 2,thin 3-2,thin 6-3,thin 9-6,thin 10-9
-=2,thin 1,thin 3,thin 3,thin 1. $
+$ 2,\ 3-2,\ 6-3,\ 9-6,\ 10-9
+=2,\ 1,\ 3,\ 3,\ 1. $
 
 The interval from $t=10$ to $t=11$ is right-censored because no failure occurs at its end, so it is not a completed time between failures.
 
@@ -2255,15 +2305,15 @@ $ hat(sigma)=0.894. $
 *Ambiguity note for Q4.7.* The saved answer uses divisor $n=5$ on completed intervals only. R's usual sample SD uses $n-1$ and would give 1.000. Neither descriptive calculation corrects for right censoring. Because the prompt does not specify a divisor or lifetime model, preserve 0.894 as the existing study answer rather than claiming a unique official answer.
 
 
-==== Q4.8
+==== Q4.8 #metadata((kind: "mdtyp-question", id: "Q4.8", summary: "Lifetimes with suspensions: Kaplan-Meier reliability at 18 hours"))
 
 _1 point_
 
 Use the R packages `survival` and `survminer` for Questions 8--10. The following data give the lifetimes, in operating hours, of $23$ identical components. Measurements marked with an asterisk are suspensions:
 
-$ 8.0,thin 21.3,thin 25.5,thin 8.1,thin 4.5,thin 4.2,thin 13.2,thin 9.9,thin 11.9^ast, \
-27.0,thin 25.7,thin 25.8,thin 28.6,thin 14.5,thin 8.0,thin 21.9,thin 10.0^ast, \
-10.6,thin 16.5^ast,thin 34.9,thin 17.5,thin 5.4,thin 20.2. $
+$ 8.0,\ 21.3,\ 25.5,\ 8.1,\ 4.5,\ 4.2,\ 13.2,\ 9.9,\ 11.9^ast, \
+27.0,\ 25.7,\ 25.8,\ 28.6,\ 14.5,\ 8.0,\ 21.9,\ 10.0^ast, \
+10.6,\ 16.5^ast,\ 34.9,\ 17.5,\ 5.4,\ 20.2. $
 
 Calculate the Kaplan--Meier estimate of $R(18)$, giving your answer to three decimal places.
 
@@ -2303,15 +2353,15 @@ Therefore,
 $ hat(R)(18)=0.494. $
 
 
-==== Q4.9
+==== Q4.9 #metadata((kind: "mdtyp-question", id: "Q4.9", summary: "Lifetimes with suspensions: Kaplan-Meier failure probability by 14 hours"))
 
 _1 point_
 
 The following data give the lifetimes, in operating hours, of $23$ identical components. Measurements marked with an asterisk are suspensions:
 
-$ 8.0,thin 21.3,thin 25.5,thin 8.1,thin 4.5,thin 4.2,thin 13.2,thin 9.9,thin 11.9^ast, \
-27.0,thin 25.7,thin 25.8,thin 28.6,thin 15.5,thin 9.0,thin 22.9,thin 11.0^ast, \
-11.6,thin 17.5^ast,thin 35.9,thin 18.5,thin 6.4,thin 21.2. $
+$ 8.0,\ 21.3,\ 25.5,\ 8.1,\ 4.5,\ 4.2,\ 13.2,\ 9.9,\ 11.9^ast, \
+27.0,\ 25.7,\ 25.8,\ 28.6,\ 15.5,\ 9.0,\ 22.9,\ 11.0^ast, \
+11.6,\ 17.5^ast,\ 35.9,\ 18.5,\ 6.4,\ 21.2. $
 
 Use the Kaplan--Meier approach to estimate $F(14)$, giving your answer to three decimal places.
 
@@ -2358,15 +2408,15 @@ Therefore,
 $ hat(F)(14)=0.401. $
 
 
-==== Q4.10
+==== Q4.10 #metadata((kind: "mdtyp-question", id: "Q4.10", summary: "Weibull shape MLE: omit censored records as instructed"))
 
 _1 point_
 
 The following data give the lifetimes, in operating hours, of $23$ identical components. Measurements marked with an asterisk are suspensions:
 
-$ 8.0,thin 21.3,thin 25.5,thin 8.1,thin 4.5,thin 4.2,thin 13.2,thin 9.9,thin 11.9^ast, \
-27.0,thin 25.7,thin 25.8,thin 28.6,thin 13.5,thin 7.0,thin 20.9,thin 9.0^ast, \
-9.6,thin 15.5^ast,thin 33.9,thin 16.5,thin 4.4,thin 19.2. $
+$ 8.0,\ 21.3,\ 25.5,\ 8.1,\ 4.5,\ 4.2,\ 13.2,\ 9.9,\ 11.9^ast, \
+27.0,\ 25.7,\ 25.8,\ 28.6,\ 13.5,\ 7.0,\ 20.9,\ 9.0^ast, \
+9.6,\ 15.5^ast,\ 33.9,\ 16.5,\ 4.4,\ 19.2. $
 
 Evaluate the MLE of $beta$ for a two-parameter Weibull model with threshold zero. Omit the censored data from the calculation and give your answer to three decimal places.
 
@@ -2425,7 +2475,7 @@ $ hat(beta)=1.889. $
 The source references a Python verification script that is absent from this workspace; no verification claim is carried over from that reference. In the Normal notation below, the second parameter is the variance.
 
 
-==== Q5.1
+==== Q5.1 #metadata((kind: "mdtyp-question", id: "Q5.1", summary: "Normal population: identify the distribution of the sample mean"))
 
 _1 point_
 
@@ -2459,7 +2509,7 @@ Therefore,
 $ macron(X)tilde.op N(49,0.5)", so the answer is Option C". $
 
 
-==== Q5.2
+==== Q5.2 #metadata((kind: "mdtyp-question", id: "Q5.2", summary: "Normal sample mean: probability above a specified threshold"))
 
 Let $X_1,dots,X_(14)$ be a simple random sample from a normal population with mean $14$ and variance $25$. Find
 
@@ -2490,7 +2540,7 @@ Hence,
 $ P(macron(X)>13)=0.77. $
 
 
-==== Q5.3
+==== Q5.3 #metadata((kind: "mdtyp-question", id: "Q5.3", summary: "Normal sample mean: two-sided deviation probability with known SD"))
 
 _1 point_
 
@@ -2522,7 +2572,7 @@ Therefore,
 $ P (|macron(X)-mu|>0.41 )=0.9560. $
 
 
-==== Q5.4
+==== Q5.4 #metadata((kind: "mdtyp-question", id: "Q5.4", summary: "Normal sample mean: minimum sample size for a specified accuracy"))
 
 _1 point_
 
@@ -2556,7 +2606,7 @@ $ n_(min)=27. $
 Indeed, the middle probabilities for $n=26$ and $n=27$ are approximately $0.98921$ and $0.99063$, respectively, confirming that $27$ is the minimum.
 
 
-==== Q5.5
+==== Q5.5 #metadata((kind: "mdtyp-question", id: "Q5.5", summary: "Student's t: positive critical value from a two-sided tail probability"))
 
 _1 point_
 
@@ -2586,7 +2636,7 @@ Therefore,
 $ t=3.810. $
 
 
-==== Q5.6
+==== Q5.6 #metadata((kind: "mdtyp-question", id: "Q5.6", summary: "Student's t: lower-tail probability with eleven degrees of freedom"))
 
 _1 point_
 
@@ -2608,7 +2658,7 @@ Hence,
 $ P(T<2.718)=0.990. $
 
 
-==== Q5.7
+==== Q5.7 #metadata((kind: "mdtyp-question", id: "Q5.7", summary: "Student's t: upper-tail probability with twenty-three degrees of freedom"))
 
 _1 point_
 
@@ -2630,7 +2680,7 @@ Therefore,
 $ P(T>2.069)=0.025. $
 
 
-==== Q5.8
+==== Q5.8 #metadata((kind: "mdtyp-question", id: "Q5.8", summary: "IID population with given moments: approximate sample-mean distribution"))
 
 _1 point_
 
@@ -2661,12 +2711,12 @@ op("Var")(macron(Y))
 
 Thus,
 
-$ macron(Y)thin dot(tilde.op)thin N(0.74,0.0112)", so the answer is Option A". $
+$ macron(Y)\ dot(tilde.op)\ N(0.74,0.0112)", so the answer is Option A". $
 
 The value $0.1059$ in Option C is the standard error, not the variance.
 
 
-==== Q5.9
+==== Q5.9 #metadata((kind: "mdtyp-question", id: "Q5.9", summary: "Normal population: is the sample-mean distribution only approximate?"))
 
 _1 point_
 
@@ -2695,7 +2745,7 @@ Therefore,
 $ "Option C: the distribution is exactly normal". $
 
 
-==== Q5.10
+==== Q5.10 #metadata((kind: "mdtyp-question", id: "Q5.10", summary: "IID lifetimes with given moments: approximate sample-mean upper tail"))
 
 _1 point_
 
@@ -2710,7 +2760,7 @@ Give the answer correct to three decimal places.
 
 The population distribution is not specified, but $n=48$ is large. The central limit theorem gives
 
-$ macron(T)thin dot(tilde.op)thin N ( 18,frac(63, 48)). $
+$ macron(T)\ dot(tilde.op)\ N ( 18,frac(63, 48)). $
 
 The standard error and corresponding $z$-score are
 
@@ -2738,7 +2788,7 @@ $ P(macron(T)>20.2)approx 0.027. $
 Sources: #link("../questions/midsem/Mid%20Sem%202025%20Sem-1.pdf")[original paper] · #link("../questions/midsem/Mid-Sem-2025-Sem-1-questions-and-answers.md")[complete existing transcription]. Questions 1, 2, 5–7, 9 and 11–12 are engineering and appear in #link("engineering-content.md")[engineering notes].
 
 
-=== M2025.3 — original Question 3
+=== M2025.3 — original Question 3 #metadata((kind: "mdtyp-question", id: "M2025.3", summary: "Censored telemetry-system lifetimes: failure rate per million hours"))
 
 In the week 4 case study, we discussed the potential reliability of a meteorology telemetry system being designed by the New Products section of Electrosystems. Let’s assume that they won the contract and installed 7 systems. After 4 years of operation, they conduct a review of the performance of these systems.
 
@@ -2765,11 +2815,11 @@ $ lambda
 failures per million hours.
 
 
-=== M2025.4 — original Question 4
+=== M2025.4 — original Question 4 #metadata((kind: "mdtyp-question", id: "M2025.4", summary: "Reliability block diagram: combine parallel and series components"))
 
 The reliability block diagram of a system is shown in the following figure with component reliability noted in each block, where $a=0.62$, $b=0.91$ and $c=0.70$. What is the reliability of the system? Give your answer to 2 d.p.
 
-#figure(image("assets/question-04-reliability-block-diagram.jpg", width: 85%), caption: [Reliability block diagram for Question 4])
+#figure(image("assets/question-04-reliability-block-diagram.jpg"), caption: [Reliability block diagram for Question 4])
 
 _Figure 2: Figure for Q4_
 
@@ -2786,7 +2836,7 @@ $ R_(upright("system"))
 =0.602 approx 0.60. $
 
 
-=== M2025.8 — original Question 8
+=== M2025.8 — original Question 8 #metadata((kind: "mdtyp-question", id: "M2025.8", summary: "Weibull foundations: failure probability over a 39-year design life"))
 
 A geotechnical engineering team is assessing the long-term reliability of offshore wind turbine foundations subjected to cyclic loading. They use Weibull analysis to model the time to failure based on historical data and laboratory test results. The team gathers failure data from past projects and laboratory tests on monopile foundations under cyclic loading. The dataset includes time to failure (in years) for different foundations. They plot the data using Weibull analysis and obtain a shape function = 1.2 and scale factor = 14.
 
@@ -2804,7 +2854,7 @@ $ F(39)=1-exp [-( frac(39, 14))^(1.2)]
 =0.967261 approx 0.967. $
 
 
-=== M2025.10 — original Question 10
+=== M2025.10 — original Question 10 #metadata((kind: "mdtyp-question", id: "M2025.10", summary: "Foundation tests: total exposure with survivors and invalid tests"))
 
 A geotechnical engineering team is assessing the long-term reliability of offshore wind turbine foundations subjected to cyclic loading. The team gathers failure data from past projects and laboratory tests on monopile foundations under cyclic loading. The dataset includes time to failure (in years) for different foundations. The team finds information for 113 foundation field tests. Five tests were unsuccessful because the equipment broke during testing. Five foundations failed under cyclic loading after 3, 5, 6, 8, 12 months, respectively. The remaining tests were carried out for 24 months and the foundations did not fail.
 
@@ -2821,9 +2871,9 @@ What is the total time on test for the foundations? Give your answer in months.
 $ T=(3+5+6+8+12)+103(24)=34+2472=2506" months". $
 
 
-=== M2025.13 — original Question 13
+=== M2025.13 — original Question 13 #metadata((kind: "mdtyp-question", id: "M2025.13", summary: "Disjoint and independent events: conditional probability of a union"))
 
-Events $A$, $B$ and $C$ have respective probabilities $P(A)=0.2$, $P(B)=0.1$, and $P(C)=0.4$. Given that $A$ and $B$ are disjoint, that $B$ and $C$ are independent, and that $P(A ∩ C)=0.1$, which ONE of the following is the correct value for $P(A union B ∣ C)$? (2dp)
+Events $A$, $B$ and $C$ have respective probabilities $P(A)=0.2$, $P(B)=0.1$, and $P(C)=0.4$. Given that $A$ and $B$ are disjoint, that $B$ and $C$ are independent, and that $P(A inter C)=0.1$, which ONE of the following is the correct value for $P(A union B | C)$? (2dp)
 
 - A. 0.30
 - B. 0.35
@@ -2831,22 +2881,22 @@ Events $A$, $B$ and $C$ have respective probabilities $P(A)=0.2$, $P(B)=0.1$, an
 - D. 0.70
 - E. None of the above
 
-*Answer: B. 0.35.* Since $B$ and $C$ are independent, $P(B ∩ C)=0.1(0.4)=0.04$. Since $A$ and $B$ are disjoint,
+*Answer: B. 0.35.* Since $B$ and $C$ are independent, $P(B inter C)=0.1(0.4)=0.04$. Since $A$ and $B$ are disjoint,
 
-$ P(A union B ∣ C)
-=frac(P(A ∩ C)+P(B ∩ C), P(C))
+$ P(A union B | C)
+=frac(P(A inter C)+P(B inter C), P(C))
 =frac(0.10+0.04, 0.40)
 =0.35. $
 
 
-=== M2025.14 — original Question 14
+=== M2025.14 — original Question 14 #metadata((kind: "mdtyp-question", id: "M2025.14", summary: "Event probabilities: identify an impossible assignment"))
 
 If $A$ and $B$ are two events, which ONE of the following assignments of probabilities is valid?
 
-- A. $P(A)=0.5$, $P(B)=0.7$, $P(A ∩ B)=0.1$
+- A. $P(A)=0.5$, $P(B)=0.7$, $P(A inter B)=0.1$
 - B. $P(A)=0.4$, $P(B)=0.3$, $P(A union B)=0.2$
 - C. $P(A)=0.1$, $P(B)=0.3$, $P(A union B)=0.5$
-- D. $P(A)=0.7$, $P(B)=0.2$, $P(A ∩ B)=0.1$
+- D. $P(A)=0.7$, $P(B)=0.2$, $P(A inter B)=0.1$
 - E. None of the above
 
 *Answer: D.* It gives
@@ -2856,7 +2906,7 @@ $ P(A union B)=0.7+0.2-0.1=0.8, $
 which is valid. The other assignments violate the bounds on intersections or unions.
 
 
-=== M2025.15 — original Question 15
+=== M2025.15 — original Question 15 #metadata((kind: "mdtyp-question", id: "M2025.15", summary: "Poisson repair requests: probability of three requests in four weeks"))
 
 The arrival of requests for repair of excavators from a mining site can be approximated as a Poisson process with rate of 1 request per week. What is the probability that there will be 3 requests for repair in a 4 weeks period? (3dp)
 
@@ -2871,7 +2921,7 @@ The arrival of requests for repair of excavators from a mining site can be appro
 $ P(X=3)=frac(4^3 e^(-4), 3!)=0.195367 approx 0.195. $
 
 
-=== M2025.16 — original Question 16
+=== M2025.16 — original Question 16 #metadata((kind: "mdtyp-question", id: "M2025.16", summary: "Lognormal pump repair time: probability a repair exceeds four hours"))
 
 A maintenance planner looks back on time taken to repair a centrifugal pump. The past data indicates that the repair time $T$ is distributed as $T=exp(X)$, where $X tilde.op N(1.2,4.3)$. There is a shutdown coming up and the operations supervisor wants to know the probability that a repair will take more than 4 hours. Which of the following is the correct value for this probability? (3dp)
 
@@ -2890,7 +2940,7 @@ $ P(T>4)
 =0.464207 approx 0.464. $
 
 
-=== M2025.17 — original Question 17
+=== M2025.17 — original Question 17 #metadata((kind: "mdtyp-question", id: "M2025.17", summary: "Normal bucket loads: probability the mean of twelve is underloaded"))
 
 An excavator bucket has a bucket capacity of $11.5 thin upright(m)^3$ with a standard deviation of $1.4 thin upright(m)^3$. Assume that the volume of material in a loaded bucket is Normally distributed. A bucket is considered “underloaded” if its material volume is less than $10.88 thin upright(m)^3$. Let $overline(X)$ denote the average material volume of 12 randomly chosen loaded buckets. What is the probability that $overline(X)$ is less than $10.88 thin upright(m)^3$? (3dp)
 
@@ -2907,7 +2957,7 @@ $ P(overline(X)<10.88)
 =0.062502 approx 0.063. $
 
 
-=== M2025.18 — original Question 18
+=== M2025.18 — original Question 18 #metadata((kind: "mdtyp-question", id: "M2025.18", summary: "Normal pump lifetimes, estimated SD: distribution of standardised mean"))
 
 A hydraulic pump used in an excavator has MTTF of $mu$ hours and standard deviation $sigma$ hours. Assume that the lifetime of a hydraulic pump is Normally distributed. Let $overline(X)$ and $S$ denote the average lifetime and standard deviation of 20 randomly chosen hydraulic pumps.
 
@@ -2924,11 +2974,11 @@ $ frac(overline(X)-mu, S/sqrt(n))thin? $
 *Answer: A. $t$ distribution with 19 degrees of freedom, exactly.* The population is Normal, its standard deviation is estimated using $S$, and $n=20$, so the statistic has an exact $t_(n-1)=t_(19)$ distribution.
 
 
-=== M2025.19 — original Question 19
+=== M2025.19 — original Question 19 #metadata((kind: "mdtyp-question", id: "M2025.19", summary: "Weibull lifetime: assess conditional survival and CDF/reliability identities"))
 
 Suppose the life time, $X$, of a component is modelled as $op("Weibull")(beta,eta)$, with $beta != 1$. Let $F(t)$, $R(t)$ and $h(t)$ be its CDF, reliability function and hazard rate function, respectively. Which ONE of the following is true?
 
-- A. $P(X>t+s ∣ X>s)=P(X>t)$, for $s,t>0$.
+- A. $P(X>t+s | X>s)=P(X>t)$, for $s,t>0$.
 - B. $F(t+s)=R(t+s)h(t+s)$, for $s,t>0$.
 - C. $R(t+s)=R(t)R(s)$, for $s,t>0$.
 - D. $F(t+s)=F(t)F(s)$, for $s,t>0$.
@@ -2937,7 +2987,7 @@ Suppose the life time, $X$, of a component is modelled as $op("Weibull")(beta,et
 *Answer: E. None of the above.* For $beta != 1$, a Weibull lifetime is not memoryless, so A and C are false. The hazard identity is $f(t)=R(t)h(t)$, using the density $f$, not the CDF $F$, so B is false; D is not a CDF identity.
 
 
-=== M2025.20 — original Question 20
+=== M2025.20 — original Question 20 #metadata((kind: "mdtyp-question", id: "M2025.20", summary: "Constant-hazard component: find hazard from mean lifetime"))
 
 An electronic component is assumed to have a constant hazard rate. The mean life time of the component is 0.125 years. What is the hazard rate of the component?
 
@@ -2960,7 +3010,7 @@ $ lambda=frac(1, 0.125)=8" year"^(-1). $
 Source: #link("../questions/week4-quiz.md")[saved Week 4 quiz]. The source saves three prompts, referencing an earlier Q1 that is not present in this file. The module-rate background is discussed in #link("engineering-content.md")[engineering notes].
 
 
-==== E4.1 — reliability of five sensors
+==== E4.1 — reliability of five sensors #metadata((kind: "mdtyp-question", id: "E4.1", summary: "Five series sensors: reliability over ten years from component failure rates"))
 
 We know from Q1 that the failure rate of an instrument module is 1.91 failures per million hours and that an instrument module is considered failed if a single sensor on the module has failed. For the purposes of this question assume that the failure rate of a single sensor is therefore 1.91 failures per million hours.
 
@@ -2974,7 +3024,7 @@ The customer's requirement is that there are five critical sensors and if one fa
 *Recorded answer: A. Source inconsistency:* with independent exponential sensors and 365 days/year, the literal data give $R=e^(-5(1.91 times 10^{-6})(87600))approx 0.433$. The keyed 0.426 uses the workshop's rounded 1.95 failures/million hours: $e^(-5(1.95 times 10^{-6})(87600))approx 0.426$. Do not change 1.91 silently. In practice a module rate cannot simply be assigned to every sensor, but the prompt explicitly makes that assumption.
 
 
-==== E4.2 — whole-system failure rate
+==== E4.2 — whole-system failure rate #metadata((kind: "mdtyp-question", id: "E4.2", summary: "Series system: combine sensor and board failure rates"))
 
 What is the failure rate of the proposed meteorological system? Assume the system includes the instrument module, signal-processing board, transmission module (comms board), power supply and battery. Give the result in failures per million hours.
 
@@ -2986,7 +3036,7 @@ What is the failure rate of the proposed meteorological system? Assume the syste
 *Recorded answer: A.* Add the independent series failure rates. The workshop uses five sensor rates of 1.95 and a combined other-board rate of 5.69, giving $5(1.95)+5.69=15.44$. Literal use of 1.91 instead gives 15.24; this is the same source-rate mismatch as E4.1. The prompt alone omits the board-rate table, so its numerical answer depends on the accompanying workshop context.
 
 
-==== E4.3 — meeting the MTBF requirement
+==== E4.3 — meeting the MTBF requirement #metadata((kind: "mdtyp-question", id: "E4.3", summary: "Constant-rate system: check whether MTBF meets a ten-year requirement"))
 
 The design meets the customer's requirement of “A 10 year MTBF is required for the loss of any one parameter?” True or False?
 
@@ -3001,7 +3051,7 @@ The design meets the customer's requirement of “A 10 year MTBF is required for
 Source: #link("../questions/week5-quiz.md")[saved Week 5 quiz]. Original Q3–Q6 appear below; qualitative Q1–Q2 and Q7–Q8 belong in #link("engineering-content.md")[engineering notes]. The bathtub-curve concept in Q2 is also explained in the cheat sheet.
 
 
-==== E5.3 — original Question 3
+==== E5.3 — original Question 3 #metadata((kind: "mdtyp-question", id: "E5.3", summary: "Exponential tooth lifetime: infer rate from survival, then failure by replacement"))
 
 In a study to improve the life of ground-engaging tools on an excavator, a reliability engineer modelled the lifetime of the teeth using an exponential distribution. The data indicated that the probability that a tooth lasts more than 1,000 working hours is 0.46. What is the probability that a tooth fails within a fixed replacement period of two weeks (336 hours)? Give the answer to three decimal places.
 
@@ -3017,7 +3067,7 @@ Use the given survival probability to calculate the failure rate:
 $ 0.46=e^(-1000 lambda)
 quad =>quad
 lambda=-frac(ln(0.46), 1000)
-=0.000776529 thin"h"^(-1). $
+=0.000776529\ "h"^(-1). $
 
 The probability of failure within 336 hours is
 
@@ -3042,7 +3092,7 @@ sprintf("%.3f", probability_of_failure)  # "0.230"
 ```
 
 
-==== E5.4 — original Question 4
+==== E5.4 — original Question 4 #metadata((kind: "mdtyp-question", id: "E5.4", summary: "Series excavator subsystem: mission reliability from component MTBFs"))
 
 Before the excavators were purchased, a reliability engineer modelled the subsystem comprising the bucket, teeth, lift-cylinder system and hydraulic pump. Each component lifetime was assumed to be exponentially distributed. The MTBF values are:
 
@@ -3091,15 +3141,15 @@ Thus,
 $ R_("sys")(500)=0.580. $
 
 
-==== E5.5 — original Question 5
+==== E5.5 — original Question 5 #metadata((kind: "mdtyp-question", id: "E5.5", summary: "Shifted Weibull cable: choose replacement interval to minimise annual cost"))
 
-A cable has a three-parameter Weibull failure distribution with $beta=1.8$, $eta=500 thin"h"$ and $gamma=50 thin"h"$.
+A cable has a three-parameter Weibull failure distribution with $beta=1.8$, $eta=500\ "h"$ and $gamma=50\ "h"$.
 
 - Corrective replacement cost: $C_f=\$6","000$
 - Scheduled replacement cost: $C_s=\$600$
-- Annual operating time: $H=5","000 thin"h"$
+- Annual operating time: $H=5","000\ "h"$
 
-Both maintenance actions replace the cable. Which scheduled replacement interval $m$ minimizes the annual cost when $m=50,75,100,dots,300 thin"h"$?
+Both maintenance actions replace the cable. Which scheduled replacement interval $m$ minimizes the annual cost when $m=50,75,100,dots,300\ "h"$?
 
 
 ===== Solution
@@ -3107,7 +3157,10 @@ Both maintenance actions replace the cable. Which scheduled replacement interval
 For the shifted Weibull model,
 
 $ F(t)=
-cases(0 quad t<gamma, 1-exp [-( frac(t-gamma, eta))^beta ] quad t >= gamma)
+cases(
+ 0, & t<gamma,,
+ 1-exp [-( frac(t-gamma, eta))^beta ], & t >= gamma,
+)
 wide
 R(t)=1-F(t). $
 
@@ -3182,14 +3235,14 @@ The expected cycle length must be used in the denominator because a corrective f
 )
 The minimum occurs at
 
-$ m=175 thin"h". $
+$ m=175\ "h". $
 
 
-==== E5.6 — original Question 6
+==== E5.6 — original Question 6 #metadata((kind: "mdtyp-question", id: "E5.6", summary: "Mixed Weibull plot: interpret early- and later-life fitted slopes"))
 
 Examine the plot for EXB8 shown in Figure 5 of an analysis of ground-engaging tools on an excavator. Which statement is true?
 
-#figure(image("assets/w5q6.PNG", width: 85%), caption: [Mixed Weibull plot for excavator EXB8])
+#figure(image("assets/w5q6.PNG"), caption: [Mixed Weibull plot for excavator EXB8])
 
 - *Option A:* The Weibull shape parameter for early life is higher than for later life.
 - *Option B:* The Weibull shape parameter for early life is lower than for later life.
@@ -3216,35 +3269,59 @@ These are distinct prompts/examples in the supplied slide decks. Repeated worked
 
 Source: #link("../probability-content/slides-pdf/02-GENG5507-STATS-extra-slides.pdf")[extra probability slides].
 
-*S1.1 — complements and unions.* For $S={ 1,2,5,10 }$ and $A={ 2,5 }$ identify the complement. For $S={ t:t>10 }$ and $A={ t:10<t <= 100 }$ identify the complement. For $A=(100,1000)$ and $B=(0,200)$ find intersection and union. For integer sets $A={ 0,dots,100 }$, $B={ 50,dots,150 }$ and $C={ 101,dots,200 }$ find $A ∩ B$, $A union B$, $A ∩ C$, $B ∩ C$, $A ∩ B ∩ C$, $A union B union C$ and $A union C$.
 
-*Answer.* Complements ${ 1,10 }$ and ${ t:t>100 }$; interval intersection $(100,200)$ and union $(0,1000)$. Integer answers: ${ 50,dots,100 }$; ${ 0,dots,150 }$; $nothing$; ${ 101,dots,150 }$; $nothing$; ${ 0,dots,200 }$; ${ 0,dots,200 }$.
+==== S1.1 — complements and unions #metadata((kind: "mdtyp-question", id: "S1.1", summary: "Sets and intervals: complements, unions and intersections"))
 
-*S1.2 — probability definitions.* A fair die has six outcomes, three odd. A pump fails to start on 20 of 2000 starts. Calculate the classical odd-outcome probability and the empirical failed-start probability. Show that $P(E^c)=1-P(E)$.
+For $S={ 1,2,5,10 }$ and $A={ 2,5 }$ identify the complement. For $S={ t:t>10 }$ and $A={ t:10<t <= 100 }$ identify the complement. For $A=(100,1000)$ and $B=(0,200)$ find intersection and union. For integer sets $A={ 0,dots,100 }$, $B={ 50,dots,150 }$ and $C={ 101,dots,200 }$ find $A inter B$, $A union B$, $A inter C$, $B inter C$, $A inter B inter C$, $A union B union C$ and $A union C$.
+
+*Answer.* Complements ${ 1,10 }$ and ${ t:t>100 }$; interval intersection $(100,200)$ and union $(0,1000)$. Integer answers: ${ 50,dots,100 }$; ${ 0,dots,150 }$; $emptyset$; ${ 101,dots,150 }$; $emptyset$; ${ 0,dots,200 }$; ${ 0,dots,200 }$.
+
+
+==== S1.2 — probability definitions #metadata((kind: "mdtyp-question", id: "S1.2", summary: "Classical and empirical probability; prove the complement rule"))
+
+A fair die has six outcomes, three odd. A pump fails to start on 20 of 2000 starts. Calculate the classical odd-outcome probability and the empirical failed-start probability. Show that $P(E^c)=1-P(E)$.
 
 *Answer.* $3/6=0.5$; $20/2000=0.01$; $E,E^c$ partition the sample space, so their probabilities sum to one. The frequency estimate assumes sufficiently comparable trials.
 
-*S1.3 — defective bolts.* One bolt from each of two independent suppliers is selected; defect probabilities are 0.05 and 0.07. Find the probabilities that both are defective and that at least one is defective.
+
+==== S1.3 — defective bolts #metadata((kind: "mdtyp-question", id: "S1.3", summary: "Independent suppliers: probability both or at least one bolt is defective"))
+
+One bolt from each of two independent suppliers is selected; defect probabilities are 0.05 and 0.07. Find the probabilities that both are defective and that at least one is defective.
 
 *Answer.* $0.05(0.07)=0.0035$; $0.05+0.07-0.0035=0.1165$.
 
-*S1.4 — sample combinations.* How many samples of four can be selected without replacement from 20 bulbs? If exactly two of the 20 are defective, what is the probability of exactly one defective in the sample?
+
+==== S1.4 — sample combinations #metadata((kind: "mdtyp-question", id: "S1.4", summary: "Sampling bulbs without replacement: combinations and exactly one defect"))
+
+How many samples of four can be selected without replacement from 20 bulbs? If exactly two of the 20 are defective, what is the probability of exactly one defective in the sample?
 
 *Answer.* $binom(20, 4)=4845$; $binom(2, 1)binom(18, 3)/binom(20, 4)=1632/4845 approx 0.33684$. This is sampling without replacement (hypergeometric), not independent binomial sampling.
 
-*S1.5 — tractors and assembly lines.* Red, White and Blue lines have failure-to-start probabilities 6%, 11% and 8%. Red makes 48% and Blue 31% of tractors. Find the overall proportion that fails to start; find the tree's joint probabilities $P(R ∩ D)$, $P(W ∩ D)$ and $P(B ∩ D)$. The slide also displays the Bayes expression for $P(R ∣ D)$.
 
-*Answer.* White makes 21%. The joints are $0.0288$, $0.0231$, $0.0248$, giving $P(D)=0.0767 approx 0.077$; $P(R ∣ D)=0.0288/0.0767 approx 0.37549$.
+==== S1.5 — tractors and assembly lines #metadata((kind: "mdtyp-question", id: "S1.5", summary: "Assembly lines: overall failure proportion, joint probabilities and source"))
 
-*S1.6 — defective transistor origin.* Systems $S_1,S_2,S_3$ make 20%, 30%, 50% of transistors, with defect rates 0.01, 0.02, 0.05. A selected transistor is defective: find the probability it came from $S_1$ (and the analogous probabilities for $S_2,S_3$).
+Red, White and Blue lines have failure-to-start probabilities 6%, 11% and 8%. Red makes 48% and Blue 31% of tractors. Find the overall proportion that fails to start; find the tree's joint probabilities $P(R inter D)$, $P(W inter D)$ and $P(B inter D)$. The slide also displays the Bayes expression for $P(R | D)$.
+
+*Answer.* White makes 21%. The joints are $0.0288$, $0.0231$, $0.0248$, giving $P(D)=0.0767 approx 0.077$; $P(R | D)=0.0288/0.0767 approx 0.37549$.
+
+
+==== S1.6 — defective transistor origin #metadata((kind: "mdtyp-question", id: "S1.6", summary: "Defective transistor: probability it came from each production system"))
+
+Systems $S_1,S_2,S_3$ make 20%, 30%, 50% of transistors, with defect rates 0.01, 0.02, 0.05. A selected transistor is defective: find the probability it came from $S_1$ (and the analogous probabilities for $S_2,S_3$).
 
 *Answer.* $P(D)=0.033$; posterior probabilities $0.002/0.033=0.06061$, $0.006/0.033=0.18182$, $0.025/0.033=0.75758$.
 
-*S1.7 — two equally credible experts.* Experts propose reliability values 0.98 and 0.60. Update their equal prior credibility after one successful reliability test, then after two successful tests.
+
+==== S1.7 — two equally credible experts #metadata((kind: "mdtyp-question", id: "S1.7", summary: "Competing expert predictions: update credibility after successful tests"))
+
+Experts propose reliability values 0.98 and 0.60. Update their equal prior credibility after one successful reliability test, then after two successful tests.
 
 *Answer and wording correction.* Treat the experts' predictions as alternative models with priors 0.5 each and assume tests conditionally independent given a model. The posterior for the first model is $0.98/(0.98+0.60)=0.62025$, then $0.98^2/(0.98^2+0.60^2)=0.72736$. The slide's words incorrectly conflate model prior credibility with the conditional success probabilities 0.98 and 0.60.
 
-*S1.8 — coin sequence.* A fair coin gives three heads in three tosses. What is the probability of heads next? Repeat for a coin whose known head probability is 0.6.
+
+==== S1.8 — coin sequence #metadata((kind: "mdtyp-question", id: "S1.8", summary: "Independent coin tosses: next-head probability after three heads"))
+
+A fair coin gives three heads in three tosses. What is the probability of heads next? Repeat for a coin whose known head probability is 0.6.
 
 *Answer.* 0.5 and 0.6, assuming independent tosses and a known fixed head probability; the previous sequence does not change it.
 
@@ -3253,28 +3330,49 @@ Source: #link("../probability-content/slides-pdf/02-GENG5507-STATS-extra-slides.
 
 Source: #link("../probability-content/slides-pdf/03-GENG5507-STATS-ProbabilityModels.pdf")[probability-model slides].
 
-*S2.1 — graphical model illustrations (Examples 2.1 and 2.2).* Slides 5–9 show rework-cost survey distributions (% of project contract value). Slides 10–13 compare histogram bins for loader-engine times to first failure. These are graphical examples, with no additional explicit numerical question or complete raw dataset in their text. The loader dataset is supplied in S4.3 below, where its 35 observations and histogram task are retained.
 
-*S2.2 — fair die (Example 2.3).* A fair die has values $1,dots,6$. Its discrete-uniform PMF is $1/6$ on these values, with mean 3.5 and variance $35/12$. This is a worked distribution illustration, not a separately worded assessment problem.
+==== S2.1 — graphical model illustrations (Examples 2.1 and 2.2) #metadata((kind: "mdtyp-question", id: "S2.1", summary: "Graphical examples: rework-cost distributions and failure-time histogram bins"))
 
-*S2.3 — surviving bulbs (Example 2.4).* Each bulb survives a 500-hour mission with probability 0.9. For four independent bulbs calculate the probabilities of 0, 1, 2, 3 and 4 survivors.
+Slides 5–9 show rework-cost survey distributions (% of project contract value). Slides 10–13 compare histogram bins for loader-engine times to first failure. These are graphical examples, with no additional explicit numerical question or complete raw dataset in their text. The loader dataset is supplied in S4.3 below, where its 35 observations and histogram task are retained.
+
+
+==== S2.2 — fair die (Example 2.3) #metadata((kind: "mdtyp-question", id: "S2.2", summary: "Fair-die distribution illustration: PMF, mean and variance"))
+
+A fair die has values $1,dots,6$. Its discrete-uniform PMF is $1/6$ on these values, with mean 3.5 and variance $35/12$. This is a worked distribution illustration, not a separately worded assessment problem.
+
+
+==== S2.3 — surviving bulbs (Example 2.4) #metadata((kind: "mdtyp-question", id: "S2.3", summary: "Independent bulbs: probabilities of zero through four mission survivors"))
+
+Each bulb survives a 500-hour mission with probability 0.9. For four independent bulbs calculate the probabilities of 0, 1, 2, 3 and 4 survivors.
 
 *Answer.* $X tilde.op op("Bin")(4,0.9)$; probabilities are $0.0001$, $0.0036$, $0.0486$, $0.2916$, $0.6561$.
 
-*S2.4 — machine-component failures (Example 2.5).* Components fail according to a Poisson process with rate 1/week. What is the probability of one failure in four weeks?
+
+==== S2.4 — machine-component failures (Example 2.5) #metadata((kind: "mdtyp-question", id: "S2.4", summary: "Poisson component failures: probability of one failure in four weeks"))
+
+Components fail according to a Poisson process with rate 1/week. What is the probability of one failure in four weeks?
 
 *Answer.* $N tilde.op op("Pois")(4)$ and $P(N=1)=4e^(-4)=0.073263$.
 
-*S2.5 — bottle filling (Example 2.6).* A machine is intended to fill plastic bottles to 16.0 ounces. Quality engineers investigate the volume using this random sample:
+
+==== S2.5 — bottle filling (Example 2.6) #metadata((kind: "mdtyp-question", id: "S2.5", summary: "Bottle-fill sample: summarise measurements and investigate fill volume"))
+
+A machine is intended to fill plastic bottles to 16.0 ounces. Quality engineers investigate the volume using this random sample:
 
 $ 16.03,16.01,16.02,16.03,16.04,15.96,15.97,16.04,16.05,15.98, \
 15.96,16.02,16.05,16.02,16.01,16.01,16.02,15.99,15.99,16.00. $
 
 The slides display a histogram/Normal illustration; they do not specify a hypothesis-test question. *Study interpretation:* describe the distribution and compare its centre with 16.0; do not invent a required test or significance level.
 
-*S2.6 — Gamma function (Example 2.7).* Evaluate $Gamma(4)$ using the positive-integer identity. *Answer:* $(4-1)!=6$.
 
-*S2.7 — Weibull calculations (Example 2.8).* A lifetime has Weibull shape 2 and scale 1000 hours. Find (a) mean; (b) SD; (c) median; (d) $P(800 <= T <= 1200)$; (e) the time the lifetime exceeds with probability 0.9.
+==== S2.6 — Gamma function (Example 2.7) #metadata((kind: "mdtyp-question", id: "S2.6", summary: "Gamma function: evaluate at a positive integer"))
+
+Evaluate $Gamma(4)$ using the positive-integer identity. *Answer:* $(4-1)!=6$.
+
+
+==== S2.7 — Weibull calculations (Example 2.8) #metadata((kind: "mdtyp-question", id: "S2.7", summary: "Weibull: mean, SD, median, interval probability and a survival quantile"))
+
+A lifetime has Weibull shape 2 and scale 1000 hours. Find (a) mean; (b) SD; (c) median; (d) $P(800 <= T <= 1200)$; (e) the time the lifetime exceeds with probability 0.9.
 
 *Answer.* $1000 Gamma(1.5)=886.227$ h; $1000sqrt(1-Gamma(1.5)^2)=463.251$ h; $1000sqrt(ln 2)=832.555$ h; $e^(-0.8^2)-e^(-1.2^2)=0.290365$; $1000sqrt(-ln 0.9)=324.593$ h. Part (e) is the lower 10th percentile, not the lower 90th percentile.
 
@@ -3285,53 +3383,89 @@ The final exponential slide invites exploration of the Poisson/exponential conne
 
 Source: #link("../probability-content/slides-pdf/04-GENG5507-STATS-HazardRate.pdf")[hazard-rate slides].
 
-*S3.1 — conditional failure and density.* Given survival up to $t$, what is the chance of failure in the next short interval $Delta t$? *Answer:* $[F(t+Delta t)-F(t)]/R(t)approx h(t)Delta t$.
 
-*S3.2 — exponential interval.* A component has exponential life with rate 0.002/hour. What is the probability of failure between 510 and 515 hours? *Answer:* $e^(-0.002(510))-e^(-0.002(515))approx 0.003588$.
+==== S3.1 — conditional failure and density #metadata((kind: "mdtyp-question", id: "S3.1", summary: "Survival to current age: failure probability in the next short interval"))
 
-*S3.3 — derive lifetime functions from constant hazard.* Assuming $h(t)=lambda$, find $f(t)$, $F(t)$ and $R(t)$. Which are probabilities? Can any exceed 1?
+Given survival up to $t$, what is the chance of failure in the next short interval $Delta t$? *Answer:* $[F(t+Delta t)-F(t)]/R(t)approx h(t)Delta t$.
+
+
+==== S3.2 — exponential interval #metadata((kind: "mdtyp-question", id: "S3.2", summary: "Exponential: probability of failure between 510 and 515 hours"))
+
+A component has exponential life with rate 0.002/hour. What is the probability of failure between 510 and 515 hours? *Answer:* $e^(-0.002(510))-e^(-0.002(515))approx 0.003588$.
+
+
+==== S3.3 — derive lifetime functions from constant hazard #metadata((kind: "mdtyp-question", id: "S3.3", summary: "Constant hazard: derive PDF, CDF and reliability; distinguish rates/probabilities"))
+
+Assuming $h(t)=lambda$, find $f(t)$, $F(t)$ and $R(t)$. Which are probabilities? Can any exceed 1?
 
 *Answer.* $R(t)=e^(-lambda t)$; $F(t)=1-e^(-lambda t)$; $f(t)=lambda e^(-lambda t)$. CDF and reliability are probabilities in $[0,1]$. Density and hazard are rates per unit time and may exceed 1.
 
-*S3.4 — exponential location and spread (Example 1).* For $f(t)=0.002e^(-0.002t)$, find MTTF, median, mode and SD.
+
+==== S3.4 — exponential location and spread (Example 1) #metadata((kind: "mdtyp-question", id: "S3.4", summary: "Exponential lifetime: MTTF, median, mode and standard deviation"))
+
+For $f(t)=0.002e^(-0.002t)$, find MTTF, median, mode and SD.
 
 *Answer.* 500 h; $ln 2/0.002=346.574$ h; boundary mode 0; 500 h. *Source correction:* the median calculation accidentally prints 0.02 instead of 0.002; the quoted median uses 0.002.
 
-*S3.5 — equal means, different reliability (Examples 2 and 2b).* Compare $R_1(t)=e^(-0.002t)$ and $R_2(t)=(1000-t)/1000$ for $0 <= t <= 1000$ (with $R_2=0$ thereafter). Find each MTTF, $R(400)$ and SD. Why might smaller SD be preferred?
+
+==== S3.5 — equal means, different reliability (Examples 2 and 2b) #metadata((kind: "mdtyp-question", id: "S3.5", summary: "Compare lifetime models with equal means: mission reliability and spread"))
+
+Compare $R_1(t)=e^(-0.002t)$ and $R_2(t)=(1000-t)/1000$ for $0 <= t <= 1000$ (with $R_2=0$ thereafter). Find each MTTF, $R(400)$ and SD. Why might smaller SD be preferred?
 
 *Answer.* Both means are 500 h. Reliabilities at 400 h are $e^(-0.8)=0.449329$ and $0.6$. SDs are 500 h and $1000/sqrt(12)=288.675$ h. Smaller spread can make lifetime more predictable, but mission reliability depends on the whole distribution and the mission time; a smaller SD alone does not dominate at all times.
 
-*S3.6 — Weibull linearisation.* The final slide asks what the Weibull straight-line identity is useful for. *Answer:* a probability plot can check approximate Weibull fit and estimate shape from slope and scale from intercept; see P3.4.
+
+==== S3.6 — Weibull linearisation #metadata((kind: "mdtyp-question", id: "S3.6", summary: "Weibull straight-line identity: explain its use in model fitting"))
+
+The final slide asks what the Weibull straight-line identity is useful for. *Answer:* a probability plot can check approximate Weibull fit and estimate shape from slope and scale from intercept; see P3.4.
 
 
 === S4 — model-estimation examples
 
 Source: #link("../probability-content/slides-pdf/05-GENG5507-STATS-ModelEstimation.pdf")[model-estimation slides].
 
-*S4.1 — 20-unit censored test.* Twenty units are tested for 50 h. Earlier failure/censoring times are $10.8,12.6^+,15.7,28.1,30.5,36.0^+,42.1,48.2$ hours; the other 12 units survive to 50 h. Find exposure $T$ and estimated MTTF assuming exponential lifetimes. Repeat if 12.6 and 36.0 are failures instead of suspensions.
+
+==== S4.1 — 20-unit censored test #metadata((kind: "mdtyp-question", id: "S4.1", summary: "Twenty-unit censored test: exposure and exponential MTTF; reclassify suspensions"))
+
+Twenty units are tested for 50 h. Earlier failure/censoring times are $10.8,12.6^+,15.7,28.1,30.5,36.0^+,42.1,48.2$ hours; the other 12 units survive to 50 h. Find exposure $T$ and estimated MTTF assuming exponential lifetimes. Repeat if 12.6 and 36.0 are failures instead of suspensions.
 
 *Answer.* The listed durations sum to 224 h; total exposure $224+12(50)=824$ h. With six failures, $hat(upright("MTTF"))=824/6=137.333$ h. Changing the two outcomes to failures leaves exposure unchanged but gives eight failures: MTTF 103 h. A plus sign means right-censored.
 
-*S4.2 — repairable-system event times.* Failures occur at 452, 752, 967, 1256, 1432, 1999 and 2383 h; observation ends at 3000 h. Find MTBF and SD. First derive inter-failure durations.
+
+==== S4.2 — repairable-system event times #metadata((kind: "mdtyp-question", id: "S4.2", summary: "Repairable-system event times: inter-failure durations, MTBF and SD"))
+
+Failures occur at 452, 752, 967, 1256, 1432, 1999 and 2383 h; observation ends at 3000 h. Find MTBF and SD. First derive inter-failure durations.
 
 *Answer with censoring caveat.* Durations are $452,300,215,289,176,567,384,617^+$. The exponential/constant-rate MTBF estimate is $3000/7=428.571$ h. The slide computes the ordinary SD of all eight recorded durations around their arithmetic mean 375: $sqrt(179660/7)=160.205$ h. *That is a descriptive SD of observed durations, not an unbiased lifetime SD*, because the final interval is censored. Under the exponential model, fitted lifetime SD equals fitted MTBF, 428.571 h.
 
-*S4.3 — 35 field failure times.* Plot these failure times in operating hours, collected over six months, and consider the underlying distribution:
+
+==== S4.3 — 35 field failure times #metadata((kind: "mdtyp-question", id: "S4.3", summary: "Thirty-five field failure times: histogram and possible lifetime model"))
+
+Plot these failure times in operating hours, collected over six months, and consider the underlying distribution:
 
 $ 20,31,36,47,98,157,182,185,210,210,214,221,246,247,279,284,289,300, \
 400,401,428,438,442,467,499,552,553,597,767,796,1024,1297,1476,1563,2025. $
 
 *Source worked approach.* Compare histogram class choices; a right-skewed shape suggests considering an exponential distribution, followed by a proper model check. If fitting an uncensored exponential, use $hat(lambda)=35/sum t_i$.
 
-*S4.4 — mean-rank plotting positions.* For ordered times $12.2,13.1,14.0,14.1,14.6,14.7,14.7,15.1,15.7,15.8,16.3,16.9$, compare cumulative percentages and estimated CDF positions.
+
+==== S4.4 — mean-rank plotting positions #metadata((kind: "mdtyp-question", id: "S4.4", summary: "Ordered lifetimes: compare empirical cumulative percentages and mean ranks"))
+
+For ordered times $12.2,13.1,14.0,14.1,14.6,14.7,14.7,15.1,15.7,15.8,16.3,16.9$, compare cumulative percentages and estimated CDF positions.
 
 *Answer.* Empirical cumulative ranks are $i/12$; mean-rank positions are $i/13$, $i=1,dots,12$; Bernard/Benard approximate median ranks are $(i-0.3)/12.4$. The two 14.7 observations share a time but have separate ordered plotting positions; a proper ECDF has one combined jump at that time.
 
-*S4.5 — Kaplan–Meier, refinery pumps.* A refinery has 100 independent identical pumps. At each monthly inspection failures are recorded, then two surviving pumps are randomly removed for external testing and not replaced. Monthly failures for months 1–5 are 5, 6, 4, 8, 3. Estimate reliability using Kaplan–Meier.
+
+==== S4.5 — Kaplan–Meier, refinery pumps #metadata((kind: "mdtyp-question", id: "S4.5", summary: "Refinery pumps: Kaplan-Meier survival with monthly failures and removals"))
+
+A refinery has 100 independent identical pumps. At each monthly inspection failures are recorded, then two surviving pumps are randomly removed for external testing and not replaced. Monthly failures for months 1–5 are 5, 6, 4, 8, 3. Estimate reliability using Kaplan–Meier.
 
 *Answer.* Risk-set sizes before failures are $100,93,85,79,69$; multiply conditional survival factors $95/100$, $87/93$, $81/85$, $71/79$, $66/69$. Removals affect later denominators, not the survival curve at the censoring time.
 
-*S4.6 — Kaplan–Meier, IPP pumps.* Irving Pulp and Paper monitored 36 pumps: 12 bearing failures, 20 suspensions and four corrupted records excluded from analysis. The slide example shows observation timelines and a KM curve. Use 32 valid records, retaining both failures and suspensions. *Data limit:* exact event times are shown graphically rather than supplied as a numerical table; use #link("../probability-content/slides-pdf/05-GENG5507-STATS-ModelEstimation.pdf#page=43")[slides 43–45] for the original plot. No new numerical target is stated, and exact values should not be invented from the graphic.
+
+==== S4.6 — Kaplan–Meier, IPP pumps #metadata((kind: "mdtyp-question", id: "S4.6", summary: "IPP pump graphical example: failures, suspensions and excluded records"))
+
+Irving Pulp and Paper monitored 36 pumps: 12 bearing failures, 20 suspensions and four corrupted records excluded from analysis. The slide example shows observation timelines and a KM curve. Use 32 valid records, retaining both failures and suspensions. *Data limit:* exact event times are shown graphically rather than supplied as a numerical table; use #link("../probability-content/slides-pdf/05-GENG5507-STATS-ModelEstimation.pdf#page=43")[slides 43–45] for the original plot. No new numerical target is stated, and exact values should not be invented from the graphic.
 
 The final R example uses the same `exa1.csv` analysis as P4.3 and is deduplicated there.
 
@@ -3340,38 +3474,62 @@ The final R example uses the same `exa1.csv` analysis as P4.3 and is deduplicate
 
 Source: #link("../probability-content/slides-pdf/06-GENG5507-STATS-lecture-week5-CLT.pdf")[random-sampling and CLT slides].
 
-*S5.0 — why sample?* How can we obtain MTTF of mining equipment, the proportion failing before warranty expiry, mean repair time, defective-production proportion, ore/oil quantity, quality compliance and the total number of tuna in Australian waters? Could we measure every item? What issues arise?
+
+==== S5.0 — why sample? #metadata((kind: "mdtyp-question", id: "S5.0", summary: "Sampling design: why sample rather than measure the entire population?"))
+
+How can we obtain MTTF of mining equipment, the proportion failing before warranty expiry, mean repair time, defective-production proportion, ore/oil quantity, quality compliance and the total number of tuna in Australian waters? Could we measure every item? What issues arise?
 
 *Slide answer.* A census can be costly, slow, impractical or destructive. Use a suitable representative sampling design and account for sampling uncertainty and bias.
 
-*S5.1 — cereal sample mean.* Box weights are Normal with mean 500 g and SD 5 g. What is the probability that a random sample of 25 boxes has mean weight below 495 g?
+
+==== S5.1 — cereal sample mean #metadata((kind: "mdtyp-question", id: "S5.1", summary: "Normal cereal weights: probability the mean of 25 boxes is below 495 g"))
+
+Box weights are Normal with mean 500 g and SD 5 g. What is the probability that a random sample of 25 boxes has mean weight below 495 g?
 
 *Answer.* $macron(X)tilde.op N(500,1)$ exactly, so $P(macron(X)<495)=Phi(-5)approx 2.8665 times 10^(-7)$.
 
-*S5.2 — linear combinations.* For random variables $X,Y$ and $U="aX"+"bY"$, can you determine the distribution, mean and variance of $U$?
+
+==== S5.2 — linear combinations #metadata((kind: "mdtyp-question", id: "S5.2", summary: "Linear combination of random variables: distribution, mean and variance"))
+
+For random variables $X,Y$ and $U="aX"+"bY"$, can you determine the distribution, mean and variance of $U$?
 
 *Answer and assumption correction.* $E(U)=a E(X)+b E(Y)$; $op("Var")(U)=a^2 op("Var")(X)+b^2 op("Var")(Y)+2"ab" op("Cov")(X,Y)$. The slide's shorter formula assumes independence (or zero covariance). A full distribution needs further information: independent Normal variables give a Normal linear combination.
 
-*S5.3 — bank service times.* A teller's service time is Normal with mean 150 s and variance 900 s${}^2$. Find the chance that mean service time exceeds 160 s for samples of (a) 25 customers; (b) 100 customers.
+
+==== S5.3 — bank service times #metadata((kind: "mdtyp-question", id: "S5.3", summary: "Normal service times: sample-mean upper tail for two sample sizes"))
+
+A teller's service time is Normal with mean 150 s and variance 900 s$""^2$. Find the chance that mean service time exceeds 160 s for samples of (a) 25 customers; (b) 100 customers.
 
 *Answer.* $1-Phi((160-150)/(30/5))approx 0.04779$; $1-Phi((160-150)/(30/10))approx 0.0004291$.
 
-*S5.4 — long-life bulbs (image-only example, slide 25).* A long-life bulb has mean life 1500 h and SD 300 h. What is the probability that a random sample of 200 bulbs has mean life less than 1450 h?
+
+==== S5.4 — long-life bulbs (image-only example, slide 25) #metadata((kind: "mdtyp-question", id: "S5.4", summary: "Bulb lifetimes: approximate probability the mean of 200 is below 1450 h"))
+
+A long-life bulb has mean life 1500 h and SD 300 h. What is the probability that a random sample of 200 bulbs has mean life less than 1450 h?
 
 *Answer.* By CLT, $Phi((1450-1500)/(300/sqrt(200)))approx 0.00921$. This is approximate when the population is not stated to be Normal.
 
-*S5.5 — simulation demonstration.* Try the slides' R code simulating 1000 means of exponential samples of size 20 with rate 2, then histograms with 50 classes and density overlays. The subsequent demonstration does the same for Weibull samples of size 100. Compare the original skewed population shape with the approximately Normal sampling distribution of means. See #link("R.md")[R guide] for repaired reproducible code; this is an exploration prompt, not an extra numerical assessment question.
+
+==== S5.5 — simulation demonstration #metadata((kind: "mdtyp-question", id: "S5.5", summary: "R simulation: compare skewed lifetimes with distributions of sample means"))
+
+Try the slides' R code simulating 1000 means of exponential samples of size 20 with rate 2, then histograms with 50 classes and density overlays. The subsequent demonstration does the same for Weibull samples of size 100. Compare the original skewed population shape with the approximately Normal sampling distribution of means. See #link("R.md")[R guide] for repaired reproducible code; this is an exploration prompt, not an extra numerical assessment question.
 
 
 === S6 — additional Weibull-analysis deck
 
 Source: #link("../probability-content/slides-pdf/Weibull-analysis.pdf")[Weibull analysis].
 
-*S6.1 — ignoring suspensions changes a cost forecast.* A hydraulic-cylinder replacement costs AUD 5000. Ignoring suspensions gives MTBF 72 days and about 25 replacements in five years; retaining suspensions gives about 13 replacements. Compare costs.
+
+==== S6.1 — ignoring suspensions changes a cost forecast #metadata((kind: "mdtyp-question", id: "S6.1", summary: "Hydraulic cylinders: compare replacement-cost forecasts with/without suspensions"))
+
+A hydraulic-cylinder replacement costs AUD 5000. Ignoring suspensions gives MTBF 72 days and about 25 replacements in five years; retaining suspensions gives about 13 replacements. Compare costs.
 
 *Answer.* The displayed rounded-count calculation gives AUD 125,000 versus AUD 65,000. This is the slide's illustrative cost comparison; the broader maintenance decision belongs in #link("engineering-content.md")[engineering notes].
 
-*S6.2 — O'Connor Example 3.2, 50-item censored Weibull exercise (slides 31–32, repeated on 38).* List failure order numbers, ordered failure lifetimes and numbers of preceding observations; calculate adjusted ranks, median ranks and a Weibull plot. `F` denotes failed and `S` suspended. The complete table shown on slide 31 is transcribed below (hours):
+
+==== S6.2 — O'Connor Example 3.2, 50-item censored Weibull exercise (slides 31–32, repeated on 38) #metadata((kind: "mdtyp-question", id: "S6.2", summary: "Fifty-item censored Weibull data: adjusted ranks, median ranks and probability plot"))
+
+List failure order numbers, ordered failure lifetimes and numbers of preceding observations; calculate adjusted ranks, median ranks and a Weibull plot. `F` denotes failed and `S` suspended. The complete table shown on slide 31 is transcribed below (hours):
 
 #table(
   columns: 6,
