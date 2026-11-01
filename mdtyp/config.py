@@ -3,14 +3,23 @@
 import dataclasses
 import tomllib
 from dataclasses import dataclass, field
+from enum import StrEnum
 from os import environ
 from pathlib import Path
+
+
+class TableStyle(StrEnum):
+    HORIZONTAL = "horizontal"
+    SHADED_HORIZONTAL = "shaded-horizontal"
+    CELL = "cell"
+    VERTICAL = "vertical"
 
 
 @dataclass
 class TableConfig:
     header_bold: bool = True
     stroke: str = ""
+    style: TableStyle = TableStyle.HORIZONTAL
 
 
 @dataclass
@@ -44,6 +53,7 @@ class PageConfig:
 @dataclass
 class TextConfig:
     size: str = ""
+    font: str = "Helvetica"
 
 
 @dataclass
@@ -84,4 +94,5 @@ def _build_config(data: dict) -> Config:
             for k, v in section_data.items():
                 if hasattr(section_obj, k):
                     setattr(section_obj, k, v)
+    cfg.table.style = TableStyle(cfg.table.style)
     return cfg

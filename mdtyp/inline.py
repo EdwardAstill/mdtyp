@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from urllib.parse import unquote
 
 from markdown_it.token import Token
 
 from mdtyp.config import Config
 from mdtyp.latex2typst import latex_to_typst
+from mdtyp.typst import typst_string
 
 _TYPST_ESCAPE = str.maketrans({
     "\\": "\\\\",
@@ -19,6 +21,17 @@ _TYPST_ESCAPE = str.maketrans({
     "~": r"\~",
     "<": r"\<",
     ">": r"\>",
+    "[": r"\[",
+    "]": r"\]",
+    "`": r"\`",
+    "/": r"\/",
+    "=": r"\=",
+    "-": r"\-",
+    "+": r"\+",
+    ".": r"\.",
+    ":": r"\:",
+    '"': r'\"',
+    "'": r"\'",
 })
 
 
@@ -49,13 +62,19 @@ _InlineHandler = Callable[[list[Token], int, Config], tuple[str, int]]
 def _collect_until(
     children: list[Token], start: int, close_type: str,
 ) -> tuple[list[Token], int]:
-    """Collect tokens from start until close_type. Returns (inner_tokens, close_index)."""
+    """Collect through the matching close, preserving nested wrappers."""
+    open_type = children[start - 1].type
+    depth = 1
     j = start
-    inner: list[Token] = []
-    while j < len(children) and children[j].type != close_type:
-        inner.append(children[j])
+    while j < len(children):
+        if children[j].type == open_type:
+            depth += 1
+        elif children[j].type == close_type:
+            depth -= 1
+            if depth == 0:
+                break
         j += 1
-    return inner, j
+    return children[start:j], j
 
 
 # --- Simple inline handlers ---
@@ -80,7 +99,7 @@ def _handle_hardbreak(
 def _handle_code_inline(
     children: list[Token], i: int, config: Config,
 ) -> tuple[str, int]:
-    return f"`{children[i].content}`", i + 1
+    return f"#raw({typst_string(children[i].content)})", i + 1
 
 
 def _handle_math_inline(
@@ -92,21 +111,32 @@ def _handle_math_inline(
 def _handle_html_inline(
     children: list[Token], i: int, config: Config,
 ) -> tuple[str, int]:
-    return f"/* {children[i].content.strip()} */", i + 1
+    return "", i + 1
+
+
+def _image_alt(tok: Token) -> str:
+    if not tok.children:
+        return tok.content
+    return "".join(
+        _image_alt(child) if child.type == "image" else
+        " " if child.type in {"softbreak", "hardbreak"} else
+        "" if child.type == "html_inline" else child.content
+        for child in tok.children
+    )
 
 
 def _handle_image(
     children: list[Token], i: int, config: Config,
 ) -> tuple[str, int]:
     tok = children[i]
-    src = tok.attrGet("src") or ""
-    alt = tok.content or ""
+    src = typst_string(unquote(tok.attrGet("src") or ""))
+    alt = typst_string(_image_alt(tok))
     img_cfg = config.image
     width_arg = f", width: {img_cfg.width}" if img_cfg.width else ""
     if img_cfg.use_figure:
-        result = f'#figure(image("{src}"{width_arg}), caption: [{alt}])'
+        result = f"#figure(image({src}{width_arg}), caption: {alt})"
     else:
-        result = f'#image("{src}"{width_arg})'
+        result = f"#image({src}{width_arg})"
     return result, i + 1
 
 
@@ -118,7 +148,7 @@ def _handle_strong(
 ) -> tuple[str, int]:
     inner, j = _collect_until(children, i + 1, "strong_close")
     content = render_inline(inner, config)
-    return (f"*{content}*" if content else ""), j + 1
+    return (f"#strong[{content}]" if content else ""), j + 1
 
 
 def _handle_em(
@@ -126,7 +156,7 @@ def _handle_em(
 ) -> tuple[str, int]:
     inner, j = _collect_until(children, i + 1, "em_close")
     content = render_inline(inner, config)
-    return (f"_{content}_" if content else ""), j + 1
+    return (f"#emph[{content}]" if content else ""), j + 1
 
 
 def _handle_strikethrough(
@@ -142,7 +172,7 @@ def _handle_link(
     href = children[i].attrGet("href") or ""
     inner, j = _collect_until(children, i + 1, "link_close")
     label = render_inline(inner, config)
-    return f'#link("{href}")[{label}]', j + 1
+    return f"#link({typst_string(href)})[{label}]", j + 1
 
 
 _INLINE_HANDLERS: dict[str, _InlineHandler] = {

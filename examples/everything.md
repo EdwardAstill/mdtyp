@@ -35,7 +35,7 @@ Here is `inline code` in a sentence.
 Here is a [link to Google](https://google.com) and a [link with **bold** text](https://example.com).
 
 <!-- Images omitted: Typst requires actual image files to compile.
-     Syntax: ![Photo of a sunset](sunset.jpg) → #figure(image("sunset.jpg"), caption: [...]) -->
+     Syntax: ![Photo of a sunset](sunset.jpg) → #figure(image("sunset.jpg"), caption: "Photo of a sunset") -->
 
 ---
 

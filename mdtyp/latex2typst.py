@@ -2,6 +2,8 @@
 
 Pipeline stages (must run in this order — each assumes prior stages completed):
 
+Text arguments are protected before these stages and serialized afterward.
+
 1. **Environments** — ``\\begin{aligned}``, matrices, cases → Typst equivalents.
    Must run first because environments contain raw LaTeX that later stages process.
 2. **Structured commands** — ``\\frac``, ``\\sqrt``, accents, font commands, ``\\mathbb``.
@@ -18,6 +20,8 @@ from __future__ import annotations
 
 import re
 
+from mdtyp.typst import typst_string
+
 # ---------------------------------------------------------------------------
 # LaTeX command → Typst replacement tables
 # ---------------------------------------------------------------------------
@@ -32,8 +36,8 @@ _COMMANDS: list[tuple[str, str]] = [
     (r"\circ", "compose"),
     (r"\ast", "ast"),
     (r"\star", "star"),
-    (r"\oplus", "plus.circle"),
-    (r"\otimes", "times.circle"),
+    (r"\oplus", "plus.o"),
+    (r"\otimes", "times.o"),
 
     # --- Relations ---
     (r"\leq", "<="),
@@ -121,7 +125,7 @@ _COMMANDS: list[tuple[str, str]] = [
 
     # --- Misc symbols ---
     (r"\infty", "infinity"),
-    (r"\partial", "diff"),
+    (r"\partial", "partial"),
     (r"\nabla", "nabla"),
     (r"\forall", "forall"),
     (r"\exists", "exists"),
@@ -138,7 +142,7 @@ _COMMANDS: list[tuple[str, str]] = [
     (r"\ddots", "dots.down"),
     (r"\dots", "dots"),
     (r"\ell", "ell"),
-    (r"\hbar", "planck.reduce"),
+    (r"\hbar", "planck"),
     (r"\Re", "Re"),
     (r"\Im", "Im"),
     (r"\aleph", "aleph"),
@@ -154,8 +158,8 @@ _COMMANDS: list[tuple[str, str]] = [
     (r"\right|", "|"),
     (r"\left.", ""),
     (r"\right.", ""),
-    (r"\langle", "angle.l"),
-    (r"\rangle", "angle.r"),
+    (r"\langle", "chevron.l"),
+    (r"\rangle", "chevron.r"),
     (r"\lfloor", "floor.l"),
     (r"\rfloor", "floor.r"),
     (r"\lceil", "ceil.l"),
@@ -224,7 +228,7 @@ _COMMANDS: list[tuple[str, str]] = [
 
 # Precompile: sorted longest-first to prevent partial matches, with compiled regex.
 _COMPILED_COMMANDS: list[tuple[re.Pattern[str], str]] = [
-    (re.compile(re.escape(cmd)), rep)
+    (re.compile(re.escape(cmd) + (r"(?![A-Za-z])" if cmd[-1].isalpha() else "")), rep)
     for cmd, rep in sorted(_COMMANDS, key=lambda x: -len(x[0]))
 ]
 
@@ -257,9 +261,9 @@ _RE_MATRICES: list[tuple[re.Pattern[str], str]] = [
     for env, delim in _MATRIX_DELIMS.items()
 ]
 
-_RE_TEXT = re.compile(r"\\text\{([^}]*)\}")
+_RE_TEXT = re.compile(r"\\text(?![A-Za-z])\s*\{")
 _RE_MATHBB = re.compile(r"\\mathbb\{([^}]*)\}")
-_RE_SQRT = re.compile(r"\\sqrt")
+_RE_SQRT = re.compile(r"\\sqrt(?![A-Za-z])")
 _RE_MULTI_SPACE = re.compile(r"  +")
 
 # \not + following symbol → negated Typst symbol (longest-first to avoid partial matches)
@@ -281,7 +285,10 @@ _NOT_MAP: list[tuple[str, str]] = sorted([
     ("<", "lt.not"),
     (">", "gt.not"),
 ], key=lambda x: -len(x[0]))
-_NOT_ALTS = "|".join(re.escape(sym) for sym, _ in _NOT_MAP)
+_NOT_ALTS = "|".join(
+    re.escape(sym) + (r"(?![A-Za-z])" if sym[-1].isalpha() else "")
+    for sym, _ in _NOT_MAP
+)
 _RE_NOT = re.compile(rf"\\not\s*({_NOT_ALTS})|\\not\b")
 _NOT_LOOKUP: dict[str, str] = dict(_NOT_MAP)
 
@@ -293,36 +300,12 @@ _TYPST_MATH_IDENTS: frozenset[str] = frozenset({
     "overline", "underline", "overbrace", "underbrace",
     "upright", "bold", "italic", "cal", "op", "bb",
     "mat", "cases", "delim",
-    # Math operator functions
-    "lim", "sup", "inf", "min", "max",
-    "log", "ln", "exp",
-    "sin", "cos", "tan", "sec", "csc", "cot",
-    "arcsin", "arccos", "arctan",
-    "sinh", "cosh", "tanh",
-    "det", "dim", "ker", "deg", "arg", "gcd", "mod",
-    # Symbols
-    "dot", "times", "div", "compose", "ast", "star",
-    "approx", "equiv", "prop",
-    "eq", "lt", "gt",
-    "subset", "supset",
-    "forall", "exists",
-    "sum", "product", "integral",
-    "union", "inter", "emptyset", "floor", "ceil",
-    "nabla", "infinity", "diff", "ell", "aleph", "nothing",
-    "dots", "quad", "wide", "thin", "med",
-    "Re", "Im",
-    "and", "or", "not", "in",
-    "plus", "minus",
-    # Greek lowercase
-    "alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta",
-    "iota", "kappa", "lambda", "mu", "nu", "xi", "pi", "rho", "sigma",
-    "tau", "upsilon", "phi", "chi", "psi", "omega",
-    # Greek uppercase
-    "Gamma", "Delta", "Theta", "Lambda", "Xi", "Pi", "Sigma", "Upsilon",
-    "Phi", "Psi", "Omega",
-    # Blackboard bold
-    "RR", "NN", "ZZ", "QQ", "CC", "FF", "PP", "EE",
-})
+    "nothing",
+} | {
+    replacement.split(".", 1)[0]
+    for _, replacement in _COMMANDS + _NOT_MAP
+    if replacement[:1].isalpha()
+} | {replacement for replacement in _MATHBB.values() if replacement.isidentifier()})
 
 
 # ---------------------------------------------------------------------------
@@ -332,14 +315,38 @@ _TYPST_MATH_IDENTS: frozenset[str] = frozenset({
 
 def latex_to_typst(latex: str) -> str:
     """Convert a LaTeX math string to Typst math syntax."""
-    s = latex.strip()
+    s, text_literals = _protect_text(latex.strip())
     s = _translate_environments(s)
     s = _translate_commands(s)
+    if unknown := re.search(r"\\[A-Za-z]+", s):
+        raise ValueError(f"Unsupported or malformed LaTeX command: {unknown.group()}")
     s = _translate_scripts(s)
     s = _separate_uppercase_products_before_calls(s)
     s = _quote_multichar_identifiers(s)
     s = _RE_MULTI_SPACE.sub(" ", s)
-    return s.strip()
+    return s.translate(text_literals).strip()
+
+
+def _protect_text(s: str) -> tuple[str, dict[int, str]]:
+    """Keep text opaque to every math stage, including environment splitting."""
+    parts: list[str] = []
+    literals: dict[int, str] = {}
+    pos = 0
+    marker = 0xF0000
+    while match := _RE_TEXT.search(s, pos):
+        text, end = _extract_braced(s, match.end() - 1)
+        if text is None:
+            raise ValueError("Unclosed LaTeX text argument")
+        while chr(marker) in s:
+            marker += 1
+        # Private-use characters are single math atoms, never identifier letters.
+        parts.extend((s[pos:match.start()], chr(marker)))
+        text = re.sub(r"\\([#$%&_{}\\])|[{}]", lambda m: m[1] or "", text)
+        literals[marker] = typst_string(text)
+        marker += 1
+        pos = end
+    parts.append(s[pos:])
+    return "".join(parts), literals
 
 
 # ---------------------------------------------------------------------------
@@ -495,9 +502,6 @@ def _translate_commands(s: str) -> str:
     # Extensible arrows: \xrightarrow{N} → arrow.r^(N)
     s = _replace_cmd_one_arg_template(s, "xrightarrow", "arrow.r^({arg})")
     s = _replace_cmd_one_arg_template(s, "xleftarrow", "arrow.l^({arg})")
-
-    # \text{...} → "..."
-    s = _RE_TEXT.sub(lambda m: f'"{m.group(1)}"', s)
 
     # Font commands
     for latex_name, typst_name in [

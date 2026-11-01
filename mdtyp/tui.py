@@ -9,6 +9,8 @@ from textual.binding import Binding
 from textual.reactive import reactive
 from textual.widgets import Footer, Header, Label, ListItem, ListView
 
+from mdtyp.config import Config, load_config
+from mdtyp.output import write_output
 
 class MdtypBrowser(App[None]):
     """Interactive Markdown file browser."""
@@ -41,11 +43,12 @@ class MdtypBrowser(App[None]):
         Binding("h", "go_up", "Go up", show=False),
     ]
 
-    current_dir: reactive[Path] = reactive(Path("."))
+    current_dir: reactive[Path] = reactive(Path("."), init=False)
 
-    def __init__(self) -> None:
+    def __init__(self, config: Config | None = None) -> None:
         super().__init__()
         self._paths: dict[str, Path] = {}
+        self.config = config if config is not None else load_config()
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -55,19 +58,16 @@ class MdtypBrowser(App[None]):
     def on_mount(self) -> None:
         self.current_dir = Path.cwd()
 
-    def watch_current_dir(self, new_dir: Path) -> None:
+    async def watch_current_dir(self, new_dir: Path) -> None:
         self.sub_title = str(new_dir)
-        self._load_directory()
-
-    def _load_directory(self) -> None:
         lv = self.query_one("#file-list", ListView)
-        lv.clear()
+        await lv.clear()
         self._paths = {}
 
         try:
-            raw = list(self.current_dir.iterdir())
-        except PermissionError:
-            self.notify("Permission denied", severity="error")
+            raw = list(new_dir.iterdir())
+        except OSError as error:
+            self.notify(str(error), severity="error")
             return
 
         entries = sorted(
@@ -75,6 +75,7 @@ class MdtypBrowser(App[None]):
             key=lambda p: (not p.is_dir(), p.name.lower()),
         )
 
+        items = []
         for i, entry in enumerate(entries):
             key = f"entry-{i}"
             self._paths[key] = entry
@@ -87,7 +88,9 @@ class MdtypBrowser(App[None]):
             else:
                 item = ListItem(Label(f"  {entry.name}"), id=key)
                 item.add_class("other-item")
-            lv.append(item)
+            items.append(item)
+        await lv.extend(items)
+        lv.index = 0 if items else None
 
     def _selected_path(self) -> Path | None:
         lv = self.query_one("#file-list", ListView)
@@ -126,24 +129,28 @@ class MdtypBrowser(App[None]):
         path = self._selected_path()
         if path is None or path.suffix != ".md":
             return
-        from mdtyp.config import load_config
         from mdtyp.converter import convert
-        config = load_config(None)
-        typst_text = convert(path.read_text(encoding="utf-8"), config)
         dest = path.with_suffix(".typ")
-        dest.write_text(typst_text)
+        try:
+            typst_text = convert(path.read_text(encoding="utf-8"), self.config)
+            write_output(typst_text, dest, sources=(path,))
+        except (ValueError, OSError) as error:
+            self.notify(str(error), severity="error")
+            return
         self.notify(f"Written: {dest.name}")
 
     def action_convert_pdf(self) -> None:
         path = self._selected_path()
         if path is None or path.suffix != ".md":
             return
-        from mdtyp.config import load_config
         from mdtyp.converter import convert
-        config = load_config(None)
-        typst_text = convert(path.read_text(encoding="utf-8"), config)
         typ_path = path.with_suffix(".typ")
-        typ_path.write_text(typst_text)
+        try:
+            typst_text = convert(path.read_text(encoding="utf-8"), self.config)
+            write_output(typst_text, typ_path, sources=(path,), pdf=True)
+        except (ValueError, OSError) as error:
+            self.notify(str(error), severity="error")
+            return
         try:
             result = subprocess.run(
                 ["typst", "compile", str(typ_path)],

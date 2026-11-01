@@ -8,9 +8,11 @@ from typing import Optional
 
 import typer
 
-from mdtyp.config import Config, load_config
+from mdtyp.config import Config, TableStyle, load_config
 from mdtyp.converter import convert
 from mdtyp.latex import convert_to_latex
+from mdtyp.output import write_output
+from mdtyp.typst import typst_string
 
 app = typer.Typer(help="Convert Markdown documents to Typst or LaTeX.")
 
@@ -26,15 +28,25 @@ def _convert_source(
     """Convert markdown text to the selected output format."""
     if latex:
         return convert_to_latex(md_text)
-    typst_text = convert(md_text, config)
+    try:
+        typst_text = convert(md_text, config)
+    except ValueError as error:
+        typer.echo(f"Conversion failed: {error}", err=True)
+        raise typer.Exit(1) from error
     if paper:
-        typst_text = f'#set page(paper: "{paper}")\n\n' + typst_text
+        typst_text = f"#set page(paper: {typst_string(paper)})\n\n" + typst_text
     return typst_text
 
 
-def _emit_to_file(output_text: str, dest: Path, pdf: bool) -> None:
+def _emit_to_file(
+    output_text: str, dest: Path, pdf: bool, *, sources: tuple[Path, ...] = (),
+) -> None:
     """Write rendered text to a file and optionally compile Typst to PDF."""
-    dest.write_text(output_text)
+    try:
+        write_output(output_text, dest, sources=sources, pdf=pdf)
+    except (ValueError, OSError) as error:
+        typer.echo(f"Cannot write output: {error}", err=True)
+        raise typer.Exit(1) from error
     typer.echo(f"Written to {dest}", err=True)
     if pdf:
         _compile_pdf(dest)
@@ -100,6 +112,14 @@ def mdtyp(
         None, "--paper", "-p",
         help='Paper size, e.g. a4, a5, us-letter.',
     ),
+    font: Optional[str] = typer.Option(
+        None, "--font",
+        help="Typst/PDF font family. Overrides config; default: Helvetica.",
+    ),
+    table_style: Optional[TableStyle] = typer.Option(
+        None, "--table-style",
+        help="Typst/PDF table appearance. Overrides config; default: horizontal.",
+    ),
     pdf: bool = typer.Option(
         False, "--pdf",
         help="Compile the generated .typ file to PDF using typst.",
@@ -119,7 +139,18 @@ def mdtyp(
         dir_okay=False,
     ),
 ) -> None:
-    config = load_config(config_path)
+    if latex and (font is not None or table_style is not None):
+        raise typer.BadParameter("--font and --table-style apply to Typst/PDF, not --latex")
+    try:
+        config = load_config(config_path)
+    except ValueError as error:
+        raise typer.BadParameter(f"Invalid configuration: {error}") from error
+    if font is not None:
+        if not font.strip():
+            raise typer.BadParameter("--font must be a non-empty font family name")
+        config.text.font = font
+    if table_style is not None:
+        config.table.style = table_style
     effective_paper = paper or config.page.paper or None
 
     if latex and pdf:
@@ -131,7 +162,7 @@ def mdtyp(
     elif input is None:
         if sys.stdin.isatty() and not output and not stdout and not latex:
             from mdtyp.tui import MdtypBrowser
-            MdtypBrowser().run()
+            MdtypBrowser(config).run()
             return
         _convert_stdin(config, effective_paper, output, pdf, latex)
     else:
@@ -150,7 +181,7 @@ def _convert_all(
         output_text = _convert_source(
             md_file.read_text(encoding="utf-8"), config, paper, latex,
         )
-        _emit_to_file(output_text, md_file.with_suffix(suffix), pdf)
+        _emit_to_file(output_text, md_file.with_suffix(suffix), pdf, sources=tuple(md_files))
 
 
 def _convert_stdin(
@@ -190,7 +221,7 @@ def _convert_file(
         sys.stdout.write(output_text)
     else:
         suffix = ".tex" if latex else ".typ"
-        _emit_to_file(output_text, output or input.with_suffix(suffix), pdf)
+        _emit_to_file(output_text, output or input.with_suffix(suffix), pdf, sources=(input,))
 
 
 if __name__ == "__main__":

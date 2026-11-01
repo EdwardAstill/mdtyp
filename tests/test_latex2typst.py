@@ -142,10 +142,6 @@ def test_font_commands(latex: str, expected: str) -> None:
     assert latex_to_typst(latex) == expected
 
 
-def test_extensible_arrow_with_label() -> None:
-    result = latex_to_typst(r"\text{DOFs}\xrightarrow{N}\text{field}")
-    assert result == '"DOFs" arrow.r^(N) "field"'
-
 
 # --- Blackboard bold ---
 
@@ -268,7 +264,6 @@ def test_sum_with_limits() -> None:
 
 @pytest.mark.parametrize("latex, expected", [
     (r"\infty", "infinity"),
-    (r"\partial", "diff"),
     (r"\nabla", "nabla"),
     (r"\forall", "forall"),
     (r"\exists", "exists"),

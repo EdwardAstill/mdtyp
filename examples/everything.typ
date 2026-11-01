@@ -1,6 +1,8 @@
+#set text(font: "Helvetica")
+
 = Markdown to Typst Feature Reference
 
-This document exercises every Markdown feature supported by mdtyp.
+This document exercises every Markdown feature supported by mdtyp\.
 
 #line(length: 100%)
 
@@ -20,31 +22,28 @@ This document exercises every Markdown feature supported by mdtyp.
 ====== Sixth Level
 
 
-== Heading with *bold* and _italic_ words
+== Heading with #strong[bold] and #emph[italic] words
 
 
-== Heading with `inline code`
+== Heading with #raw("inline code")
 
 #line(length: 100%)
 
 
 == Inline Formatting
 
-This is *bold text* and this is _italic text_ and this is #strike[strikethrough text].
+This is #strong[bold text] and this is #emph[italic text] and this is #strike[strikethrough text]\.
 
-Combining: *bold and _italic_ together* and #strike[strikethrough with *bold*].
+Combining\: #strong[bold and #emph[italic] together] and #strike[strikethrough with #strong[bold]]\.
 
-Here is `inline code` in a sentence.
+Here is #raw("inline code") in a sentence\.
 
 #line(length: 100%)
 
 
 == Links and Images
 
-Here is a #link("https://google.com")[link to Google] and a #link("https://example.com")[link with *bold* text].
-
-/* HTML: <!-- Images omitted: Typst requires actual image files to compile.
-     Syntax: ![Photo of a sunset](sunset.jpg) → #figure(image("sunset.jpg"), caption: [...]) --> */
+Here is a #link("https://google.com")[link to Google] and a #link("https://example.com")[link with #strong[bold] text]\.
 
 #line(length: 100%)
 
@@ -54,53 +53,140 @@ Here is a #link("https://google.com")[link to Google] and a #link("https://examp
 
 === Unordered List
 
-- Item one
-- Item two
-- Item three
+#list(tight: true,
+[
+Item one
+],
+[
+Item two
+],
+[
+Item three
+],
+)
 
 
 === Ordered List
 
-+ First item
-+ Second item
-+ Third item
+#enum(start: 1, tight: true,
+[
+First item
+],
+[
+Second item
+],
+[
+Third item
+],
+)
 
 
 === Nested Unordered
 
-- Top level
-  - Second level
-    - Third level
-  - Back to second
-- Back to top
+#list(tight: true,
+[
+Top level
+#list(tight: true,
+[
+Second level
+#list(tight: true,
+[
+Third level
+],
+)
+
+],
+[
+Back to second
+],
+)
+
+],
+[
+Back to top
+],
+)
 
 
 === Nested Ordered
 
-+ First
-  + Sub first
-  + Sub second
-+ Second
-  + Another sub
+#enum(start: 1, tight: true,
+[
+First
+#enum(start: 1, tight: true,
+[
+Sub first
+],
+[
+Sub second
+],
+)
+
+],
+[
+Second
+#enum(start: 1, tight: true,
+[
+Another sub
+],
+)
+
+],
+)
 
 
 === Mixed Nesting
 
-+ Ordered top
-  - Unordered child
-  - Another child
-+ Back to ordered
-  - Child again
-    + Deep ordered
-    + More deep
+#enum(start: 1, tight: true,
+[
+Ordered top
+#list(tight: true,
+[
+Unordered child
+],
+[
+Another child
+],
+)
+
+],
+[
+Back to ordered
+#list(tight: true,
+[
+Child again
+#enum(start: 1, tight: true,
+[
+Deep ordered
+],
+[
+More deep
+],
+)
+
+],
+)
+
+],
+)
 
 
 === List Items with Formatting
 
-- *Bold item*
-- _Italic item_
-- Item with `code`
-- Item with #link("https://example.com")[a link]
+#list(tight: true,
+[
+#strong[Bold item]
+],
+[
+#emph[Italic item]
+],
+[
+Item with #raw("code")
+],
+[
+Item with #link("https://example.com")[a link]
+],
+)
 
 #line(length: 100%)
 
@@ -108,34 +194,40 @@ Here is a #link("https://google.com")[link to Google] and a #link("https://examp
 == Blockquotes
 
 #quote[
-This is a simple blockquote.
+This is a simple blockquote\.
 ]
 
 #quote[
-This is a blockquote that spans multiple lines in the source.
+This is a blockquote that spans multiple lines in the source\.
 ]
 
 #quote[
-First paragraph of a blockquote.
+First paragraph of a blockquote\.
 
-Second paragraph of the same blockquote.
+Second paragraph of the same blockquote\.
 ]
 
 #quote[
-Blockquote with *bold*, _italic_, and `code`.
+Blockquote with #strong[bold], #emph[italic], and #raw("code")\.
 ]
 
 #quote[
 #quote[
-Nested blockquote inside a blockquote.
+Nested blockquote inside a blockquote\.
 ]
 ]
 
 #quote[
-Blockquote with a list:
+Blockquote with a list\:
 
-- Item one
-- Item two
+#list(tight: true,
+[
+Item one
+],
+[
+Item two
+],
+)
 ]
 
 #line(length: 100%)
@@ -143,37 +235,21 @@ Blockquote with a list:
 
 == Code Blocks
 
-Inline: use `print("hello")` to print.
+Inline\: use #raw("print(\"hello\")") to print\.
 
-Fenced with language:
+Fenced with language\:
 
-```python
-def factorial(n):
-    if n <= 1:
-        return 1
-    return n * factorial(n - 1)
-```
+#raw(lang: "python", "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)", block: true)
 
-```javascript
-function greet(name) {
-    console.log(`Hello, ${name}!`);
-}
-```
+#raw(lang: "javascript", "function greet(name) {\n    console.log(`Hello, ${name}!`);\n}", block: true)
 
-Fenced without language:
+Fenced without language\:
 
-```
-Just plain text in a code block.
-No syntax highlighting.
-```
+#raw("Just plain text in a code block.\nNo syntax highlighting.", block: true)
 
-Indented code block:
+Indented code block\:
 
-```
-this is an indented
-code block with
-four spaces
-```
+#raw("this is an indented\ncode block with\nfour spaces", block: true)
 
 #line(length: 100%)
 
@@ -186,6 +262,7 @@ four spaces
 #table(
   columns: 3,
   align: (auto, auto, auto,),
+  stroke: (x: none, y: 0.5pt),
   table.header(
     [*Name*],
     [*Age*],
@@ -204,6 +281,7 @@ four spaces
 #table(
   columns: 3,
   align: (left, center, right,),
+  stroke: (x: none, y: 0.5pt),
   table.header(
     [*Left*],
     [*Center*],
@@ -225,22 +303,23 @@ four spaces
 #table(
   columns: 3,
   align: (auto, auto, auto,),
+  stroke: (x: none, y: 0.5pt),
   table.header(
     [*Feature*],
     [*Syntax*],
     [*Output*],
   ),
   [Bold],
-  [`**text**`],
-  [*text*],
+  [#raw("**text**")],
+  [#strong[text]],
   [Italic],
-  [`_text_`],
-  [_text_],
+  [#raw("_text_")],
+  [#emph[text]],
   [Code],
-  [``code``],
-  [`code`],
+  [#raw("`code`")],
+  [#raw("code")],
   [Link],
-  [`[t](url)`],
+  [#raw("[t](url)")],
   [#link("https://example.com")[t]],
 )
 
@@ -249,6 +328,7 @@ four spaces
 #table(
   columns: 1,
   align: (auto,),
+  stroke: (x: none, y: 0.5pt),
   table.header(
     [*Values*],
   ),
@@ -262,6 +342,7 @@ four spaces
 #table(
   columns: 6,
   align: (auto, auto, auto, auto, auto, auto,),
+  stroke: (x: none, y: 0.5pt),
   table.header(
     [*Col1*],
     [*Col2*],
@@ -282,15 +363,15 @@ four spaces
 
 == Horizontal Rules
 
-Content above the first rule.
+Content above the first rule\.
 
 #line(length: 100%)
 
-Content between rules.
+Content between rules\.
 
 #line(length: 100%)
 
-Content after the last rule.
+Content after the last rule\.
 
 #line(length: 100%)
 
@@ -300,11 +381,11 @@ Content after the last rule.
 
 === Inline Math
 
-The quadratic formula is $x = frac(-b plus.minus sqrt(b^2 - 4"ac"), 2a)$.
+The quadratic formula is $x = frac(-b plus.minus sqrt(b^2 - 4"ac"), 2a)$\.
 
-Euler's identity: $e^(i pi) + 1 = 0$.
+Euler\'s identity\: $e^(i pi) + 1 = 0$\.
 
-A simple sum: $sum_(i=1)^(n) i = frac(n(n+1), 2)$.
+A simple sum\: $sum_(i=1)^(n) i = frac(n(n+1), 2)$\.
 
 
 === Display Math
@@ -353,7 +434,7 @@ $<=, >=, !=, approx, equiv, tilde.op, prop$
 
 $in, in.not, subset, subset.eq, union, inter$
 
-$forall, exists, nabla, diff, infinity$
+$forall, exists, nabla, partial, infinity$
 
 
 === Accents and Decorations
@@ -385,41 +466,37 @@ $RR, NN, ZZ, QQ, CC$
 
 == HTML Elements
 
-Some inline HTML: /* <b> */bold via HTML/* </b> */ and /* <em> */emphasis via HTML/* </em> */.
+Some inline HTML\: bold via HTML and emphasis via HTML\.
 
-A block of HTML:
-
-/* HTML: <div class="note">
-  <p>This is an HTML block.</p>
-</div> */
+A block of HTML\:
 
 #line(length: 100%)
 
 
 == Special Characters
 
-Ampersands & angles \< \> and quotes "double" 'single'.
+Ampersands & angles \< \> and quotes \"double\" \'single\'\.
 
-Backslash: \\ and tilde: \~ and caret: ^
+Backslash\: \\ and tilde\: \~ and caret\: ^
 
-Dollar sign: \$100 and hash: \#hashtag and at: \@mention
+Dollar sign\: \$100 and hash\: \#hashtag and at\: \@mention
 
 #line(length: 100%)
 
 
 == Consecutive Formatting
 
-*bold1* *bold2* _italic1_ _italic2_ `code1` `code2`
+#strong[bold1] #strong[bold2] #emph[italic1] #emph[italic2] #raw("code1") #raw("code2")
 
 #line(length: 100%)
 
 
 == Paragraph and Soft Breaks
 
-This is the first paragraph. It has multiple sentences. They should flow together.
+This is the first paragraph\. It has multiple sentences\. They should flow together\.
 
-This is the second paragraph, separated by a blank line.
+This is the second paragraph, separated by a blank line\.
 
-This line has a soft break that should become a space.
+This line has a soft break that should become a space\.
 
-A paragraph with *bold*, _italic_, `code`, and #link("https://example.com")[a link] all mixed together in one flowing block of text.
+A paragraph with #strong[bold], #emph[italic], #raw("code"), and #link("https://example.com")[a link] all mixed together in one flowing block of text\.

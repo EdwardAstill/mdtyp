@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-import json
 import re
 
-from mdtyp.config import Config
+from mdtyp.config import Config, TableStyle
 from mdtyp.ctx import Ctx
 from mdtyp.inline import render_inline
 from mdtyp.latex2typst import latex_to_typst
+from mdtyp.typst import typst_string
 
 
 # --- Headings ---
@@ -27,8 +27,7 @@ def _handle_heading(ctx: Ctx) -> None:
         if annotation and annotation.type == "html_block" else None
     )
     if question:
-        identifier, summary = (json.dumps(part.strip(), ensure_ascii=False)
-                               for part in question.groups())
+        identifier, summary = (typst_string(part.strip()) for part in question.groups())
         content += f' #metadata((kind: "mdtyp-question", id: {identifier}, summary: {summary}))'
     ctx.write(f"\n{prefix} {content}\n\n")
     ctx.advance(4 if question else 3)  # heading tokens + optional annotation
@@ -40,75 +39,59 @@ def _handle_heading(ctx: Ctx) -> None:
 def _handle_paragraph(ctx: Ctx) -> None:
     inline_tok = ctx.peek()
     text = render_inline(inline_tok.children or [], ctx.config) if inline_tok else ""
-    if ctx.list_stack and ctx.item_first_para:
-        depth = len(ctx.list_stack) - 1
-        indent = "  " * depth
-        marker = "+" if ctx.list_stack[-1] == "ordered" else "-"
-        ctx.write(f"{indent}{marker} {text}\n")
-        ctx.item_first_para = False
-    elif ctx.list_stack:
-        depth = len(ctx.list_stack) - 1
-        indent = "  " * (depth + 1)
-        ctx.write(f"\n{indent}{text}\n")
-    else:
-        ctx.write(text + "\n\n")
+    ctx.write(text + ("\n" if ctx.current().hidden else "\n\n"))
     ctx.advance(3)  # paragraph_open + inline + paragraph_close
 
 
 # --- Code blocks ---
 
 
-def _handle_fence(ctx: Ctx) -> None:
-    tok = ctx.current()
-    info = tok.info.strip() if tok.info else ""
-    content = tok.content.rstrip("\n")
-    fn = ctx.config.code.block_function
-    if fn:
-        lang_attr = f'lang: "{info}", ' if info else ""
-        ctx.write(f"#{fn}({lang_attr}```\n{content}\n```)\n\n")
-    elif info:
-        ctx.write(f"```{info}\n{content}\n```\n\n")
-    else:
-        ctx.write(f"```\n{content}\n```\n\n")
-    ctx.advance()
-
-
 def _handle_code_block(ctx: Ctx) -> None:
-    content = ctx.current().content.rstrip("\n")
+    tok = ctx.current()
+    info = tok.info.strip()
+    content = typst_string(tok.content.removesuffix("\n"))
+    lang_attr = f"lang: {typst_string(info)}, " if info else ""
     fn = ctx.config.code.block_function
     if fn:
-        ctx.write(f"#{fn}(```\n{content}\n```)\n\n")
+        ctx.write(f"#{fn}({lang_attr}raw({content}, block: true))\n\n")
     else:
-        ctx.write(f"```\n{content}\n```\n\n")
+        ctx.write(f"#raw({lang_attr}{content}, block: true)\n\n")
     ctx.advance()
 
 
 # --- Lists ---
 
 
-def _handle_bullet_list_open(ctx: Ctx) -> None:
-    ctx.list_stack.append("bullet")
-    ctx.advance()
-
-
-def _handle_ordered_list_open(ctx: Ctx) -> None:
-    ctx.list_stack.append("ordered")
+def _handle_list_open(ctx: Ctx) -> None:
+    tok = ctx.current()
+    tight = True
+    for index in range(ctx.i + 1, len(ctx.tokens)):
+        child = ctx.tokens[index]
+        if child.level == tok.level:
+            break
+        if child.type == "paragraph_open" and child.level == tok.level + 2 and not child.hidden:
+            tight = False
+            break
+    if tok.type == "ordered_list_open":
+        ctx.write(f"#enum(start: {tok.attrs.get('start', 1)}, ")
+    else:
+        ctx.write("#list(")
+    ctx.write(f"tight: {str(tight).lower()},\n")
     ctx.advance()
 
 
 def _handle_list_close(ctx: Ctx) -> None:
-    ctx.list_stack.pop()
-    if not ctx.list_stack:
-        ctx.write("\n")
+    ctx.write(")\n\n")
     ctx.advance()
 
 
 def _handle_list_item_open(ctx: Ctx) -> None:
-    ctx.item_first_para = True
+    ctx.write("[\n")
     ctx.advance()
 
 
 def _handle_list_item_close(ctx: Ctx) -> None:
+    ctx.write("],\n")
     ctx.advance()
 
 
@@ -177,8 +160,6 @@ Find a similar question by its topic, then turn to the page shown.
 #pagebreak()
 
 ''')
-    else:
-        ctx.write(f"/* HTML: {content} */\n\n")
     ctx.advance()
 
 
@@ -261,8 +242,17 @@ def _format_table(
     lines = ["#table("]
     lines.append(f"  columns: {cols},")
     lines.append(f"  align: ({col_spec},),")
-    if config.table.stroke:
-        lines.append(f"  stroke: {config.table.stroke},")
+    style = TableStyle(config.table.style)
+    stroke = config.table.stroke or "0.5pt"
+    if style == TableStyle.SHADED_HORIZONTAL:
+        lines.append("  stroke: none,")
+        lines.append("  fill: (x, y) => if calc.odd(y) { luma(94%) } else { none },")
+    elif style == TableStyle.HORIZONTAL:
+        lines.append(f"  stroke: (x: none, y: {stroke}),")
+    elif style == TableStyle.VERTICAL:
+        lines.append(f"  stroke: (x: {stroke}, y: none),")
+    else:
+        lines.append(f"  stroke: {stroke},")
 
     if header_cells:
         lines.append("  table.header(")
@@ -287,10 +277,10 @@ def _format_table(
 BLOCK_HANDLERS: dict[str, Callable[[Ctx], None]] = {
     "heading_open": _handle_heading,
     "paragraph_open": _handle_paragraph,
-    "fence": _handle_fence,
+    "fence": _handle_code_block,
     "code_block": _handle_code_block,
-    "bullet_list_open": _handle_bullet_list_open,
-    "ordered_list_open": _handle_ordered_list_open,
+    "bullet_list_open": _handle_list_open,
+    "ordered_list_open": _handle_list_open,
     "bullet_list_close": _handle_list_close,
     "ordered_list_close": _handle_list_close,
     "list_item_open": _handle_list_item_open,

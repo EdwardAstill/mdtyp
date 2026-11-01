@@ -15,8 +15,6 @@ class Ctx:
         self.config = config
         self.i = 0
         self._parts: list[str] = []
-        self.list_stack: list[str] = []  # "bullet" | "ordered"
-        self.item_first_para: bool = False  # True right after list_item_open
 
     def current(self) -> Token:
         return self.tokens[self.i]

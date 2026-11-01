@@ -18,6 +18,8 @@ To compile to PDF (`--pdf` and TUI `p` action), also install [Typst](https://git
 
 ## Usage
 
+See [the Markdown authoring guide](markdown-guide.md) for portable syntax, image handling, and current limitations.
+
 ### Interactive browser (TUI)
 
 Run `mdtyp` with no arguments to open the file browser:
@@ -97,6 +99,28 @@ mdtyp input.md --paper a4
 mdtyp input.md --paper us-letter
 ```
 
+### Font and table appearance
+
+Typst/PDF output defaults to **Helvetica** and **horizontal table rules**. Override either per conversion:
+
+```bash
+mdtyp input.md --font "Arial" --table-style shaded-horizontal --pdf
+mdtyp input.md --table-style cell
+mdtyp --all --font "DejaVu Sans" --table-style vertical
+echo "# Notes" | mdtyp --font "Arial"
+```
+
+| `--table-style` | Appearance |
+|---|---|
+| `horizontal` (default) | Horizontal rules between rows and along the top/bottom; no vertical rules |
+| `shaded-horizontal` | No rules; alternating light-grey body rows, starting with the first body row; unshaded header |
+| `cell` | Horizontal and vertical rules around every cell |
+| `vertical` | Vertical rules between columns and along the sides; no horizontal rules |
+
+CLI flags override config-file values, which override defaults. The same settings apply to the TUI (`mdtyp --font "Arial" --table-style cell`). Explicit `--font` or `--table-style` with `--latex` is rejected; LaTeX output does not use the Typst presentation configuration.
+
+The requested font must be installed where Typst compiles the document. mdtyp does not bundle Helvetica: if it is missing, Typst warns and substitutes another font. Run `typst fonts` to list available families, then select one with `--font`.
+
 Use a custom config file:
 
 ```bash
@@ -124,18 +148,23 @@ The LaTeX renderer preserves Markdown math as LaTeX math and maps common Markdow
 | Markdown | Typst |
 |---|---|
 | `# H1` … `###### H6` | `= H1` … `====== H6` |
-| `**bold**` | `*bold*` |
-| `_italic_` | `_italic_` |
+| `**bold**` | `#strong[bold]` |
+| `_italic_` | `#emph[italic]` |
 | `~~strike~~` | `#strike[...]` |
-| `` `code` `` | `` `code` `` |
+| `` `code` `` | `#raw("code")` |
 | `[text](url)` | `#link("url")[text]` |
-| `![alt](src)` | `#figure(image("src"), caption: [alt])` |
+| `![alt](src)` | `#figure(image("src"), caption: "alt")` |
 | `> quote` | `#quote[...]` |
 | `---` | `#line(length: 100%)` |
 | `$...$` | `$...$` (with LaTeX → Typst math translation) |
 | `$$...$$` | `$ ... $` (display math) |
 | Tables | `#table(columns: N, ...)` |
-| Fenced code blocks | ` ```lang ... ``` ` |
+| Fenced code blocks | `#raw("...", lang: "lang", block: true)` |
+| Bullet / ordered lists | `#list(...)` / `#enum(start: N, ...)` |
+
+Text, URLs, image captions, and code are encoded for their Typst context rather than inserted as executable markup. Nested list items own all their child blocks; ordered starts are preserved. Ordinary HTML is omitted, except for the explicit directives below. Local image URL escapes are decoded, but assets are not downloaded, copied, or rebased when output moves.
+
+CLI and TUI writes reject output paths that alias their input or another output in the same conversion, including symbolic and hard links. Existing unrelated output files are still replaced.
 
 ### Table of contents
 
@@ -184,6 +213,15 @@ Math expressions are translated from LaTeX to Typst syntax automatically:
 | `\mathbb{R}` | `RR` |
 | `\begin{aligned}…\end{aligned}` | Typst aligned block |
 | `\begin{pmatrix}…\end{pmatrix}` | Typst matrix |
+| `\partial`, `\hbar` | `partial`, `planck` |
+| `\oplus`, `\otimes` | `plus.o`, `times.o` |
+| `\langle`, `\rangle` | `chevron.l`, `chevron.r` |
+
+Text inside `\text{...}` stays literal through the entire translation pipeline, including matrix and alignment parsing. Unsupported or malformed named commands raise `ValueError` in the Python API; CLI/TUI conversions report the error without replacing the output. Command names are matched as complete tokens, so an unknown command such as `\alphabet` is not silently rewritten as `\alpha` plus text.
+
+Generated symbol identifiers are derived from the translation table so they cannot drift out of a separate allowlist. The mappings use [Typst's canonical symbol names](https://typst.app/docs/reference/symbols/sym/); regression checks inspect actual symbols, not just generated strings.
+
+This remains a subset translator, not a full TeX validator or an untrusted-document sandbox. Configuration expressions and compiler resource access require trusted inputs.
 
 ---
 
@@ -196,7 +234,8 @@ All fields are optional — omitted fields use defaults.
 ```toml
 [table]
 header_bold = true   # wrap header cells in *...*
-stroke = ""          # e.g. "0.5pt" — adds stroke: param to #table
+style = "horizontal"  # horizontal, shaded-horizontal, cell, vertical
+stroke = ""          # rule stroke; empty uses 0.5pt; shaded-horizontal ignores it
 
 [blockquote]
 function = "quote"   # Typst function name used for blockquotes
@@ -217,6 +256,7 @@ margin = ""          # Typst length, e.g. "15mm"
 numbering = ""       # page-number pattern, e.g. "1"
 
 [text]
+font = "Helvetica"   # font family (--font overrides)
 size = ""            # Typst font size, e.g. "12pt"
 ```
 
@@ -228,12 +268,14 @@ size = ""            # Typst font size, e.g. "12pt"
 # Run tests
 uv run pytest tests/ -v
 
-# Update the snapshot test after intentional output changes
+# Regenerate the example Typst document
 uv run mdtyp examples/everything.md -o examples/everything.typ
 
 # Quick smoke test
 uv run python -c "from mdtyp.converter import convert; print(convert('# Hello'))"
 ```
+
+Compiler-backed regression tests check rendered content, nesting, and literal preservation rather than exact generated-source formatting. They require `typst` and are skipped when it is unavailable.
 
 ### Architecture
 
@@ -246,6 +288,8 @@ mdtyp/
 ├── handlers.py     Block-level token handlers
 ├── inline.py       Inline token rendering
 ├── latex2typst.py  LaTeX math → Typst math translation
+├── typst.py        Literal Typst string serialization
+├── output.py       Source-preserving output writes
 └── config.py       Config dataclass + TOML loader
 ```
 
