@@ -55,6 +55,24 @@ def test_font_default_and_cli_precedence(tmp_path, monkeypatch, use_config, over
 
 
 @needs_typst
+@pytest.mark.parametrize("override, expected_mm", [(None, 25), ("15mm", 15), ("0pt", 0)])
+def test_margin_cli_overrides_config(tmp_path, override, expected_mm):
+    config = tmp_path / "settings.toml"
+    config.write_text('[page]\nmargin = "25mm"\n')
+    args = ["--config", str(config)]
+    if override is not None:
+        args += ["--margin", override]
+    source = _convert(tmp_path, args)
+    source.write_text(source.read_text() + "\n#context metadata(page.margin / 1mm)\n")
+    result = subprocess.run(
+        ["typst", "query", str(source), "metadata", "--field", "value", "--one"],
+        capture_output=True, text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout) == pytest.approx(expected_mm)
+
+
+@needs_typst
 @pytest.mark.parametrize("style, horizontal, vertical, shaded", [
     (None, 5, 0, False),
     ("horizontal", 5, 0, False),
@@ -105,6 +123,7 @@ def test_table_style_draws_the_requested_rules_and_rows(
 @pytest.mark.parametrize("args", [
     ["--table-style", "diagonal"], ["--font", " "],
     ["--latex", "--font", "Arial"], ["--latex", "--table-style", "cell"],
+    ["--margin", " "], ["--latex", "--margin", "15mm"],
 ])
 def test_invalid_or_inapplicable_flags_leave_output_untouched(tmp_path, args):
     dest = tmp_path / "out.typ"

@@ -112,6 +112,10 @@ def mdtyp(
         None, "--paper", "-p",
         help='Paper size, e.g. a4, a5, us-letter.',
     ),
+    margin: Optional[str] = typer.Option(
+        None, "--margin",
+        help='Typst/PDF page margin, e.g. "15mm" or "1in". Overrides config.',
+    ),
     font: Optional[str] = typer.Option(
         None, "--font",
         help="Typst/PDF font family. Overrides config; default: Helvetica.",
@@ -139,12 +143,16 @@ def mdtyp(
         dir_okay=False,
     ),
 ) -> None:
-    if latex and (font is not None or table_style is not None):
-        raise typer.BadParameter("--font and --table-style apply to Typst/PDF, not --latex")
+    if latex and (font is not None or table_style is not None or margin is not None):
+        raise typer.BadParameter("--font, --table-style, and --margin apply to Typst/PDF, not --latex")
     try:
         config = load_config(config_path)
     except ValueError as error:
         raise typer.BadParameter(f"Invalid configuration: {error}") from error
+    if margin is not None:
+        if not margin.strip():
+            raise typer.BadParameter("--margin must be a non-empty Typst length or margin expression")
+        config.page.margin = margin
     if font is not None:
         if not font.strip():
             raise typer.BadParameter("--font must be a non-empty font family name")

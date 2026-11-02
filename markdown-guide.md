@@ -6,6 +6,7 @@ Use standard Markdown plus pipe tables, strikethrough, and dollar-delimited math
 
 - Soft line breaks become spaces; use paragraphs or Markdown hard breaks where needed.
 - Ordered lists preserve the starting number, then renumber automatically. Use headings or prose labels for question IDs.
+- Nested items may contain multiple paragraphs, code blocks, quotes, and sublists. Indent those blocks under their owning item; blank lines distinguish loose lists from tight lists.
 - GitHub alerts such as `[!NOTE]` are not callouts; use `**Note:**`.
 - Do not rely on YAML metadata, footnote/citation extensions, task checkboxes, definition lists, or heading IDs/attributes. Use ordinary prose and explicit references.
 - HTML tags and blocks are omitted; text between inline tags survives. Unsupported extensions can lose meaning without an error.
@@ -49,6 +50,10 @@ $$
 - Separate multiplied variables: `a b` or `a \cdot b`. Unknown multi-letter runs may become a single textual identifier.
 - Use standard LaTeX commands and `\text{...}` for words. Inside `\text`, braces group; `\{` and `\}` produce literal braces, and escaped punctuation stays literal.
 - `aligned`, matrix, and cases environments are supported; inspect complex expressions in the PDF.
+- Matrix environments include `matrix`, `pmatrix`, `bmatrix`, `Bmatrix`, `vmatrix`, and `Vmatrix`. Use `&` between cells and `\\` between rows.
+- Compact forms such as `\frac12`, `\binom21`, `\sqrt x`, and `\hat x` are accepted; braced forms are clearer.
+- Statistics notation includes `\ne`, `\mid`, `\cap`, `\bigcap`, `\emptyset`, and `\binom{n}{k}`. Write thousands separators as `6{,}149{,}520` and standalone unit powers as `m${}^3$`.
+- Use `\xrightarrow{N}` or `\xleftarrow{N}` for labelled arrows.
 - This is a LaTeX subset, not a TeX engine: no arbitrary package commands, custom macros, `\newcommand`, equation labels/references, or document environments. Use prose equation numbers.
 
 Unsupported or malformed named commands stop conversion (`ValueError` in `convert()` / `latex_to_typst()`); the CLI leaves existing output untouched. Other invalid expressions may pass, so conversion success does not establish mathematical fidelity.
@@ -86,10 +91,15 @@ Omit `uv run` for an installed tool. `--pdf` requires Typst and replaces sibling
 
 Check assets and links, inspect generated Typst for lost content, then inspect PDF equations, tables, captions, images, and page breaks. Conversion, compilation, and visual inspection are separate checks; report which were performed. `--latex` is a separate workflow, not a rendering-equivalence guarantee.
 
-Typst/PDF defaults to Helvetica and horizontal table rules. Override at conversion time:
+Typst/PDF defaults to Helvetica and horizontal table rules. Override margins, font, and table style at conversion time:
 
 ```bash
-uv run mdtyp document.md --font "Arial" --table-style shaded-horizontal --pdf
+uv run mdtyp document.md --margin 15mm --font "Arial" --table-style shaded-horizontal --pdf
 ```
 
-Table styles: `horizontal`, `shaded-horizontal` (alternating grey body rows, no rules), `cell` (both rule directions), `vertical`. Flags override `[text].font` and `[table].style`. Missing fonts trigger substitution; check availability with `typst fonts`.
+Table styles: `horizontal`, `shaded-horizontal` (alternating grey body rows, no rules), `cell` (both rule directions), `vertical`. Flags override `[page].margin`, `[text].font`, and `[table].style`, including when launching the TUI. These three flags cannot be used with `--latex`. Missing fonts trigger substitution; check availability with `typst fonts`.
+
+Use `--margin "(x: 15mm, y: 20mm)"` for separate horizontal and vertical margins.
+Margin expressions are evaluated by Typst during compilation, not validated by
+conversion alone. Set page numbering (`[page].numbering`) and font size
+(`[text].size`) in a TOML config; see the [print configuration example](README.md#configuration).

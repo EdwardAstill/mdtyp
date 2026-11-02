@@ -92,12 +92,35 @@ cat notes.md | mdtyp --stdout
 cat notes.md | mdtyp --latex --stdout
 ```
 
+With stdin, `--pdf` writes PDF bytes to stdout unless `-o` supplies the intermediate
+Typst output path:
+
+```bash
+echo "# Hello" | mdtyp --pdf > hello.pdf
+echo "# Hello" | mdtyp --pdf -o hello.typ   # writes hello.typ and hello.pdf
+```
+
+Do not combine `--latex` with `--pdf`, or file-input `--stdout` with `--pdf`.
+
 Set paper size:
 
 ```bash
 mdtyp input.md --paper a4
 mdtyp input.md --paper us-letter
 ```
+
+Set page margins for Typst/PDF output (overrides `[page].margin` in config):
+
+```bash
+mdtyp input.md --margin 15mm --pdf
+mdtyp --all --margin 1in
+```
+
+`--margin` accepts a Typst length or margin expression, such as
+`"(x: 15mm, y: 20mm)"` for separate horizontal and vertical margins.
+It also applies to the TUI (`mdtyp --margin 15mm`) and is rejected with `--latex`.
+Typst validates margin expressions when compiling; generating `.typ` alone does
+not validate them.
 
 ### Font and table appearance
 
@@ -117,7 +140,7 @@ echo "# Notes" | mdtyp --font "Arial"
 | `cell` | Horizontal and vertical rules around every cell |
 | `vertical` | Vertical rules between columns and along the sides; no horizontal rules |
 
-CLI flags override config-file values, which override defaults. The same settings apply to the TUI (`mdtyp --font "Arial" --table-style cell`). Explicit `--font` or `--table-style` with `--latex` is rejected; LaTeX output does not use the Typst presentation configuration.
+CLI flags override config-file values, which override defaults. The same settings apply to the TUI (`mdtyp --font "Arial" --table-style cell`). Explicit `--font`, `--table-style`, or `--margin` with `--latex` is rejected; LaTeX output does not use the Typst presentation configuration.
 
 The requested font must be installed where Typst compiles the document. mdtyp does not bundle Helvetica: if it is missing, Typst warns and substitutes another font. Run `typst fonts` to list available families, then select one with `--font`.
 
@@ -211,6 +234,10 @@ Math expressions are translated from LaTeX to Typst syntax automatically:
 | `x_{i}`, `x^{2}` | `x_(i)`, `x^(2)` |
 | `\mathbf{F}` | `bold(F)` |
 | `\mathbb{R}` | `RR` |
+| `\binom{n}{k}` | `binom(n, k)` |
+| `\ne`, `\mid` | `!=`, `\|` |
+| `\cap`, `\bigcap`, `\emptyset` | `inter`, `inter.big`, `emptyset` |
+| `\xrightarrow{N}` | `arrow.r^(N)` |
 | `\begin{aligned}…\end{aligned}` | Typst aligned block |
 | `\begin{pmatrix}…\end{pmatrix}` | Typst matrix |
 | `\partial`, `\hbar` | `partial`, `planck` |
@@ -252,13 +279,33 @@ block_function = ""  # e.g. "sourcecode" — wraps code blocks: #sourcecode[...]
 
 [page]
 paper = ""           # default paper size, e.g. "a4" (--paper flag overrides)
-margin = ""          # Typst length, e.g. "15mm"
+margin = ""          # Typst length, e.g. "15mm" (--margin overrides)
 numbering = ""       # page-number pattern, e.g. "1"
 
 [text]
 font = "Helvetica"   # font family (--font overrides)
 size = ""            # Typst font size, e.g. "12pt"
 ```
+
+For printable notes, save this as `print.toml`:
+
+```toml
+[page]
+paper = "a4"
+margin = "15mm"
+numbering = "1"
+
+[text]
+size = "12pt"
+```
+
+```bash
+mdtyp notes.md --config print.toml --pdf
+mdtyp notes.md --config print.toml --margin 10mm --pdf
+```
+
+Page numbering and text size are config-only settings; there are no `--numbering`
+or `--size` flags. Leave them empty to use Typst's defaults.
 
 ---
 
@@ -288,6 +335,7 @@ mdtyp/
 ├── handlers.py     Block-level token handlers
 ├── inline.py       Inline token rendering
 ├── latex2typst.py  LaTeX math → Typst math translation
+├── latex.py        Markdown → LaTeX renderer
 ├── typst.py        Literal Typst string serialization
 ├── output.py       Source-preserving output writes
 └── config.py       Config dataclass + TOML loader
