@@ -61,6 +61,8 @@ mdtyp
 
 Hidden files and directories are not shown. Folders are listed before files. Non-Markdown files are visible but have no actions.
 
+`$EDITOR` accepts quoted paths and arguments (for example, `code --wait`), without invoking a shell. It defaults to `vi`; invalid or unavailable commands produce an error notification.
+
 ---
 
 ### CLI
@@ -100,6 +102,8 @@ echo "# Hello" | mdtyp --pdf > hello.pdf
 echo "# Hello" | mdtyp --pdf -o hello.typ   # writes hello.typ and hello.pdf
 ```
 
+For stdin PDF output, relative images resolve from the current working directory; no intermediate files are created.
+
 Do not combine `--latex` with `--pdf`, or file-input `--stdout` with `--pdf`.
 
 Set paper size:
@@ -108,6 +112,8 @@ Set paper size:
 mdtyp input.md --paper a4
 mdtyp input.md --paper us-letter
 ```
+
+Paper settings also apply to the TUI and Python API. `--paper` overrides `[page].paper` in config.
 
 Set page margins for Typst/PDF output (overrides `[page].margin` in config):
 
@@ -124,7 +130,7 @@ not validate them.
 
 ### Font and table appearance
 
-Typst/PDF output defaults to **Helvetica** and **horizontal table rules**. Override either per conversion:
+Typst/PDF output defaults to **Helvetica**, falling back to **Arial**, and **horizontal table rules**. Override either per conversion:
 
 ```bash
 mdtyp input.md --font "Arial" --table-style shaded-horizontal --pdf
@@ -142,7 +148,7 @@ echo "# Notes" | mdtyp --font "Arial"
 
 CLI flags override config-file values, which override defaults. The same settings apply to the TUI (`mdtyp --font "Arial" --table-style cell`). Explicit `--font`, `--table-style`, or `--margin` with `--latex` is rejected; LaTeX output does not use the Typst presentation configuration.
 
-The requested font must be installed where Typst compiles the document. mdtyp does not bundle Helvetica: if it is missing, Typst warns and substitutes another font. Run `typst fonts` to list available families, then select one with `--font`.
+Fonts must be installed where Typst compiles the document; mdtyp does not bundle them. The default font order is Helvetica, then Arial. Typst warns about unavailable families and uses the next available font. Config accepts a single family or an ordered list; `--font` replaces that setting with one family. Run `typst fonts` to list available families.
 
 Use a custom config file:
 
@@ -162,7 +168,7 @@ mdtyp input.md --latex --stdout    # print LaTeX to stdout
 mdtyp --all --latex                # convert all .md files to .tex
 ```
 
-The LaTeX renderer preserves Markdown math as LaTeX math and maps common Markdown features to standard LaTeX constructs, including sections, emphasis, lists, blockquotes, tables, links, images, and verbatim code blocks. Documents that use links, images, or strikethrough may need the usual LaTeX packages such as `hyperref`, `graphicx`, or `ulem` in the surrounding document preamble.
+The LaTeX renderer preserves Markdown math as LaTeX math and maps common Markdown features to standard LaTeX constructs, including sections, nested emphasis, lists with their starting numbers, blockquotes, tables, links, images, and verbatim code blocks. HTML tags and blocks are omitted; text between inline tags survives. Documents that use links, images, or strikethrough may need the usual LaTeX packages such as `hyperref`, `graphicx`, or `ulem` in the surrounding document preamble.
 
 ---
 
@@ -187,7 +193,7 @@ The LaTeX renderer preserves Markdown math as LaTeX math and maps common Markdow
 
 Text, URLs, image captions, and code are encoded for their Typst context rather than inserted as executable markup. Nested list items own all their child blocks; ordered starts are preserved. Ordinary HTML is omitted, except for the explicit directives below. Local image URL escapes are decoded, but assets are not downloaded, copied, or rebased when output moves.
 
-CLI and TUI writes reject output paths that alias their input or another output in the same conversion, including symbolic and hard links. Existing unrelated output files are still replaced.
+CLI and TUI writes reject output paths that alias their input or another output in the same conversion, including symbolic and hard links. Outputs are staged before replacement. With `--pdf`, missing Typst or a compilation failure leaves both existing `.typ` and `.pdf` files unchanged. Successful publication uses separate renames for the two files, not a transaction; interruption during publication can leave a mismatched pair. Existing unrelated output files are still replaced on success.
 
 ### Table of contents
 
@@ -244,9 +250,9 @@ Math expressions are translated from LaTeX to Typst syntax automatically:
 | `\oplus`, `\otimes` | `plus.o`, `times.o` |
 | `\langle`, `\rangle` | `chevron.l`, `chevron.r` |
 
-Text inside `\text{...}` stays literal through the entire translation pipeline, including matrix and alignment parsing. Unsupported or malformed named commands raise `ValueError` in the Python API; CLI/TUI conversions report the error without replacing the output. Command names are matched as complete tokens, so an unknown command such as `\alphabet` is not silently rewritten as `\alpha` plus text.
+Text inside `\text{...}` stays literal through the entire translation pipeline, including matrix and alignment parsing. Adjacent supported commands keep their boundaries, so expressions such as `\eta\sqrt{x}` do not merge into a different command. Blackboard symbols such as `\mathbb{R}(x)` remain intact. Unsupported or malformed named commands raise `ValueError` in the Python API; CLI/TUI conversions report the error without replacing the output. Command names are matched as complete tokens, so an unknown command such as `\alphabet` is not silently rewritten as `\alpha` plus text.
 
-Generated symbol identifiers are derived from the translation table so they cannot drift out of a separate allowlist. The mappings use [Typst's canonical symbol names](https://typst.app/docs/reference/symbols/sym/); regression checks inspect actual symbols, not just generated strings.
+Generated symbol identifiers are derived from the translation table so they cannot drift out of a separate allowlist. The mappings use [Typst's canonical symbol names](https://typst.app/docs/reference/symbols/sym/).
 
 This remains a subset translator, not a full TeX validator or an untrusted-document sandbox. Configuration expressions and compiler resource access require trusted inputs.
 
@@ -283,7 +289,7 @@ margin = ""          # Typst length, e.g. "15mm" (--margin overrides)
 numbering = ""       # page-number pattern, e.g. "1"
 
 [text]
-font = "Helvetica"   # font family (--font overrides)
+font = ["Helvetica", "Arial"]  # ordered fallbacks; a single string also works (--font overrides)
 size = ""            # Typst font size, e.g. "12pt"
 ```
 
@@ -311,18 +317,20 @@ or `--size` flags. Leave them empty to use Typst's defaults.
 
 ## Development
 
+Use the examples as the main rendering check. Inspect the generated PDFs for formatting and mathematical fidelity; compilation alone does not prove either.
+
 ```bash
-# Run tests
-uv run pytest tests/ -v
+# Feature reference
+uv run mdtyp examples/everything.md --pdf
 
-# Regenerate the example Typst document
-uv run mdtyp examples/everything.md -o examples/everything.typ
+# Longer documents with math, tables, and local images
+(cd examples2 && uv run mdtyp --all --config print.toml --pdf)
 
-# Quick smoke test
-uv run python -c "from mdtyp.converter import convert; print(convert('# Hello'))"
+# Small CLI smoke suite
+uv run pytest -q
 ```
 
-Compiler-backed regression tests check rendered content, nesting, and literal preservation rather than exact generated-source formatting. They require `typst` and are skipped when it is unavailable.
+`tests/test_cli.py` checks file/stdin conversion, stdout, batch conversion, LaTeX/PDF output, and basic overwrite protection. Rendering coverage lives in the examples, not a separate unit-test suite. Extend the examples when a real document exposes a gap.
 
 ### Architecture
 

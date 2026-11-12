@@ -2,7 +2,6 @@
 
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 from typing import Optional
 
@@ -12,7 +11,6 @@ from mdtyp.config import Config, TableStyle, load_config
 from mdtyp.converter import convert
 from mdtyp.latex import convert_to_latex
 from mdtyp.output import write_output
-from mdtyp.typst import typst_string
 
 app = typer.Typer(help="Convert Markdown documents to Typst or LaTeX.")
 
@@ -22,9 +20,7 @@ app = typer.Typer(help="Convert Markdown documents to Typst or LaTeX.")
 # ---------------------------------------------------------------------------
 
 
-def _convert_source(
-    md_text: str, config: Config, paper: str | None, latex: bool,
-) -> str:
+def _convert_source(md_text: str, config: Config, latex: bool) -> str:
     """Convert markdown text to the selected output format."""
     if latex:
         return convert_to_latex(md_text)
@@ -33,8 +29,6 @@ def _convert_source(
     except ValueError as error:
         typer.echo(f"Conversion failed: {error}", err=True)
         raise typer.Exit(1) from error
-    if paper:
-        typst_text = f"#set page(paper: {typst_string(paper)})\n\n" + typst_text
     return typst_text
 
 
@@ -44,46 +38,31 @@ def _emit_to_file(
     """Write rendered text to a file and optionally compile Typst to PDF."""
     try:
         write_output(output_text, dest, sources=sources, pdf=pdf)
+    except subprocess.CalledProcessError as error:
+        typer.echo(f"typst compile failed:\n{error.stderr}", err=True)
+        raise typer.Exit(error.returncode) from error
     except (ValueError, OSError) as error:
         typer.echo(f"Cannot write output: {error}", err=True)
         raise typer.Exit(1) from error
     typer.echo(f"Written to {dest}", err=True)
     if pdf:
-        _compile_pdf(dest)
+        typer.echo(f"Compiled to {dest.with_suffix('.pdf')}", err=True)
 
 
 def _emit_pdf_to_stdout(typst_text: str) -> None:
-    """Compile typst text to PDF and write the PDF bytes to stdout."""
-    with tempfile.NamedTemporaryFile(suffix=".typ", delete=False, mode="w") as tmp:
-        tmp.write(typst_text)
-        tmp_path = Path(tmp.name)
-    try:
-        _compile_pdf(tmp_path)
-        pdf_bytes = tmp_path.with_suffix(".pdf").read_bytes()
-        sys.stdout.buffer.write(pdf_bytes)
-    finally:
-        tmp_path.unlink(missing_ok=True)
-        tmp_path.with_suffix(".pdf").unlink(missing_ok=True)
-
-
-def _compile_pdf(typ_path: Path) -> None:
-    """Compile a .typ file to PDF using the typst CLI."""
+    """Compile stdin in the working directory and stream PDF bytes to stdout."""
     try:
         result = subprocess.run(
-            ["typst", "compile", str(typ_path)],
-            capture_output=True,
-            text=True,
+            ["typst", "compile", "--format", "pdf", "-", "-"],
+            input=typst_text.encode("utf-8"), capture_output=True, check=True,
         )
-    except FileNotFoundError:
-        typer.echo(
-            "Error: 'typst' command not found. Install Typst to use --pdf.",
-            err=True,
-        )
-        raise typer.Exit(1)
-    if result.returncode != 0:
-        typer.echo(f"typst compile failed:\n{result.stderr}", err=True)
-        raise typer.Exit(result.returncode)
-    typer.echo(f"Compiled to {typ_path.with_suffix('.pdf')}", err=True)
+    except subprocess.CalledProcessError as error:
+        typer.echo(f"typst compile failed:\n{error.stderr.decode('utf-8', errors='replace')}", err=True)
+        raise typer.Exit(error.returncode) from error
+    except OSError as error:
+        typer.echo(f"Cannot compile PDF: {error}", err=True)
+        raise typer.Exit(1) from error
+    sys.stdout.buffer.write(result.stdout)
 
 
 # ---------------------------------------------------------------------------
@@ -118,7 +97,7 @@ def mdtyp(
     ),
     font: Optional[str] = typer.Option(
         None, "--font",
-        help="Typst/PDF font family. Overrides config; default: Helvetica.",
+        help="Typst/PDF font family. Overrides config; default: Helvetica, then Arial.",
     ),
     table_style: Optional[TableStyle] = typer.Option(
         None, "--table-style",
@@ -159,27 +138,26 @@ def mdtyp(
         config.text.font = font
     if table_style is not None:
         config.table.style = table_style
-    effective_paper = paper or config.page.paper or None
+    if paper is not None:
+        config.page.paper = paper
 
     if latex and pdf:
         typer.echo("Error: --latex and --pdf are incompatible.", err=True)
         raise typer.Exit(1)
 
     if all:
-        _convert_all(config, effective_paper, pdf, latex)
+        _convert_all(config, pdf, latex)
     elif input is None:
         if sys.stdin.isatty() and not output and not stdout and not latex:
             from mdtyp.tui import MdtypBrowser
             MdtypBrowser(config).run()
             return
-        _convert_stdin(config, effective_paper, output, pdf, latex)
+        _convert_stdin(config, output, pdf, latex)
     else:
-        _convert_file(input, config, effective_paper, output, stdout, pdf, latex)
+        _convert_file(input, config, output, stdout, pdf, latex)
 
 
-def _convert_all(
-    config: Config, paper: str | None, pdf: bool, latex: bool,
-) -> None:
+def _convert_all(config: Config, pdf: bool, latex: bool) -> None:
     md_files = sorted(Path(".").glob("*.md"))
     if not md_files:
         typer.echo("No .md files found in the current directory.", err=True)
@@ -187,21 +165,20 @@ def _convert_all(
     suffix = ".tex" if latex else ".typ"
     for md_file in md_files:
         output_text = _convert_source(
-            md_file.read_text(encoding="utf-8"), config, paper, latex,
+            md_file.read_text(encoding="utf-8"), config, latex,
         )
         _emit_to_file(output_text, md_file.with_suffix(suffix), pdf, sources=tuple(md_files))
 
 
 def _convert_stdin(
     config: Config,
-    paper: str | None,
     output: Path | None,
     pdf: bool,
     latex: bool,
 ) -> None:
     if sys.stdin.isatty():
         typer.echo("Reading from stdin… (Ctrl-D to finish)", err=True)
-    output_text = _convert_source(sys.stdin.read(), config, paper, latex)
+    output_text = _convert_source(sys.stdin.read(), config, latex)
     if output:
         _emit_to_file(output_text, output, pdf)
     elif pdf:
@@ -213,7 +190,6 @@ def _convert_stdin(
 def _convert_file(
     input: Path,
     config: Config,
-    paper: str | None,
     output: Path | None,
     to_stdout: bool,
     pdf: bool,
@@ -223,7 +199,7 @@ def _convert_file(
         typer.echo("Error: --stdout and --pdf are incompatible.", err=True)
         raise typer.Exit(1)
     output_text = _convert_source(
-        input.read_text(encoding="utf-8"), config, paper, latex,
+        input.read_text(encoding="utf-8"), config, latex,
     )
     if to_stdout:
         sys.stdout.write(output_text)

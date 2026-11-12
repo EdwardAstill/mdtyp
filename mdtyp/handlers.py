@@ -206,10 +206,10 @@ def _parse_table_data(
             current_row = []
         elif t == "tr_close":
             if in_head:
-                header_cells = current_row[:]
+                header_cells = current_row
             elif in_body:
-                body_rows.append(current_row[:])
-        elif t in ("th_open", "td_open"):
+                body_rows.append(current_row)
+        elif t == "th_open":
             style = tok.attrGet("style") or ""
             if "left" in style:
                 alignments.append("left")
@@ -217,7 +217,7 @@ def _parse_table_data(
                 alignments.append("right")
             elif "center" in style:
                 alignments.append("center")
-            elif not in_body or not alignments:
+            else:
                 alignments.append("auto")
         elif t == "inline":
             current_row.append(render_inline(tok.children or [], ctx.config))

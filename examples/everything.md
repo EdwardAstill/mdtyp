@@ -26,6 +26,8 @@ This is **bold text** and this is _italic text_ and this is ~~strikethrough text
 
 Combining: **bold and _italic_ together** and ~~strikethrough with **bold**~~.
 
+*Emphasis with **bold and *nested emphasis* inside** and the correct ending*.
+
 Here is `inline code` in a sentence.
 
 ---
@@ -47,11 +49,11 @@ Here is a [link to Google](https://google.com) and a [link with **bold** text](h
 - Item two
 - Item three
 
-### Ordered List
+### Ordered List (Starting at Three)
 
-1. First item
-2. Second item
-3. Third item
+3. First item
+4. Second item
+5. Third item
 
 ### Nested Unordered
 
@@ -64,8 +66,9 @@ Here is a [link to Google](https://google.com) and a [link with **bold** text](h
 ### Nested Ordered
 
 1. First
-   1. Sub first
-   2. Sub second
+
+   7. Sub first
+   8. Sub second
 2. Second
    1. Another sub
 
@@ -291,9 +294,20 @@ $x_1, x_{12}, x^2, x^{2n}, x_i^2, a_{i,j}^{k+1}$
 
 $x = 0 \text{ when } y > 1$
 
+$\text{two  spaces; cost \$5; set \{a, b\}}$
+
+### Adjacent Commands
+
+$$
+\eta\sqrt{\Gamma(1+2/\beta)-\Gamma(1+1/\beta)^2},
+\quad \alpha\sqrt[3]{x},
+\quad \eta\boxed{x},
+\quad \eta\not=
+$$
+
 ### Blackboard Bold
 
-$\mathbb{R}, \mathbb{N}, \mathbb{Z}, \mathbb{Q}, \mathbb{C}$
+$\mathbb{R}, \mathbb{N}, \mathbb{Z}, \mathbb{Q}, \mathbb{C}, \mathbb{R}(x)$
 
 ---
 

@@ -100,13 +100,19 @@ def _escape_braced_argument(text: str) -> str:
 def _collect_until(
     children: list[Token], start: int, close_type: str,
 ) -> tuple[list[Token], int]:
-    """Collect inline tokens until close_type is reached."""
+    """Collect through the matching close, preserving nested wrappers."""
+    open_type = children[start - 1].type
+    depth = 1
     j = start
-    inner: list[Token] = []
-    while j < len(children) and children[j].type != close_type:
-        inner.append(children[j])
+    while j < len(children):
+        if children[j].type == open_type:
+            depth += 1
+        elif children[j].type == close_type:
+            depth -= 1
+            if depth == 0:
+                break
         j += 1
-    return inner, j
+    return children[start:j], j
 
 
 def _render_inline(children: list[Token]) -> str:
@@ -142,10 +148,6 @@ def _handle_code_inline(children: list[Token], i: int) -> tuple[str, int]:
 
 def _handle_math_inline(children: list[Token], i: int) -> tuple[str, int]:
     return f"${children[i].content}$", i + 1
-
-
-def _handle_html_inline(children: list[Token], i: int) -> tuple[str, int]:
-    return f"% HTML: {children[i].content.strip()}", i + 1
 
 
 def _handle_image(children: list[Token], i: int) -> tuple[str, int]:
@@ -193,7 +195,6 @@ _INLINE_HANDLERS: dict[str, _InlineHandler] = {
     "hardbreak": _handle_hardbreak,
     "code_inline": _handle_code_inline,
     "math_inline": _handle_math_inline,
-    "html_inline": _handle_html_inline,
     "image": _handle_image,
     "strong_open": _handle_strong,
     "em_open": _handle_em,
@@ -223,12 +224,6 @@ def _handle_paragraph(ctx: _LatexCtx) -> None:
     ctx.advance(3)
 
 
-def _handle_fence(ctx: _LatexCtx) -> None:
-    content = ctx.current().content.rstrip("\n")
-    ctx.write(f"\\begin{{verbatim}}\n{content}\n\\end{{verbatim}}\n\n")
-    ctx.advance()
-
-
 def _handle_code_block(ctx: _LatexCtx) -> None:
     content = ctx.current().content.rstrip("\n")
     ctx.write(f"\\begin{{verbatim}}\n{content}\n\\end{{verbatim}}\n\n")
@@ -244,6 +239,10 @@ def _handle_bullet_list_open(ctx: _LatexCtx) -> None:
 def _handle_ordered_list_open(ctx: _LatexCtx) -> None:
     ctx.list_stack.append("ordered")
     ctx.write("\\begin{enumerate}\n")
+    start = ctx.current().attrs.get("start", 1)
+    if start != 1:
+        # A quote resets the token context, but not LaTeX's enumerate depth.
+        ctx.write(f"\\setcounter{{\\csname @enumctr\\endcsname}}{{{start - 1}}}\n")
     ctx.advance()
 
 
@@ -292,11 +291,6 @@ def _handle_hr(ctx: _LatexCtx) -> None:
     ctx.advance()
 
 
-def _handle_html_block(ctx: _LatexCtx) -> None:
-    ctx.write(f"% HTML: {ctx.current().content.strip()}\n\n")
-    ctx.advance()
-
-
 def _handle_math_block(ctx: _LatexCtx) -> None:
     content = ctx.current().content.strip()
     ctx.write(f"\\[\n{content}\n\\]\n\n")
@@ -335,16 +329,16 @@ def _parse_table_data(
             current_row = []
         elif token_type == "tr_close":
             if in_head:
-                header_cells = current_row[:]
+                header_cells = current_row
             elif in_body:
-                body_rows.append(current_row[:])
-        elif token_type in ("th_open", "td_open"):
+                body_rows.append(current_row)
+        elif token_type == "th_open":
             style = str(tok.attrGet("style") or "")
             if "right" in style:
                 alignments.append("r")
             elif "center" in style:
                 alignments.append("c")
-            elif not in_body or not alignments:
+            else:
                 alignments.append("l")
         elif token_type == "inline":
             current_row.append(_render_inline(tok.children or []))
@@ -376,7 +370,7 @@ def _format_table(
 _BLOCK_HANDLERS: dict[str, _BlockHandler] = {
     "heading_open": _handle_heading,
     "paragraph_open": _handle_paragraph,
-    "fence": _handle_fence,
+    "fence": _handle_code_block,
     "code_block": _handle_code_block,
     "bullet_list_open": _handle_bullet_list_open,
     "ordered_list_open": _handle_ordered_list_open,
@@ -386,7 +380,6 @@ _BLOCK_HANDLERS: dict[str, _BlockHandler] = {
     "list_item_close": _handle_list_item_close,
     "blockquote_open": _handle_blockquote,
     "hr": _handle_hr,
-    "html_block": _handle_html_block,
     "math_block": _handle_math_block,
     "table_open": _handle_table,
 }

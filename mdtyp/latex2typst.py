@@ -321,7 +321,6 @@ def latex_to_typst(latex: str) -> str:
     if unknown := re.search(r"\\[A-Za-z]+", s):
         raise ValueError(f"Unsupported or malformed LaTeX command: {unknown.group()}")
     s = _translate_scripts(s)
-    s = _separate_uppercase_products_before_calls(s)
     s = _quote_multichar_identifiers(s)
     s = _RE_MULTI_SPACE.sub(" ", s)
     return s.translate(text_literals).strip()
@@ -513,7 +512,9 @@ def _translate_commands(s: str) -> str:
 
     # \mathbb{X} → XX or bb(X)
     s = _RE_MATHBB.sub(
-        lambda m: _MATHBB.get(m.group(1), f"bb({m.group(1)})"), s,
+        lambda m: _pad_command_replacement(
+            s, m.start(), m.end(), _MATHBB.get(m.group(1), f"bb({m.group(1)})"),
+        ), s,
     )
 
     # Quote thousands separators so commas cannot become function arguments.
@@ -535,15 +536,20 @@ def _translate_commands(s: str) -> str:
 # ---------------------------------------------------------------------------
 
 
+def _pad_command_replacement(s: str, start: int, end: int, replacement: str) -> str:
+    """Keep replacements from joining adjacent commands or identifiers."""
+    before = " " if start > 0 and s[start - 1].isalnum() else ""
+    after = " " if end < len(s) and s[end].isalnum() else ""
+    return before + replacement + after
+
+
 def _replace_with_spacing(
     s: str, pattern: re.Pattern[str], typst_rep: str,
 ) -> str:
     """Replace a LaTeX command, adding spaces to prevent identifier merging."""
-    def _padded(m: re.Match[str]) -> str:
-        before = " " if m.start() > 0 and m.string[m.start() - 1].isalnum() else ""
-        after = " " if m.end() < len(m.string) and m.string[m.end()].isalnum() else ""
-        return before + typst_rep + after
-    return pattern.sub(_padded, s)
+    return pattern.sub(
+        lambda m: _pad_command_replacement(s, m.start(), m.end(), typst_rep), s,
+    )
 
 
 def _replace_cmd_passthrough(s: str, latex_name: str) -> str:
@@ -553,7 +559,7 @@ def _replace_cmd_passthrough(s: str, latex_name: str) -> str:
         arg, end = _extract_braced(s, m.end() - 1)
         if arg is None:
             break
-        s = s[: m.start()] + arg + s[end:]
+        s = s[: m.start()] + _pad_command_replacement(s, m.start(), end, arg) + s[end:]
     return s
 
 
@@ -565,8 +571,9 @@ def _replace_cmd_one_arg(s: str, latex_name: str, typst_name: str) -> str:
         arg, end = _extract_braced(s, m.end() - 1)
         if arg is None:
             break
-        prefix = " " if start > 0 and s[start - 1].isalpha() else ""
-        s = s[:start] + f"{prefix}{typst_name}({arg})" + s[end:]
+        s = s[:start] + _pad_command_replacement(
+            s, start, end, f"{typst_name}({arg})",
+        ) + s[end:]
     return s
 
 
@@ -578,9 +585,9 @@ def _replace_cmd_one_arg_template(s: str, latex_name: str, template: str) -> str
         arg, end = _extract_braced(s, m.end() - 1)
         if arg is None:
             break
-        prefix = " " if start > 0 and _needs_math_space(s[start - 1]) else ""
-        suffix = " " if end < len(s) and (s[end].isalpha() or s[end] == "\\") else ""
-        s = s[:start] + prefix + template.format(arg=arg) + suffix + s[end:]
+        s = s[:start] + _pad_command_replacement(
+            s, start, end, template.format(arg=arg),
+        ) + s[end:]
     return s
 
 
@@ -592,8 +599,9 @@ def _replace_cmd_bare_atom(s: str, latex_name: str, typst_name: str) -> str:
         atom, end = _extract_math_atom(s, m.end())
         if atom is None:
             break
-        prefix = " " if start > 0 and s[start - 1].isalpha() else ""
-        s = s[:start] + f"{prefix}{typst_name}({atom})" + s[end:]
+        s = s[:start] + _pad_command_replacement(
+            s, start, end, f"{typst_name}({atom})",
+        ) + s[end:]
     return s
 
 
@@ -666,8 +674,9 @@ def _replace_cmd_two_args(s: str, latex_name: str, typst_name: str) -> str:
         arg2, after2 = _extract_braced(s, after1)
         if arg2 is None:
             break
-        prefix = " " if start > 0 and s[start - 1].isalpha() else ""
-        s = s[:start] + f"{prefix}{typst_name}({arg1}, {arg2})" + s[after2:]
+        s = s[:start] + _pad_command_replacement(
+            s, start, after2, f"{typst_name}({arg1}, {arg2})",
+        ) + s[after2:]
     return s
 
 
@@ -682,8 +691,9 @@ def _replace_cmd_two_bare_atoms(s: str, latex_name: str, typst_name: str) -> str
         arg2, after2 = _extract_math_atom(s, after1)
         if arg2 is None:
             break
-        prefix = " " if start > 0 and s[start - 1].isalpha() else ""
-        s = s[:start] + f"{prefix}{typst_name}({arg1}, {arg2})" + s[after2:]
+        s = s[:start] + _pad_command_replacement(
+            s, start, after2, f"{typst_name}({arg1}, {arg2})",
+        ) + s[after2:]
     return s
 
 
@@ -699,17 +709,20 @@ def _replace_sqrt(s: str) -> str:
             arg, after = _extract_braced(s, bracket_end + 1)
             if arg is None:
                 break
-            s = s[: m.start()] + f"root({n_arg}, {arg})" + s[after:]
+            replacement = f"root({n_arg}, {arg})"
         elif pos < len(s) and s[pos] == "{":
             arg, after = _extract_braced(s, pos)
             if arg is None:
                 break
-            s = s[: m.start()] + f"sqrt({arg})" + s[after:]
+            replacement = f"sqrt({arg})"
         else:
             arg, after = _extract_math_atom(s, pos)
             if arg is None:
                 break
-            s = s[: m.start()] + f"sqrt({arg})" + s[after:]
+            replacement = f"sqrt({arg})"
+        s = s[: m.start()] + _pad_command_replacement(
+            s, m.start(), after, replacement,
+        ) + s[after:]
     return s
 
 
@@ -743,7 +756,8 @@ def _translate_not(s: str) -> str:
     """Replace ``\\not X`` with negated Typst symbol, or bare ``not`` as fallback."""
     def _replace(m: re.Match[str]) -> str:
         sym = m.group(1)
-        return _NOT_LOOKUP[sym] if sym is not None else "not"
+        replacement = _NOT_LOOKUP[sym] if sym is not None else "not"
+        return _pad_command_replacement(s, m.start(), m.end(), replacement)
     return _RE_NOT.sub(_replace, s)
 
 
@@ -782,20 +796,6 @@ def _translate_scripts(s: str) -> str:
         result.append(s[i])
         i += 1
     return "".join(result)
-
-
-def _separate_uppercase_products_before_calls(s: str) -> str:
-    """Split uppercase products that would otherwise look like unknown calls.
-
-    LaTeX often writes matrix products compactly, e.g. ``B^TDB(s,t)`` for
-    ``B^T D B(s,t)``. Typst reads ``DB(s,t)`` as a function call, so add the
-    missing product spacing for all-caps runs before ``(``.
-    """
-    return re.sub(
-        r"(?<![A-Za-z])([A-Z]{2,})(?=\()",
-        lambda m: " ".join(m.group(1)),
-        s,
-    )
 
 
 # ---------------------------------------------------------------------------

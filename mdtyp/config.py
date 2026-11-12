@@ -53,7 +53,7 @@ class PageConfig:
 @dataclass
 class TextConfig:
     size: str = ""
-    font: str = "Helvetica"
+    font: str | list[str] = field(default_factory=lambda: ["Helvetica", "Arial"])
 
 
 @dataclass

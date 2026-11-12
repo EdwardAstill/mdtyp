@@ -1,6 +1,7 @@
 """TUI file browser for mdtyp."""
 
 import os
+import shlex
 import subprocess
 from pathlib import Path
 
@@ -121,9 +122,12 @@ class MdtypBrowser(App[None]):
         path = self._selected_path()
         if path is None or path.suffix != ".md":
             return
-        editor = os.environ.get("EDITOR", "vi")
-        with self.suspend():
-            subprocess.run([editor, str(path)])
+        try:
+            editor = shlex.split(os.environ.get("EDITOR") or "vi")
+            with self.suspend():
+                subprocess.run([*editor, str(path)])
+        except (OSError, ValueError) as error:
+            self.notify(f"Cannot open editor: {error}", severity="error")
 
     def action_convert_typst(self) -> None:
         path = self._selected_path()
@@ -148,22 +152,10 @@ class MdtypBrowser(App[None]):
         try:
             typst_text = convert(path.read_text(encoding="utf-8"), self.config)
             write_output(typst_text, typ_path, sources=(path,), pdf=True)
+        except subprocess.CalledProcessError as error:
+            self.notify(f"typst failed: {error.stderr.strip()[:80]}", severity="error")
+            return
         except (ValueError, OSError) as error:
             self.notify(str(error), severity="error")
             return
-        try:
-            result = subprocess.run(
-                ["typst", "compile", str(typ_path)],
-                capture_output=True,
-                text=True,
-            )
-        except FileNotFoundError:
-            self.notify("'typst' not found — install Typst for PDF", severity="error")
-            return
-        if result.returncode != 0:
-            self.notify(
-                f"typst failed: {result.stderr.strip()[:80]}",
-                severity="error",
-            )
-        else:
-            self.notify(f"PDF: {typ_path.with_suffix('.pdf').name}")
+        self.notify(f"PDF: {typ_path.with_suffix('.pdf').name}")

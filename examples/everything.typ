@@ -1,4 +1,4 @@
-#set text(font: "Helvetica")
+#set text(font: ("Helvetica", "Arial",))
 
 = Markdown to Typst Feature Reference
 
@@ -36,6 +36,8 @@ This is #strong[bold text] and this is #emph[italic text] and this is #strike[st
 
 Combining\: #strong[bold and #emph[italic] together] and #strike[strikethrough with #strong[bold]]\.
 
+#emph[Emphasis with #strong[bold and #emph[nested emphasis] inside] and the correct ending]\.
+
 Here is #raw("inline code") in a sentence\.
 
 #line(length: 100%)
@@ -66,9 +68,9 @@ Item three
 )
 
 
-=== Ordered List
+=== Ordered List (Starting at Three)
 
-#enum(start: 1, tight: true,
+#enum(start: 3, tight: true,
 [
 First item
 ],
@@ -110,10 +112,11 @@ Back to top
 
 === Nested Ordered
 
-#enum(start: 1, tight: true,
+#enum(start: 1, tight: false,
 [
 First
-#enum(start: 1, tight: true,
+
+#enum(start: 7, tight: true,
 [
 Sub first
 ],
@@ -125,6 +128,7 @@ Sub second
 ],
 [
 Second
+
 #enum(start: 1, tight: true,
 [
 Another sub
@@ -456,10 +460,20 @@ $x_1, x_(12), x^2, x^(2n), x_i^2, a_(i,j)^(k+1)$
 
 $x = 0 " when " y > 1$
 
+$"two  spaces; cost $5; set {a, b}"$
+
+
+=== Adjacent Commands
+
+$ eta sqrt(Gamma(1+2/beta)-Gamma(1+1/beta)^2),
+quad alpha root(3, x),
+quad eta x,
+quad eta eq.not $
+
 
 === Blackboard Bold
 
-$RR, NN, ZZ, QQ, CC$
+$RR, NN, ZZ, QQ, CC, RR(x)$
 
 #line(length: 100%)
 

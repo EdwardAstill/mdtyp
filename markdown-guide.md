@@ -87,17 +87,17 @@ uv run mdtyp document.md --stdout
 uv run mdtyp document.md --pdf
 ```
 
-Omit `uv run` for an installed tool. `--pdf` requires Typst and replaces sibling `.typ`/`.pdf` outputs; use it only when safe. CLI/TUI writes reject input aliases, including symbolic and hard links.
+Omit `uv run` for an installed tool. `--pdf` requires Typst and replaces sibling `.typ`/`.pdf` outputs only after compilation succeeds; missing or failed Typst leaves both existing files unchanged. The final replacements are separate renames, not a transaction. CLI/TUI writes reject input aliases, including symbolic and hard links. Stdin PDF output resolves relative images from the current working directory without creating intermediate files. Paper settings apply consistently to the CLI, TUI, and Python API.
 
-Check assets and links, inspect generated Typst for lost content, then inspect PDF equations, tables, captions, images, and page breaks. Conversion, compilation, and visual inspection are separate checks; report which were performed. `--latex` is a separate workflow, not a rendering-equivalence guarantee.
+Check assets and links, inspect generated Typst for lost content, then inspect PDF equations, tables, captions, images, and page breaks. The examples are the main rendering check; automated tests only smoke-check commands and basic overwrite protection. Compilation alone does not prove rendering or mathematical fidelity. `--latex` is a separate workflow, not a rendering-equivalence guarantee.
 
-Typst/PDF defaults to Helvetica and horizontal table rules. Override margins, font, and table style at conversion time:
+Typst/PDF defaults to Helvetica, with Arial as its fallback, and horizontal table rules. Override margins, font, and table style at conversion time:
 
 ```bash
 uv run mdtyp document.md --margin 15mm --font "Arial" --table-style shaded-horizontal --pdf
 ```
 
-Table styles: `horizontal`, `shaded-horizontal` (alternating grey body rows, no rules), `cell` (both rule directions), `vertical`. Flags override `[page].margin`, `[text].font`, and `[table].style`, including when launching the TUI. These three flags cannot be used with `--latex`. Missing fonts trigger substitution; check availability with `typst fonts`.
+Table styles: `horizontal`, `shaded-horizontal` (alternating grey body rows, no rules), `cell` (both rule directions), `vertical`. Flags override `[page].margin`, `[text].font`, and `[table].style`, including when launching the TUI. These three flags cannot be used with `--latex`. Configured fonts can be a single family or an ordered list such as `["Helvetica", "Arial"]`; `--font` replaces the list with one family. Missing fonts trigger substitution; check availability with `typst fonts`.
 
 Use `--margin "(x: 15mm, y: 20mm)"` for separate horizontal and vertical margins.
 Margin expressions are evaluated by Typst during compilation, not validated by
